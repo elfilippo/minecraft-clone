@@ -2,22 +2,23 @@ package com.minecraftclone;
 
 import GLOOP.*;
 
-/**
- * Hello world!
- */
 public class App {
 
+    static String textureGrass = "lib/textures/grass.png";
+    static String textureSky = "lib/textures/sky.jpg";
+    static String textureMarble = "lib/textures/marble.jpg";
+
     public static void main(String[] args) {
-        System.out.println("Hello World!");
-        var cam = new GLSchwenkkamera();
-        var texture = new GLTextur("lib/bluesmurfcat.jpg");
+        var cam = new Camera();
+
         new GLLicht();
-        new GLBoden(texture);
-        new GLHimmel(texture);
-        var keys = new GLTastatur();
+        new GLBoden(textureGrass);
+        new GLHimmel(textureSky);
+
         while (true) {
+            cam.movement();
             try {
-                Thread.sleep(4); // ~60 FPS
+                Thread.sleep(5);
             } catch (InterruptedException e) {}
         }
     }

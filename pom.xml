@@ -10,7 +10,6 @@
   <version>0.1</version>
 
   <name>minecraft-clone</name>
-  <url>http://www.example.com</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,44 +19,37 @@
   </properties>
 
   <dependencies>
-
     <dependency>
       <groupId>com.gloop</groupId>
       <artifactId>gloop</artifactId>
       <version>1.0</version>
     </dependency>
-
     <dependency>
       <groupId>org.jogamp.gluegen</groupId>
       <artifactId>gluegen-rt-main</artifactId>
       <version>2.3.2</version>
     </dependency>
-
     <dependency>
       <groupId>com.gluegenrt</groupId>
       <artifactId>gluegenrtwinamd64</artifactId>
       <version>1.0</version>
     </dependency>
-
     <dependency>
       <groupId>org.jogamp.jogl</groupId>
       <artifactId>jogl-all-main</artifactId>
       <version>2.3.2</version>
     </dependency>
-
     <dependency>
       <groupId>com.jogl</groupId>
       <artifactId>joglwinamd64</artifactId>
       <version>1.0</version>
     </dependency>
-
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
   <build>
@@ -113,5 +105,4 @@
       </plugins>
     </pluginManagement>
   </build>
-
 </project>
