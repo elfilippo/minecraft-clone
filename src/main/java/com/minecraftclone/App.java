@@ -20,9 +20,7 @@ public class App {
         new GLHimmel(textureSky);
 
         while (true) {
-            try {
-                Thread.sleep(16); // ~60 FPS
-            } catch (InterruptedException e) {}
+            cam.mouseMovementListen();
         }
     }
 }
