@@ -1,6 +1,7 @@
 package com.minecraftclone;
 
 import GLOOP.*;
+import com.minecraftclone.render.Camera;
 
 public class App {
 

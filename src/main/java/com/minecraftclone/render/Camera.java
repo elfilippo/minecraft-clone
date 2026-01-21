@@ -1,10 +1,10 @@
-package com.minecraftclone;
+package com.minecraftclone.render;
 
 import GLOOP.*;
 import java.awt.*;
 import javax.swing.JFrame;
 
-class Camera {
+public class Camera {
 
     private Point location;
     //TODO: automatically center curosor with robot and hide it
@@ -26,7 +26,7 @@ class Camera {
 
     private final double maxPitch = Math.toRadians(89);
 
-    Camera() {
+    public Camera() {
         cam = new GLKamera(1280, 720);
 
         try {
@@ -49,7 +49,7 @@ class Camera {
         cam.setzePosition(0, 100, 0);
     }
 
-    void movement() {
+    public void movement() {
         if (mouse.gibX() != lastX || mouse.gibY() != lastY) {
             int dx = mouse.gibX() - lastX;
             int dy = mouse.gibY() - lastY;
