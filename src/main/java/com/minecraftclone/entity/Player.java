@@ -5,8 +5,15 @@ import com.minecraftclone.render.Camera;
 
 public class Player {
 
-    GLQuader body;
     Camera cam;
+    GLQuader body;
+    GLTastatur key;
+
+    private double speed = 1;
+
+    private double velX;
+    private double velY;
+    private double velZ;
 
     private double posX = 100;
     private double posY = floor; //PlayerScale/2 is floor
@@ -15,13 +22,24 @@ public class Player {
     private static int playerScale = 128;
     private static int floor = playerScale / 2;
 
-    public Player(Camera camera) {
+    public Player() {
+        key = new GLTastatur();
+        cam = new Camera();
         body = new GLQuader(posX, posY, posZ, playerScale / 2, playerScale, playerScale / 2);
     }
 
-    private void posUpdate(double x, double y, double z) {
+    public void movement() {
+        cam.movement();
+        double yaw = cam.getYaw()
+        System.out.println(yaw);
+
+        double dx = Math.sin(yaw);
+        double dz = Math.cos(yaw);
+    }
+
+    private void positionUpdate(double x, double y, double z) {
         body.setzePosition(x, y, z);
-        cam.setPos(x, y + playerScale / 4 + playerScale / 8, z); //Setzt Kamera immer auf das obere viertel des Spielers
+        cam.setPos(x, y + 48, z); //Setzt Kamera immer auf das obere viertel des Spielers
     }
 }
 

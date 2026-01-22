@@ -21,7 +21,7 @@ public class Camera {
     private int windowCenterX;
     private int windowCenterY;
 
-    private double sensitivity;
+    private double sensitivity = 0.01;
 
     private final double maxPitch = Math.toRadians(89);
 
@@ -39,7 +39,6 @@ public class Camera {
 
         windowCenterX = location.x + frame.getWidth() / 2;
         windowCenterY = location.y + frame.getHeight() / 2;
-        sensitivity = 0.005;
 
         mouse = new GLMaus();
 
@@ -63,6 +62,7 @@ public class Camera {
             lastX = mouse.gibX();
             lastY = mouse.gibY();
         }
+        //System.out.println(cam.gibBlickpunktX() + " - " + cam.gibBlickpunktY() + " - " + cam.gibBlickpunktZ());
     }
 
     private void update() {
@@ -76,7 +76,11 @@ public class Camera {
         cam.setzeScheitelrichtung(0, 1, 0);
     }
 
+    public double getYaw() {
+        return yaw;
+    }
+
     public void setPos(double x, double y, double z) {
-        this.cam.setzePosition(x, y, z);
+        cam.setzePosition(x, y, z);
     }
 }
