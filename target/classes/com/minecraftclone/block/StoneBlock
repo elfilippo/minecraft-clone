@@ -1,0 +1,14 @@
+public class StoneBlock extends Block {
+
+    @Override
+    public Geometry createGeometry(AssetManager assetManager) {
+        Box box = new Box(0.5f, 0.5f, 0.5f);
+        Geometry geom = new Geometry("Stone", box);
+
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setTexture("ColorMap", assetManager.loadTexture("lib/textures/blocks/stone.png"));
+
+        geom.setMaterial(mat);
+        return geom;
+    }
+}
