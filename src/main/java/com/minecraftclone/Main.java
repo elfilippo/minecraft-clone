@@ -18,5 +18,9 @@ public class Main extends SimpleApplication {
     public void simpleInitApp() {
         World world = new World(rootNode, assetManager);
         world.placeBlock(0, 0, 0, new StoneBlock());
+        world.placeBlock(1, 0, 0, new StoneBlock());
+        world.placeBlock(2, 0, 0, new StoneBlock());
+        world.placeBlock(1, 1, 0, new StoneBlock());
+        world.placeBlock(1, 2, 0, new StoneBlock());
     }
 }
