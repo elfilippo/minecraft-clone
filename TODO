@@ -1,0 +1,50 @@
+movement
+Move World to Main, RenderEngine only read
+Improve Player Control (put update() classs in simpleUpdate or some shit)
+Culling
+Block placing and breaking
+Saving
+Items
+Entities
+Multiplayer?
+
+App (SimpleApplication)
+│
+├─ GameLoop
+│   └─ TickManager
+│       └─ Tickables
+│            ├─ World
+│            └─ (later: systems)
+│
+├─ World   ← OWNS ALL GAME STATE
+│   │
+│   ├─ ChunkManager
+│   │   └─ Chunk*
+│   │        ├─ block ID arrays
+│   │        ├─ light data
+│   │        └─ scheduled block ticks
+│   │
+│   ├─ EntityManager
+│   │   └─ Entity*
+│   │        └─ Player (entity)
+│   │
+│   └─ BlockEntityManager
+│       └─ BlockEntity*
+│            ├─ Chest
+│            └─ Furnace
+│
+├─ RenderEngine   ← READ-ONLY VIEW
+│   │
+│   ├─ ChunkRenderer
+│   │   ├─ Mesh
+│   │   ├─ Geometry
+│   │   └─ RigidBodyControl (per chunk)
+│   │
+│   └─ EntityRenderer
+│       └─ Visual models (read entity state)
+│
+├─ SaveManager
+│   └─ Disk files (chunks, entities)
+│
+└─ util
+    └─ math / helpers (no ownership)

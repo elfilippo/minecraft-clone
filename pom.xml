@@ -33,10 +33,21 @@
       <version>3.9.0-stable</version>
     </dependency>
     <dependency>
+        <groupId>com.github.stephengold</groupId>
+        <artifactId>Minie</artifactId>
+        <version>8.2.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>6.0.2</version>
       <scope>test</scope>
+    </dependency>
+  
+    <dependency>
+      <groupId>us.ihmc</groupId>
+      <artifactId>jme3-jbullet</artifactId>
+      <version>3.2.0-171209</version>
     </dependency>
   </dependencies>
 
