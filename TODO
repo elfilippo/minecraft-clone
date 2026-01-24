@@ -1,4 +1,6 @@
 movement
+separate rendering (visual blocks, RenderEngine class) from blocks in memory (Chunk class)
+chunk meshes & chunk collision
 Move World to Main, RenderEngine only read
 Improve Player Control (put update() classs in simpleUpdate or some shit)
 Culling
@@ -6,6 +8,7 @@ Block placing and breaking
 Saving
 Items
 Entities
+greedy meshing
 Multiplayer?
 
 App (SimpleApplication)

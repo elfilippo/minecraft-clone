@@ -14,14 +14,14 @@ public class KeyMapping {
         this.keys = keys;
         this.actionListener = actionListener;
 
-        bind("jump", KeyInput.KEY_SPACE);
-        bind("forward", KeyInput.KEY_W);
-        bind("back", KeyInput.KEY_S);
-        bind("left", KeyInput.KEY_A);
-        bind("right", KeyInput.KEY_D);
+        bindAction("jump", KeyInput.KEY_SPACE);
+        bindAction("forward", KeyInput.KEY_W);
+        bindAction("back", KeyInput.KEY_S);
+        bindAction("left", KeyInput.KEY_A);
+        bindAction("right", KeyInput.KEY_D);
     }
 
-    private void bind(String name, int keyCode) {
+    private void bindAction(String name, int keyCode) {
         keys.addMapping(name, new KeyTrigger(keyCode));
         keys.addListener(actionListener, name);
     }

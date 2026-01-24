@@ -5,6 +5,7 @@ import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
+import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.minecraftclone.block.Block;
@@ -28,6 +29,10 @@ public class World {
         this.assetManager = assetManager;
 
         entityManager = new EntityManager(bulletAppState, rootNode);
+    }
+
+    public void tick(ActionInput input, Camera cam) {
+        entityManager.tick(input, cam);
     }
 
     public void placeBlock(int x, int y, int z, Block block) {
