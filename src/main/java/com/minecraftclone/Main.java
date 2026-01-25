@@ -47,7 +47,7 @@ public class Main extends SimpleApplication {
         stateManager.attach(bulletAppState);
 
         //NOTE: Camera cam
-        flyCam.setMoveSpeed(0);
+        //flyCam.setMoveSpeed(0);
         cam.setFrustumNear(0.2f);
         cam.setFov(70);
 
@@ -56,12 +56,12 @@ public class Main extends SimpleApplication {
         engine = new RenderEngine(rootNode, assetManager, bulletAppState);
 
         //NOTE: player is CharacterControl playerControl
-        playerCharacter = engine.getPlayerCharacter();
-        playerControl = playerCharacter.getPlayerControl();
+        //playerCharacter = engine.getPlayerCharacter();
+        //playerControl = playerCharacter.getPlayerControl();
 
         //NOTE: actionInput
-        actionInput = new ActionInput(playerControl);
-        new KeyMapping(inputManager, actionInput.getActionListener());
+        //actionInput = new ActionInput(playerControl);
+        //new KeyMapping(inputManager, actionInput.getActionListener());
     }
 
     @Override
@@ -69,7 +69,7 @@ public class Main extends SimpleApplication {
         tps();
         timeAccumulator += tpf;
 
-        cam.setLocation(playerCharacter.getPlayerControl().getPhysicsLocation().add(0, 0.2f, 0));
+        //cam.setLocation(playerCharacter.getPlayerControl().getPhysicsLocation().add(0, 0.2f, 0));
 
         //INFO: runs tick() until it's caught up
         while (timeAccumulator >= tickTime) {
@@ -79,7 +79,7 @@ public class Main extends SimpleApplication {
     }
 
     private void tick() {
-        engine.tick(actionInput, cam);
+        //engine.tick(actionInput, cam);
         totalTicks++;
     }
 
