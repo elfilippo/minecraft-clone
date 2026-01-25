@@ -1,86 +1,89 @@
 package com.minecraftclone.block;
 
-public class Blocks {
+public final class Blocks {
 
-    public static final Block STONE = new DefaultBlock("stone.png");
-    public static final Block DIRT = new DefaultBlock("dirt.png");
-    public static final Block COBBLESTONE = new DefaultBlock("cobblestone.png");
-    public static final Block MOSSY_COBBLESTONE = new DefaultBlock("mossy_cobblestone.png");
-    public static final Block PLANK_OAK = new DefaultBlock("planks_oak.png");
-    public static final Block PLANK_SPRUCE = new DefaultBlock("planks_spruce.png");
-    public static final Block PLANK_BIRCH = new DefaultBlock("planks_birch.png");
-    public static final Block PLANK_JUNGLE = new DefaultBlock("planks_jungle.png");
-    public static final Block PLANK_ACACIA = new DefaultBlock("planks_acacia.png");
-    public static final Block PLANK_DARK_OAK = new DefaultBlock("planks_dark_oak.png");
-    public static final Block BEDROCK = new DefaultBlock("bedrock.png");
-    public static final Block SAND = new DefaultBlock("sand.png");
-    public static final Block GRAVEL = new DefaultBlock("gravel.png");
-    public static final Block GOLD_ORE = new DefaultBlock("gold_ore.png");
-    public static final Block IRON_ORE = new DefaultBlock("iron_ore.png");
-    public static final Block COAL_ORE = new DefaultBlock("coal_ore.png");
-    public static final Block LAPIS_ORE = new DefaultBlock("lapis_ore.png");
-    public static final Block DIAMOND_ORE = new DefaultBlock("diamond_ore.png");
-    public static final Block REDSTONE_ORE = new DefaultBlock("redstone_ore.png");
-    public static final Block EMERALD_ORE = new DefaultBlock("emerald_ore.png");
-    public static final Block GOLD_BLOCK = new DefaultBlock("gold_block.png");
-    public static final Block IRON_BLOCK = new DefaultBlock("iron_block.png");
-    public static final Block DIAMOND_BLOCK = new DefaultBlock("diamond_block.png");
-    public static final Block LAPIS_BLOCK = new DefaultBlock("lapis_block.png");
-    public static final Block EMERALD_BLOCK = new DefaultBlock("emerald_block.png");
-    public static final Block BRICK = new DefaultBlock("brick.png");
-    public static final Block GLASS = new DefaultBlock("glass.png");
-    public static final Block SPONGE = new DefaultBlock("sponge.png");
-    public static final Block WET_SPONGE = new DefaultBlock("sponge_wet.png");
-    public static final Block SANDSTONE = new DefaultBlock("sandstone.png");
-    public static final Block WOOL_WHITE = new DefaultBlock("wool_colored_white.png");
-    public static final Block WOOL_ORANGE = new DefaultBlock("wool_colored_orange.png");
-    public static final Block WOOL_MAGENTA = new DefaultBlock("wool_colored_magenta.png");
-    public static final Block WOOL_LIGHT_BLUE = new DefaultBlock("wool_colored_light_blue.png");
-    public static final Block WOOL_YELLOW = new DefaultBlock("wool_colored_yellow.png");
-    public static final Block WOOL_LIME = new DefaultBlock("wool_colored_lime.png");
-    public static final Block WOOL_PINK = new DefaultBlock("wool_colored_pink.png");
-    public static final Block WOOL_GRAY = new DefaultBlock("wool_colored_gray.png");
-    public static final Block WOOL_SILVER = new DefaultBlock("wool_colored_silver.png");
-    public static final Block WOOL_CYAN = new DefaultBlock("wool_colored_cyan.png");
-    public static final Block WOOL_PURPLE = new DefaultBlock("wool_colored_purple.png");
-    public static final Block WOOL_BLUE = new DefaultBlock("wool_colored_blue.png");
-    public static final Block WOOL_BROWN = new DefaultBlock("wool_colored_brown.png");
-    public static final Block WOOL_GREEN = new DefaultBlock("wool_colored_green.png");
-    public static final Block WOOL_RED = new DefaultBlock("wool_colored_red.png");
-    public static final Block WOOL_BLACK = new DefaultBlock("wool_colored_black.png");
-    public static final Block NETHER_BRICK = new DefaultBlock("nether_brick.png");
-    public static final Block NETHERRACK = new DefaultBlock("netherrack.png");
-    public static final Block SOUL_SAND = new DefaultBlock("soul_sand.png");
-    public static final Block GLOWSTONE = new DefaultBlock("glowstone.png");
-    public static final Block END_STONE = new DefaultBlock("end_stone.png");
-    public static final Block ICE = new DefaultBlock("ice.png");
-    public static final Block PACKED_ICE = new DefaultBlock("ice_packed.png");
-    public static final Block SNOW = new DefaultBlock("snow.png");
-    public static final Block CLAY = new DefaultBlock("clay.png");
-    public static final Block HARDENED_CLAY = new DefaultBlock("hardened_clay.png");
-    public static final Block STAINED_CLAY_WHITE = new DefaultBlock("hardened_clay_stained_white.png");
-    public static final Block STAINED_CLAY_ORANGE = new DefaultBlock("hardened_clay_stained_orange.png");
-    public static final Block STAINED_CLAY_MAGENTA = new DefaultBlock("hardened_clay_stained_magenta.png");
-    public static final Block STAINED_CLAY_LIGHT_BLUE = new DefaultBlock("hardened_clay_stained_light_blue.png");
-    public static final Block STAINED_CLAY_YELLOW = new DefaultBlock("hardened_clay_stained_yellow.png");
-    public static final Block STAINED_CLAY_LIME = new DefaultBlock("hardened_clay_stained_lime.png");
-    public static final Block STAINED_CLAY_PINK = new DefaultBlock("hardened_clay_stained_pink.png");
-    public static final Block STAINED_CLAY_GRAY = new DefaultBlock("hardened_clay_stained_gray.png");
-    public static final Block STAINED_CLAY_SILVER = new DefaultBlock("hardened_clay_stained_silver.png");
-    public static final Block STAINED_CLAY_CYAN = new DefaultBlock("hardened_clay_stained_cyan.png");
-    public static final Block STAINED_CLAY_PURPLE = new DefaultBlock("hardened_clay_stained_purple.png");
-    public static final Block STAINED_CLAY_BLUE = new DefaultBlock("hardened_clay_stained_blue.png");
-    public static final Block STAINED_CLAY_BROWN = new DefaultBlock("hardened_clay_stained_brown.png");
-    public static final Block STAINED_CLAY_GREEN = new DefaultBlock("hardened_clay_stained_green.png");
-    public static final Block STAINED_CLAY_RED = new DefaultBlock("hardened_clay_stained_red.png");
-    public static final Block STAINED_CLAY_BLACK = new DefaultBlock("hardened_clay_stained_black.png");
-    public static final Block COAL_BLOCK = new DefaultBlock("coal_block.png");
-    public static final Block QUARTZ_BLOCK = new DefaultBlock("quartz_block_side.png");
-    public static final Block PRISMARINE = new DefaultBlock("prismarine_rough.png");
-    public static final Block PRISMARINE_BRICKS = new DefaultBlock("prismarine_bricks.png");
-    public static final Block DARK_PRISMARINE = new DefaultBlock("dark_prismarine.png");
-    public static final Block SEA_LANTERN = new DefaultBlock("sea_lantern.png");
-    public static final Block RED_SAND = new DefaultBlock("red_sand.png");
-    public static final Block RED_SANDSTONE = new DefaultBlock("red_sandstone.png");
-    public static final Block OBSIDIAN = new DefaultBlock("obsidian.png");
+    public static final Block STONE = BlockRegistry.register("stone", "stone.png");
+    public static final Block DIRT = BlockRegistry.register("dirt", "dirt.png");
+    public static final Block COBBLESTONE = BlockRegistry.register("cobblestone", "cobblestone.png");
+    public static final Block MOSSY_COBBLESTONE = BlockRegistry.register("mossy_cobblestone", "mossy_cobblestone.png");
+
+    public static final Block PLANK_OAK = BlockRegistry.register("plank_oak", "planks_oak.png");
+    public static final Block PLANK_SPRUCE = BlockRegistry.register("plank_spruce", "planks_spruce.png");
+    public static final Block PLANK_BIRCH = BlockRegistry.register("plank_birch", "planks_birch.png");
+    public static final Block PLANK_JUNGLE = BlockRegistry.register("plank_jungle", "planks_jungle.png");
+    public static final Block PLANK_ACACIA = BlockRegistry.register("plank_acacia", "planks_acacia.png");
+    public static final Block PLANK_DARK_OAK = BlockRegistry.register("plank_dark_oak", "planks_dark_oak.png");
+
+    public static final Block BEDROCK = BlockRegistry.register("bedrock", "bedrock.png");
+    public static final Block SAND = BlockRegistry.register("sand", "sand.png");
+    public static final Block GRAVEL = BlockRegistry.register("gravel", "gravel.png");
+
+    public static final Block GOLD_ORE = BlockRegistry.register("gold_ore", "gold_ore.png");
+    public static final Block IRON_ORE = BlockRegistry.register("iron_ore", "iron_ore.png");
+    public static final Block COAL_ORE = BlockRegistry.register("coal_ore", "coal_ore.png");
+    public static final Block LAPIS_ORE = BlockRegistry.register("lapis_ore", "lapis_ore.png");
+    public static final Block DIAMOND_ORE = BlockRegistry.register("diamond_ore", "diamond_ore.png");
+    public static final Block REDSTONE_ORE = BlockRegistry.register("redstone_ore", "redstone_ore.png");
+    public static final Block EMERALD_ORE = BlockRegistry.register("emerald_ore", "emerald_ore.png");
+
+    public static final Block GOLD_BLOCK = BlockRegistry.register("gold_block", "gold_block.png");
+    public static final Block IRON_BLOCK = BlockRegistry.register("iron_block", "iron_block.png");
+    public static final Block DIAMOND_BLOCK = BlockRegistry.register("diamond_block", "diamond_block.png");
+    public static final Block LAPIS_BLOCK = BlockRegistry.register("lapis_block", "lapis_block.png");
+    public static final Block EMERALD_BLOCK = BlockRegistry.register("emerald_block", "emerald_block.png");
+
+    public static final Block BRICK = BlockRegistry.register("brick", "brick.png");
+    public static final Block GLASS = BlockRegistry.register("glass", "glass.png");
+
+    public static final Block SPONGE = BlockRegistry.register("sponge", "sponge.png");
+    public static final Block WET_SPONGE = BlockRegistry.register("wet_sponge", "sponge_wet.png");
+
+    public static final Block SANDSTONE = BlockRegistry.register("sandstone", "sandstone.png");
+
+    public static final Block WOOL_WHITE = BlockRegistry.register("wool_white", "wool_colored_white.png");
+    public static final Block WOOL_ORANGE = BlockRegistry.register("wool_orange", "wool_colored_orange.png");
+    public static final Block WOOL_MAGENTA = BlockRegistry.register("wool_magenta", "wool_colored_magenta.png");
+    public static final Block WOOL_LIGHT_BLUE = BlockRegistry.register(
+        "wool_light_blue",
+        "wool_colored_light_blue.png"
+    );
+    public static final Block WOOL_YELLOW = BlockRegistry.register("wool_yellow", "wool_colored_yellow.png");
+    public static final Block WOOL_LIME = BlockRegistry.register("wool_lime", "wool_colored_lime.png");
+    public static final Block WOOL_PINK = BlockRegistry.register("wool_pink", "wool_colored_pink.png");
+    public static final Block WOOL_GRAY = BlockRegistry.register("wool_gray", "wool_colored_gray.png");
+    public static final Block WOOL_SILVER = BlockRegistry.register("wool_silver", "wool_colored_silver.png");
+    public static final Block WOOL_CYAN = BlockRegistry.register("wool_cyan", "wool_colored_cyan.png");
+    public static final Block WOOL_PURPLE = BlockRegistry.register("wool_purple", "wool_colored_purple.png");
+    public static final Block WOOL_BLUE = BlockRegistry.register("wool_blue", "wool_colored_blue.png");
+    public static final Block WOOL_BROWN = BlockRegistry.register("wool_brown", "wool_colored_brown.png");
+    public static final Block WOOL_GREEN = BlockRegistry.register("wool_green", "wool_colored_green.png");
+    public static final Block WOOL_RED = BlockRegistry.register("wool_red", "wool_colored_red.png");
+    public static final Block WOOL_BLACK = BlockRegistry.register("wool_black", "wool_colored_black.png");
+
+    public static final Block NETHER_BRICK = BlockRegistry.register("nether_brick", "nether_brick.png");
+    public static final Block NETHERRACK = BlockRegistry.register("netherrack", "netherrack.png");
+    public static final Block SOUL_SAND = BlockRegistry.register("soul_sand", "soul_sand.png");
+    public static final Block GLOWSTONE = BlockRegistry.register("glowstone", "glowstone.png");
+
+    public static final Block END_STONE = BlockRegistry.register("end_stone", "end_stone.png");
+
+    public static final Block ICE = BlockRegistry.register("ice", "ice.png");
+    public static final Block PACKED_ICE = BlockRegistry.register("packed_ice", "ice_packed.png");
+    public static final Block SNOW = BlockRegistry.register("snow", "snow.png");
+
+    public static final Block CLAY = BlockRegistry.register("clay", "clay.png");
+    public static final Block HARDENED_CLAY = BlockRegistry.register("hardened_clay", "hardened_clay.png");
+
+    public static final Block COAL_BLOCK = BlockRegistry.register("coal_block", "coal_block.png");
+    public static final Block QUARTZ_BLOCK = BlockRegistry.register("quartz_block", "quartz_block_side.png");
+
+    public static final Block PRISMARINE = BlockRegistry.register("prismarine", "prismarine_rough.png");
+    public static final Block PRISMARINE_BRICKS = BlockRegistry.register("prismarine_bricks", "prismarine_bricks.png");
+    public static final Block DARK_PRISMARINE = BlockRegistry.register("dark_prismarine", "dark_prismarine.png");
+
+    public static final Block SEA_LANTERN = BlockRegistry.register("sea_lantern", "sea_lantern.png");
+    public static final Block RED_SAND = BlockRegistry.register("red_sand", "red_sand.png");
+    public static final Block RED_SANDSTONE = BlockRegistry.register("red_sandstone", "red_sandstone.png");
+
+    public static final Block OBSIDIAN = BlockRegistry.register("obsidian", "obsidian.png");
 }

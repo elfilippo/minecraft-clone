@@ -47,6 +47,7 @@ public class Main extends SimpleApplication {
         stateManager.attach(bulletAppState);
 
         //NOTE: Camera cam
+        //flyCam.setEnabled(false);
         flyCam.setMoveSpeed(0);
         cam.setFrustumNear(0.2f);
         cam.setFov(70);
