@@ -8,6 +8,7 @@ import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.minecraftclone.Helper;
 import com.minecraftclone.block.Block;
 import com.minecraftclone.entitiy.EntityManager;
 import com.minecraftclone.entitiy.PlayerCharacter;
@@ -19,16 +20,18 @@ public class World {
     private final Node rootNode;
     private final AssetManager assetManager;
     private final EntityManager entityManager;
+    private PlayerCharacter playerCharacter;
 
     private final Map<String, Chunk> chunks = new HashMap<>();
 
     private Geometry geom;
 
-    public World(Node rootNode, AssetManager assetManager, BulletAppState bulletAppState) {
+    public World(Node rootNode, AssetManager assetManager, BulletAppState bulletAppState, Helper helper) {
         this.rootNode = rootNode;
         this.assetManager = assetManager;
 
-        entityManager = new EntityManager(bulletAppState, rootNode);
+        entityManager = new EntityManager(bulletAppState, rootNode, helper);
+        playerCharacter = entityManager.createPlayerCharacter();
     }
 
     public void tick(ActionInput input, Camera cam) {
@@ -69,6 +72,6 @@ public class World {
     }
 
     public PlayerCharacter getPlayerCharacter() {
-        return entityManager.getPlayerCharacter();
+        return playerCharacter;
     }
 }

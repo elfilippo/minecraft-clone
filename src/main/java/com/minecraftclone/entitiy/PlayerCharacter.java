@@ -6,10 +6,12 @@ import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
+import com.minecraftclone.Helper;
 import com.minecraftclone.world.ActionInput;
 
 public class PlayerCharacter {
 
+    private Inventory inventory;
     private final CharacterControl playerControl;
     private final Node playerNode;
 
@@ -18,7 +20,9 @@ public class PlayerCharacter {
     private final boolean debugEnabled = false;
     private final Vector3f walkDir = new Vector3f();
 
-    public PlayerCharacter(BulletAppState bulletAppState) {
+    public PlayerCharacter(BulletAppState bulletAppState, Helper helper) {
+        inventory = new Inventory(helper);
+
         bulletAppState.setDebugEnabled(debugEnabled);
 
         var shape = new CapsuleCollisionShape(0.5f, 1.8f);

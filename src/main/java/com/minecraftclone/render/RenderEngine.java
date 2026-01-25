@@ -4,6 +4,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
+import com.minecraftclone.Helper;
 import com.minecraftclone.block.Blocks;
 import com.minecraftclone.entitiy.PlayerCharacter;
 import com.minecraftclone.world.ActionInput;
@@ -13,10 +14,10 @@ public class RenderEngine {
 
     private World world;
 
-    public RenderEngine(Node rootNode, AssetManager assetManager, BulletAppState bulletAppState) {
+    public RenderEngine(Node rootNode, AssetManager assetManager, BulletAppState bulletAppState, Helper helper) {
         //TODO: move world to main
         //TODO: separate block creation in memory (Chunk) from visual block creation (RenderEngine)
-        world = new World(rootNode, assetManager, bulletAppState);
+        world = new World(rootNode, assetManager, bulletAppState, helper);
         testMap(world, bulletAppState);
     }
 

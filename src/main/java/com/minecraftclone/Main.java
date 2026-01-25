@@ -23,6 +23,8 @@ public class Main extends SimpleApplication {
     private long initialTime;
     private double timeActiveSeconds;
 
+    private static Helper helper;
+
     public static void main(String[] args) {
         var settings = new AppSettings(true);
         settings.setWindowSize(1920, 1080);
@@ -35,6 +37,7 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        helper = new Helper(settings, guiNode, assetManager);
         initialTime = System.nanoTime();
         tickTime = 1 / ticksPerSecond;
 
@@ -53,7 +56,7 @@ public class Main extends SimpleApplication {
 
         //NOTE: Render engine
         //INFO: renders the world and sets it up for now, setup will be moved later
-        engine = new RenderEngine(rootNode, assetManager, bulletAppState);
+        engine = new RenderEngine(rootNode, assetManager, bulletAppState, helper);
 
         //NOTE: player is CharacterControl playerControl
         playerCharacter = engine.getPlayerCharacter();
