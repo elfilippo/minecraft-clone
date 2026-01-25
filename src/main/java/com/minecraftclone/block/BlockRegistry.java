@@ -8,7 +8,7 @@ public final class BlockRegistry {
     private static final Map<String, Block> BLOCKS = new HashMap<>();
 
     public static Block register(String id, String texture) {
-        Block block = new Block(id, texture);
+        Block block = new DefaultBlock(id, texture);
         BLOCKS.put(id, block);
         return block;
     }

@@ -5,7 +5,7 @@ import com.jme3.material.Material;
 import com.jme3.scene.Geometry;
 import com.jme3.texture.Texture;
 
-public class Block {
+public abstract class Block {
 
     private final String id;
     private final String texture;
