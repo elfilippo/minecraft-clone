@@ -4,6 +4,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.font.BitmapText;
+import com.jme3.renderer.Camera;
 import com.jme3.system.AppSettings;
 import com.minecraftclone.entitiy.PlayerCharacter;
 import com.minecraftclone.render.RenderEngine;
@@ -41,6 +42,16 @@ public class Main extends SimpleApplication {
         tpsText = new BitmapText(guiFont);
         guiNode.attachChild(tpsText);
         tpsText.setLocalTranslation(10, settings.getHeight() - 20, 0);
+
+        BitmapText ch = new BitmapText(guiFont);
+        ch.setSize(guiFont.getCharSet().getRenderedSize() * 2);
+        ch.setText("+");
+        ch.setLocalTranslation(
+            settings.getWidth() / 2 - ch.getLineWidth() / 2,
+            settings.getHeight() / 2 + ch.getLineHeight() / 2,
+            0
+        );
+        guiNode.attachChild(ch);
 
         //NOTE: Physics bulletAppState
         var bulletAppState = new BulletAppState();
@@ -90,5 +101,9 @@ public class Main extends SimpleApplication {
         double tps = (Math.floor((10 * totalTicks) / timeActiveSeconds)) / 10;
         if (timeActiveSeconds < 10) tps = Math.clamp(tps, 0, 20);
         tpsText.setText("TPS: " + tps);
+    }
+
+    public Camera getCam() {
+        return cam;
     }
 }

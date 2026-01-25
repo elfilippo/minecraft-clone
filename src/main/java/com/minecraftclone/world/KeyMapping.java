@@ -2,6 +2,7 @@ package com.minecraftclone.world;
 
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 
@@ -19,6 +20,8 @@ public class KeyMapping {
         bindAction("back", KeyInput.KEY_S);
         bindAction("left", KeyInput.KEY_A);
         bindAction("right", KeyInput.KEY_D);
+        bindAction("break", MouseInput.BUTTON_LEFT);
+        bindAction("place", MouseInput.BUTTON_RIGHT);
     }
 
     private void bindAction(String name, int keyCode) {
