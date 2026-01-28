@@ -11,7 +11,6 @@ import com.jme3.scene.Node;
 import com.minecraftclone.block.Block;
 import com.minecraftclone.render.BlockMaterialCache;
 import com.minecraftclone.render.ChunkMeshBuilder;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,8 +49,6 @@ public class Chunk {
     public Block getBlock(int x, int y, int z) {
         return blocks[x][y][z];
     }
-    
-
 
     public void rebuild(PhysicsSpace physicsSpace) {
         if (!dirty) return;
@@ -85,7 +82,18 @@ public class Chunk {
             physicsSpace.add(collisionBody);
         }
 
-
         dirty = false;
+    }
+
+    public Block[][][] getBlocks() {
+        return blocks;
+    }
+
+    public int getChunkX() {
+        return chunkX;
+    }
+
+    public int getChunkZ() {
+        return chunkZ;
     }
 }

@@ -19,6 +19,15 @@ public class World {
         this.rootNode = rootNode;
         this.physicsSpace = physicsSpace;
         this.assetManager = assetManager;
+        for (int x = -5; x < 5; x++) {
+            for (int z = -5; z < 5; z++) {
+                Chunk chunk = new Chunk(x, 0, z, assetManager);
+                chunks.put("x,0,z", chunk);
+                rootNode.attachChild(chunk.getNode());
+                TerrainGenerator.generateChunk(chunk);
+                chunk.rebuild(physicsSpace);
+            }
+        }
     }
 
     public void placeBlock(int wx, int wy, int wz, Block block) {

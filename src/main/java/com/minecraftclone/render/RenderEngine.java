@@ -25,7 +25,15 @@ public class RenderEngine {
     private void testMap() {
         for (int x = 0; x < 10; x++) {
             for (int z = 0; z < 10; z++) {
-                world.placeBlock(x, 0, z, Blocks.GRASS_BLOCK);
+                if (Math.random() * 3 < 1) {
+                    world.placeBlock(x, 0, z, Blocks.DIAMOND_BLOCK);
+                    continue;
+                }
+                if (Math.random() * 2 < 1) {
+                    world.placeBlock(x, 0, z, Blocks.GOLD_BLOCK);
+                    continue;
+                }
+                world.placeBlock(x, 0, z, Blocks.EMERALD_BLOCK);
             }
         }
 
