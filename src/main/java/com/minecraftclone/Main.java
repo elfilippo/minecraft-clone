@@ -53,7 +53,6 @@ public class Main extends SimpleApplication {
         //NOTE: Camera cam
         flyCam.setMoveSpeed(0);
         cam.setFrustumNear(0.2f);
-        cam.setFrustumFar(500f);
         cam.setFov(70);
 
         //INFO: world owns all data
@@ -64,15 +63,6 @@ public class Main extends SimpleApplication {
         //NOTE: Render engine
         //INFO: will render the world eventually, does nothing rn
         //new RenderEngine(rootNode, assetManager, bulletAppState);
-
-        AmbientLight ambient = new AmbientLight();
-        ambient.setColor(ColorRGBA.White.mult(0.25f));
-        rootNode.addLight(ambient);
-        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
-
-        SSAOFilter ssao = new SSAOFilter(6.0f, 4.0f, 1.0f, 0.05f);
-        fpp.addFilter(ssao);
-        viewPort.addProcessor(fpp);
     }
 
     @Override

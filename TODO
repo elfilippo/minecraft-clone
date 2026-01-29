@@ -3,6 +3,7 @@ implement render distance
 compact blocks.java (json, hashmap, etc?), merge with block cache (hashmap with loaded blocks)
 separate rendering (visual blocks, RenderEngine class) from blocks in memory (Chunk class)
 ambient occlusion
+fix slight noise on block sides (taa?)
 Block placing and breaking
 Saving
 Items
