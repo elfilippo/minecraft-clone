@@ -11,8 +11,7 @@ public class EntityManager {
 
     private PlayerCharacter playerCharacter;
 
-    public EntityManager(BulletAppState bulletAppState, Node rootNode, Camera cam, InputManager inputManager) {
-        var actionInput = new ActionInput();
+    public EntityManager(BulletAppState bulletAppState, Node rootNode, Camera cam, InputManager inputManager, ActionInput actionInput) {
         new KeyMapping(inputManager, actionInput.getActionListener());
         playerCharacter = new PlayerCharacter(bulletAppState, actionInput, cam);
         rootNode.attachChild(playerCharacter.getNode());

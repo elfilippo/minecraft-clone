@@ -4,7 +4,18 @@ import com.jme3.input.controls.ActionListener;
 
 public class ActionInput implements ActionListener {
 
-    private boolean forward, backward, left, right, jump;
+    private boolean forward;
+    private boolean backward;
+    private boolean left;
+    private boolean right;
+    private boolean jump;
+
+    private boolean breakBlock;
+    private boolean placeBlock;
+
+    // =========================
+    // CONSTRUCTOR
+    // =========================
 
     @Override
     public void onAction(String name, boolean isPressed, float tpf) {
@@ -14,12 +25,14 @@ public class ActionInput implements ActionListener {
             case "left" -> left = isPressed;
             case "right" -> right = isPressed;
             case "jump" -> jump = isPressed;
+            case "left-click" -> breakBlock = isPressed;
+            case "right-click" -> placeBlock = isPressed;
         }
     }
 
-    public boolean isJump() {
-        return jump;
-    }
+    // =========================
+    // MOVEMENT
+    // =========================
 
     public boolean isForward() {
         return forward;
@@ -36,6 +49,26 @@ public class ActionInput implements ActionListener {
     public boolean isRight() {
         return right;
     }
+
+    public boolean isJump() {
+        return jump;
+    }
+
+    // =========================
+    // BLOCK INTERACTION
+    // =========================
+
+    public boolean breakBlock() {
+        return breakBlock;
+    }
+
+    public boolean placeBlock() {
+        return placeBlock;
+    }
+
+    // =========================
+    // INTERNAL
+    // =========================
 
     public ActionListener getActionListener() {
         return this;

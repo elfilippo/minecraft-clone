@@ -1,5 +1,7 @@
 package com.minecraftclone.block;
 
+import com.minecraftclone.world.World;
+
 public class Block {
 
     private final boolean solid;
@@ -21,9 +23,25 @@ public class Block {
         this.bottom = texture;
     }
 
+    // =========================
+    // PROPERTIES
+    // =========================
+
     public boolean isSolid() {
         return solid;
     }
+
+    public boolean isBreakable() {
+        return true;
+    }
+
+    public boolean canBePlacedAt(World world, int x, int y, int z) {
+        return true;
+    }
+
+    // =========================
+    // TEXTURES
+    // =========================
 
     public String top() {
         return top;

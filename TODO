@@ -1,5 +1,15 @@
+fix non-solid blocks breaking the game (mesh)
 improve movement (smoother)
+fix not being able to walk directly below blocks
+figure out stepHeight
+add limiting block placing speed
+add block hardness, mining tool capability for future
+add selected block border
+add gui (crosshair)
+add proper comments
+generalize block actions (using, hitting, etc)
 implement render distance
+clear blockMaterialCache items
 compact blocks.java (json, hashmap, etc?), merge with block cache (hashmap with loaded blocks)
 separate rendering (visual blocks, RenderEngine class) from blocks in memory (Chunk class)
 ambient occlusion
@@ -8,7 +18,6 @@ Block placing and breaking
 Saving
 Items
 Entities
-
 greedy meshing?
 Multiplayer?
 
