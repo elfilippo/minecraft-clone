@@ -10,8 +10,6 @@ import com.minecraftclone.input.ActionInput;
 
 public class PlayerCharacter {
 
-    public static final float HEIGHT = 1.8f;
-    public static final float RADIUS = 0.5f;
     private final CharacterControl playerControl;
     private final Node playerNode;
 
@@ -28,7 +26,7 @@ public class PlayerCharacter {
 
         bulletAppState.setDebugEnabled(debugEnabled);
 
-        var shape = new CapsuleCollisionShape(RADIUS, HEIGHT);
+        var shape = new CapsuleCollisionShape(0.5f, 1.8f);
         var player = new CharacterControl(shape, stepHeight);
         player.setJumpSpeed(10f);
         player.setFallSpeed(20f);
@@ -58,7 +56,6 @@ public class PlayerCharacter {
         playerControl.setWalkDirection(walkDir);
 
         if (input.isJump() && playerControl.onGround()) playerControl.jump();
-        System.out.println(input.breakBlock());
     }
 
     public Node getNode() {

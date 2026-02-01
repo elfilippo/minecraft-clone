@@ -4,11 +4,9 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.font.BitmapText;
 import com.jme3.system.AppSettings;
-import com.minecraftclone.block.Blocks;
 import com.minecraftclone.entitiy.PlayerCharacter;
-import com.minecraftclone.input.ActionInput;
-import com.minecraftclone.world.BlockInteractionSystem;
-import com.minecraftclone.world.World;
+import com.minecraftclone.render.RenderEngine;
+import com.minecraftclone.world.*;
 
 public class Main extends SimpleApplication {
 
@@ -21,14 +19,8 @@ public class Main extends SimpleApplication {
     private double timeActiveSeconds;
     private PlayerCharacter playerCharacter;
 
+    private RenderEngine engine;
     private World world;
-
-    // =========================
-    // NEW
-    // =========================
-
-    private ActionInput actionInput;
-    private BlockInteractionSystem blockInteraction;
 
     public static void main(String[] args) {
         var settings = new AppSettings(true);
@@ -44,7 +36,7 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         initialTime = System.nanoTime();
-        tickTime = 1f / ticksPerSecond;
+        tickTime = 1 / ticksPerSecond;
 
         tpsText = new BitmapText(guiFont);
         guiNode.attachChild(tpsText);
@@ -60,22 +52,13 @@ public class Main extends SimpleApplication {
         cam.setFov(70);
 
         //INFO: world owns all data
-        actionInput = new ActionInput();
-        world = new World(rootNode, assetManager, bulletAppState, cam, inputManager, actionInput);
+        world = new World(rootNode, assetManager, bulletAppState, cam, inputManager);
+
         playerCharacter = world.getPlayerCharacter();
 
         //NOTE: Render engine
         //INFO: will render the world eventually, does nothing rn
         //new RenderEngine(rootNode, assetManager, bulletAppState);
-
-        // =========================
-        // BLOCK INTERACTION
-        // =========================
-
-        blockInteraction = new BlockInteractionSystem(world, rootNode, cam, actionInput);
-
-        // Example: selected block (later this comes from hotbar)
-        blockInteraction.setSelectedBlock(Blocks.DIRT);
     }
 
     @Override
@@ -85,6 +68,7 @@ public class Main extends SimpleApplication {
 
         cam.setLocation(playerCharacter.getPlayerControl().getPhysicsLocation().add(0, 0.2f, 0));
 
+        //INFO: runs tick() until it's caught up
         while (timeAccumulator >= tickTime) {
             tick();
             timeAccumulator -= tickTime;
@@ -93,19 +77,12 @@ public class Main extends SimpleApplication {
 
     private void tick() {
         totalTicks++;
-
         playerCharacter.tick();
-
-        // =========================
-        // BLOCK INTERACTION TICK
-        // =========================
-
-        blockInteraction.update();
     }
 
     private void tps() {
         //INFO: ticks are inaccurate with small timeActive, clamped at 20 for the first 10 seconds
-        timeActiveSeconds = (System.nanoTime() - initialTime) / 1_000_000_000.0;
+        timeActiveSeconds = (System.nanoTime() - initialTime) / 1000000000.0;
         double tps = (Math.floor((10 * totalTicks) / timeActiveSeconds)) / 10;
         if (timeActiveSeconds < 10) tps = Math.clamp(tps, 0, 20);
         tpsText.setText("TPS: " + tps);
