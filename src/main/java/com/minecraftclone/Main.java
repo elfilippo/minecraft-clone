@@ -61,7 +61,7 @@ public class Main extends SimpleApplication {
 
         //INFO: world owns all data
         actionInput = new ActionInput();
-        world = new World(rootNode, assetManager, bulletAppState, cam, inputManager, actionInput);
+        world = new World(this, actionInput);
         playerCharacter = world.getPlayerCharacter();
 
         //NOTE: Render engine
@@ -84,6 +84,8 @@ public class Main extends SimpleApplication {
         timeAccumulator += tpf;
 
         cam.setLocation(playerCharacter.getPlayerControl().getPhysicsLocation().add(0, 0.2f, 0));
+
+        world.update();
 
         while (timeAccumulator >= tickTime) {
             tick();

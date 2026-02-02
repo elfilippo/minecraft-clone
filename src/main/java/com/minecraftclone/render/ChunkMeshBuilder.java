@@ -47,12 +47,7 @@ public final class ChunkMeshBuilder {
                         uv,
                         idx,
                         offset,
-                        quad(
-                            new Vector3f(x, y, z),
-                            new Vector3f(x + 1, y, z),
-                            new Vector3f(x + 1, y, z + 1),
-                            new Vector3f(x, y, z + 1)
-                        ),
+                        quad(new Vector3f(x, y, z), new Vector3f(x + 1, y, z), new Vector3f(x + 1, y, z + 1), new Vector3f(x, y, z + 1)),
                         Vector3f.UNIT_Y.negate()
                     );
 
@@ -79,12 +74,7 @@ public final class ChunkMeshBuilder {
                         uv,
                         idx,
                         offset,
-                        quad(
-                            new Vector3f(x + 1, y, z),
-                            new Vector3f(x, y, z),
-                            new Vector3f(x, y + 1, z),
-                            new Vector3f(x + 1, y + 1, z)
-                        ),
+                        quad(new Vector3f(x + 1, y, z), new Vector3f(x, y, z), new Vector3f(x, y + 1, z), new Vector3f(x + 1, y + 1, z)),
                         Vector3f.UNIT_Z.negate()
                     );
 
@@ -111,12 +101,7 @@ public final class ChunkMeshBuilder {
                         uv,
                         idx,
                         offset,
-                        quad(
-                            new Vector3f(x, y, z),
-                            new Vector3f(x, y, z + 1),
-                            new Vector3f(x, y + 1, z + 1),
-                            new Vector3f(x, y + 1, z)
-                        ),
+                        quad(new Vector3f(x, y, z), new Vector3f(x, y, z + 1), new Vector3f(x, y + 1, z + 1), new Vector3f(x, y + 1, z)),
                         Vector3f.UNIT_X.negate()
                     );
                 }
@@ -127,21 +112,9 @@ public final class ChunkMeshBuilder {
 
         for (String tex : pos.keySet()) {
             Mesh m = new Mesh();
-            m.setBuffer(
-                VertexBuffer.Type.Position,
-                3,
-                BufferUtils.createFloatBuffer(pos.get(tex).toArray(new Vector3f[0]))
-            );
-            m.setBuffer(
-                VertexBuffer.Type.Normal,
-                3,
-                BufferUtils.createFloatBuffer(norm.get(tex).toArray(new Vector3f[0]))
-            );
-            m.setBuffer(
-                VertexBuffer.Type.TexCoord,
-                2,
-                BufferUtils.createFloatBuffer(uv.get(tex).toArray(new Vector2f[0]))
-            );
+            m.setBuffer(VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer(pos.get(tex).toArray(new Vector3f[0])));
+            m.setBuffer(VertexBuffer.Type.Normal, 3, BufferUtils.createFloatBuffer(norm.get(tex).toArray(new Vector3f[0])));
+            m.setBuffer(VertexBuffer.Type.TexCoord, 2, BufferUtils.createFloatBuffer(uv.get(tex).toArray(new Vector2f[0])));
             m.setBuffer(
                 VertexBuffer.Type.Index,
                 3,
@@ -199,8 +172,6 @@ public final class ChunkMeshBuilder {
     }
 
     private static boolean isAir(Block[][][] blocks, int x, int y, int z) {
-        return (
-            x < 0 || y < 0 || z < 0 || x >= Chunk.SIZE || y >= Chunk.SIZE || z >= Chunk.SIZE || blocks[x][y][z] == null
-        );
+        return (x < 0 || y < 0 || z < 0 || x >= Chunk.SIZE || y >= Chunk.SIZE || z >= Chunk.SIZE || blocks[x][y][z] == null);
     }
 }

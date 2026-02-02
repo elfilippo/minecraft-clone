@@ -1,10 +1,7 @@
 package com.minecraftclone.world;
 
-import com.jme3.asset.AssetManager;
+import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.input.InputManager;
-import com.jme3.renderer.Camera;
-import com.jme3.scene.Node;
 import com.minecraftclone.block.Block;
 import com.minecraftclone.entitiy.EntityManager;
 import com.minecraftclone.entitiy.PlayerCharacter;
@@ -14,10 +11,10 @@ import java.util.Map;
 
 public class World {
 
-    private final Node rootNode;
-    private final BulletAppState bulletAppState;
-    private final AssetManager assetManager;
+    private final SimpleApplication app;
     private final EntityManager entityManager;
+    private final BulletAppState bulletAppState;
+    private final ChunkManager chunkManager;
 
     private final Map<String, Chunk> chunks = new HashMap<>();
 
@@ -25,33 +22,13 @@ public class World {
     // CONSTRUCTOR
     // =========================
 
-    public World(
-        Node rootNode,
-        AssetManager assetManager,
-        BulletAppState bulletAppState,
-        Camera cam,
-        InputManager inputManager,
-        ActionInput actionInput
-    ) {
-        this.rootNode = rootNode;
-        this.assetManager = assetManager;
-        this.bulletAppState = bulletAppState;
+    public World(SimpleApplication app, ActionInput actionInput) {
+        this.app = app;
+        bulletAppState = app.getStateManager().getState(BulletAppState.class);
 
-        entityManager = new EntityManager(bulletAppState, rootNode, cam, inputManager, actionInput);
+        entityManager = new EntityManager(app, bulletAppState, actionInput);
         entityManager.getPlayerCharacter();
-
-        int generationDistance = 5;
-
-        for (int x = -generationDistance; x <= generationDistance; x++) {
-            for (int z = -generationDistance; z <= generationDistance; z++) {
-                Chunk chunk = new Chunk(x, 0, z, assetManager);
-                chunks.put(key(x, 0, z), chunk);
-                rootNode.attachChild(chunk.getNode());
-
-                TerrainGenerator.generateChunk(chunk);
-                chunk.rebuild(bulletAppState.getPhysicsSpace());
-            }
-        }
+        chunkManager = new ChunkManager(app, this, 8); // render distance
     }
 
     // =========================
@@ -79,8 +56,8 @@ public class World {
         int lz = Math.floorMod(wz, Chunk.SIZE);
 
         Chunk chunk = chunks.computeIfAbsent(key(cx, cy, cz), k -> {
-            Chunk c = new Chunk(cx, cy, cz, assetManager);
-            rootNode.attachChild(c.getNode());
+            Chunk c = new Chunk(cx, cy, cz, app.getAssetManager());
+            app.getRootNode().attachChild(c.getNode());
             return c;
         });
 
@@ -117,11 +94,23 @@ public class World {
         }
     }
 
-    private static String key(int x, int y, int z) {
+    static String key(int x, int y, int z) {
         return x + "," + y + "," + z;
     }
 
     public PlayerCharacter getPlayerCharacter() {
         return entityManager.getPlayerCharacter();
+    }
+
+    public void update() {
+        chunkManager.update(entityManager.getPlayerCharacter().getPlayerControl().getPhysicsLocation());
+    }
+
+    public boolean hasChunk(ChunkPos pos) {
+        return chunks.containsKey(key(pos.x, pos.y, pos.z));
+    }
+
+    public void addChunk(Chunk chunk) {
+        chunks.put(key(chunk.getChunkX(), chunk.getChunkY(), chunk.getChunkZ()), chunk);
     }
 }

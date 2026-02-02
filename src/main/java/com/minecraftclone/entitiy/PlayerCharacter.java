@@ -37,7 +37,7 @@ public class PlayerCharacter {
         Node playerNode = new Node("Player");
         playerNode.addControl(player);
         bulletAppState.getPhysicsSpace().add(player);
-        player.setPhysicsLocation(new Vector3f(5, 20, 2));
+        player.setPhysicsLocation(new Vector3f(5, 80, 2));
         this.playerControl = player;
         this.playerNode = playerNode;
     }
