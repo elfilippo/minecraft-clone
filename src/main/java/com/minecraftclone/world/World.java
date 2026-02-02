@@ -28,7 +28,7 @@ public class World {
 
         entityManager = new EntityManager(app, bulletAppState, actionInput);
         entityManager.getPlayerCharacter();
-        chunkManager = new ChunkManager(app, this, 8); // render distance
+        chunkManager = new ChunkManager(app, this, 50); // render distance
     }
 
     // =========================

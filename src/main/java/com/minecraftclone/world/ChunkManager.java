@@ -43,18 +43,25 @@ public class ChunkManager {
         int cx = Math.floorDiv((int) playerPos.x, Chunk.SIZE);
         int cz = Math.floorDiv((int) playerPos.z, Chunk.SIZE);
 
-        for (int x = cx - renderDistance; x <= cx + renderDistance; x++) {
-            for (int z = cz - renderDistance; z <= cz + renderDistance; z++) {
-                ChunkPos pos = new ChunkPos(x, 0, z);
+        // Spiral / diamond order
+        for (int d = 0; d <= renderDistance; d++) {
+            // distance from player chunk
+            for (int dx = -d; dx <= d; dx++) {
+                int dz1 = d - Math.abs(dx);
+                int dz2 = -dz1;
 
-                if (world.hasChunk(pos) || queued.contains(pos)) {
-                    continue;
-                }
-
-                queue.add(pos);
-                queued.add(pos);
+                addIfMissing(cx + dx, cz + dz1);
+                if (dz1 != dz2) addIfMissing(cx + dx, cz + dz2);
             }
         }
+    }
+
+    private void addIfMissing(int x, int z) {
+        ChunkPos pos = new ChunkPos(x, 0, z);
+        if (world.hasChunk(pos) || queued.contains(pos)) return;
+
+        queue.add(pos);
+        queued.add(pos);
     }
 
     private void processQueue() {
