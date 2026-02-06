@@ -5,7 +5,7 @@ import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
-import com.jme3.input.controls.MouseAxisTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
 
 public class KeyMapping {
 
@@ -16,21 +16,23 @@ public class KeyMapping {
         this.input = input;
         this.actionListener = actionListener;
 
-        bindKey("jump", KeyInput.KEY_SPACE);
-        bindKey("forward", KeyInput.KEY_W);
-        bindKey("back", KeyInput.KEY_S);
-        bindKey("left", KeyInput.KEY_A);
-        bindKey("right", KeyInput.KEY_D);
-        bindKey("one", KeyInput.KEY_1);
-        bindKey("two", KeyInput.KEY_2);
-        bindKey("three", KeyInput.KEY_3);
-        bindKey("four", KeyInput.KEY_4);
-        bindKey("five", KeyInput.KEY_5);
-        bindKey("six", KeyInput.KEY_6);
-        bindKey("seven", KeyInput.KEY_7);
-        bindKey("eight", KeyInput.KEY_8);
-        bindKey("nine", KeyInput.KEY_9);
-        bindMouse("mouseWheel", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false));
+        bindKey("space", KeyInput.KEY_SPACE);
+        bindKey("w", KeyInput.KEY_W);
+        bindKey("s", KeyInput.KEY_S);
+        bindKey("a", KeyInput.KEY_A);
+        bindKey("d", KeyInput.KEY_D);
+        bindKey("e", KeyInput.KEY_E);
+        bindKey("q", KeyInput.KEY_Q);
+        bindKey("1", KeyInput.KEY_1);
+        bindKey("2", KeyInput.KEY_2);
+        bindKey("3", KeyInput.KEY_3);
+        bindKey("4", KeyInput.KEY_4);
+        bindKey("5", KeyInput.KEY_5);
+        bindKey("6", KeyInput.KEY_6);
+        bindKey("7", KeyInput.KEY_7);
+        bindKey("8", KeyInput.KEY_8);
+        bindKey("9", KeyInput.KEY_9);
+        bindMouse("mouseWheel", MouseInput.AXIS_WHEEL);
     }
 
     private void bindKey(String name, int keyInput) {
@@ -39,6 +41,7 @@ public class KeyMapping {
     }
 
     private void bindMouse(String name, int mouseInput) {
-        input.addMapping(name, new MouseAxisTrigger(mouseInput));
+        input.addMapping(name, new MouseButtonTrigger(mouseInput));
+        input.addListener(actionListener, name);
     }
 }

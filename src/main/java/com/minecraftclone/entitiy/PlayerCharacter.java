@@ -65,14 +65,14 @@ public class PlayerCharacter {
 
         walkDir.set(0, 0, 0);
 
-        if (input.isForward()) walkDir.addLocal(forward);
-        if (input.isBackward()) walkDir.addLocal(forward.negate());
-        if (input.isLeft()) walkDir.addLocal(left);
-        if (input.isRight()) walkDir.addLocal(left.negate());
+        if (input.keyDown('w')) walkDir.addLocal(forward);
+        if (input.keyDown('a')) walkDir.addLocal(left);
+        if (input.keyDown('s')) walkDir.addLocal(forward.negate());
+        if (input.keyDown('d')) walkDir.addLocal(left.negate());
 
         playerControl.setWalkDirection(walkDir);
 
-        if (input.isJump() && playerControl.onGround()) playerControl.jump();
+        if (input.keyDown(' ') && playerControl.onGround()) playerControl.jump();
     }
 
     public Node getNode() {
