@@ -50,6 +50,28 @@ public class ActionInput implements ActionListener {
         };
     }
 
+    public boolean keyUp(char key) {
+        return !switch (key) {
+            case 'w' -> w;
+            case 'a' -> a;
+            case 's' -> s;
+            case 'd' -> d;
+            case 'e' -> e;
+            case 'q' -> q;
+            case '1' -> one;
+            case '2' -> two;
+            case '3' -> three;
+            case '4' -> four;
+            case '5' -> five;
+            case '6' -> six;
+            case '7' -> seven;
+            case '8' -> eight;
+            case '9' -> nine;
+            case ' ' -> space;
+            default -> false;
+        };
+    }
+
     public ActionListener getActionListener() {
         return this;
     }

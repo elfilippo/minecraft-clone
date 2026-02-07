@@ -24,6 +24,7 @@ public class PlayerCharacter {
     private final ActionInput input;
     private final Camera cam;
     private PlayerGUI gui;
+    private boolean eWasUp;
 
     public PlayerCharacter(
         BulletAppState bulletAppState,
@@ -35,6 +36,7 @@ public class PlayerCharacter {
     ) {
         this.input = input;
         this.cam = cam;
+        eWasUp = true;
 
         try {
             gui = new PlayerGUI(settings, guiNode, assetManager);
@@ -72,7 +74,6 @@ public class PlayerCharacter {
         if (input.keyDown('d')) walkDir.addLocal(left.negate());
 
         playerControl.setWalkDirection(walkDir);
-
         if (input.keyDown(' ') && playerControl.onGround()) playerControl.jump();
 
         if (input.keyDown('1')) gui.changeHotbarSlot(1);
@@ -85,7 +86,11 @@ public class PlayerCharacter {
         if (input.keyDown('8')) gui.changeHotbarSlot(8);
         if (input.keyDown('9')) gui.changeHotbarSlot(9);
 
-        if (input.keyDown('e')) gui.toggleInventory();
+        if (eWasUp && input.keyDown('e')) {
+            gui.toggleInventory();
+            eWasUp = false;
+        }
+        if (input.keyUp('e')) eWasUp = true;
     }
 
     public Node getNode() {
