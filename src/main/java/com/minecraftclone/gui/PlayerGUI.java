@@ -18,7 +18,7 @@ public class PlayerGUI {
     private int scale = 4; // nur glatte zahlen
     private Picture hotbar, hotbarSelector, inventory, crosshair, experienceBarEmpty, heartContainer, fullHeart, halfHeart, hungerContainer, fullHunger, halfHunger;
     private int windowWidth, windowHeight;
-    private ImageLoader imageLoader;
+    private ImageLoader imageLoader = new ImageLoader();
     private Node guiNode;
     private boolean inventoryShown;
     private AssetManager assetManager;
@@ -31,7 +31,6 @@ public class PlayerGUI {
         this.guiNode = guiNode;
         windowWidth = settings.getWidth();
         windowHeight = settings.getHeight();
-        imageLoader = new ImageLoader();
 
         hotbarTexture = loadTexture("src/main/resources/textures/gui/sprites/hud/hotbar.png"); //182x22
         hotbarSelectorTexture = loadTexture("src/main/resources/textures/gui/sprites/hud/hotbar_selection.png"); //24x23
