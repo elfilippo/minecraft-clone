@@ -109,7 +109,7 @@ public class Main extends SimpleApplication {
         //INFO: ticks are inaccurate with small timeActive, clamped at 20 for the first 10 seconds
         timeActiveSeconds = (System.nanoTime() - initialTime) / 1_000_000_000.0;
         double tps = (Math.floor((10 * totalTicks) / timeActiveSeconds)) / 10;
-        if (timeActiveSeconds < 10) tps = Math.clamp(tps, 0, 20);
+        if (timeActiveSeconds < 20) tps = Math.clamp(tps, 0, 40);
         tpsText.setText("TPS: " + tps);
     }
 }
