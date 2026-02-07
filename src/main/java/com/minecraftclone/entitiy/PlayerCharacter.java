@@ -74,6 +74,16 @@ public class PlayerCharacter {
         playerControl.setWalkDirection(walkDir);
 
         if (input.keyDown(' ') && playerControl.onGround()) playerControl.jump();
+
+        if (input.keyDown('1')) gui.changeHotbarSlot(1);
+        if (input.keyDown('2')) gui.changeHotbarSlot(2);
+        if (input.keyDown('3')) gui.changeHotbarSlot(3);
+        if (input.keyDown('4')) gui.changeHotbarSlot(4);
+        if (input.keyDown('5')) gui.changeHotbarSlot(5);
+        if (input.keyDown('6')) gui.changeHotbarSlot(6);
+        if (input.keyDown('7')) gui.changeHotbarSlot(7);
+        if (input.keyDown('8')) gui.changeHotbarSlot(8);
+        if (input.keyDown('9')) gui.changeHotbarSlot(9);
     }
 
     public Node getNode() {
