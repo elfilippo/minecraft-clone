@@ -24,13 +24,16 @@ public class PlayerGUI {
     private AssetManager assetManager;
     private Texture2D hotbarTexture, hotbarSelectorTexture, crosshairTexture, inventoryTexture, experienceBarEmptyTexture, heartContainerTexture, fullHeartTexture, halfHeartTexture, hungerContainerTexture, fullHungerTexture, halfHungerTexture;
 
+    private Node hungerNode, heartNode;
+
     List<ItemInstance> slots = new ArrayList<>(9);
 
     public PlayerGUI(AppSettings settings, Node guiNode, AssetManager assetManager) throws IOException {
         this.assetManager = assetManager;
         this.guiNode = guiNode;
-        heartContainerNode = new Node("heartcCntainerNode");
+        heartContainerNode = new Node("heartContainerNode");
         hungerContainerNode = new Node("hungerContainerNode");
+        containerNode = new Node("containerNode");
         guiNode.attachChild(containerNode);
         hungerNode = new Node("hungerNode");
         heartNode = new Node("heartNode");
@@ -40,17 +43,17 @@ public class PlayerGUI {
         windowWidth = settings.getWidth();
         windowHeight = settings.getHeight();
 
-        hotbarTexture = loadTexture("src/main/resources/textures/gui/sprites/hud/hotbar.png"); //182x22
-        hotbarSelectorTexture = loadTexture("src/main/resources/textures/gui/sprites/hud/hotbar_selection.png"); //24x23
-        crosshairTexture = loadTexture("src/main/resources/textures/gui/sprites/hud/crosshair.png"); //15x15
+        hotbarTexture = loadTexture(hudPath("hotbar.png")); //182x22
+        hotbarSelectorTexture = loadTexture(hudPath("hotbar_selection.png")); //24x23
+        crosshairTexture = loadTexture(hudPath("crosshair.png")); //15x15
         inventoryTexture = loadTexture("src/main/resources/textures/gui/container/inventory.png"); //256x256
-        experienceBarEmptyTexture = loadTexture("src/main/resources/textures/gui/sprites/hud/experience_bar_background.png"); //182x5
-        heartContainerTexture = loadTexture("src/main/resources/textures/gui/sprites/hud/heart/container.png"); //9x9
-        fullHeartTexture = loadTexture("src/main/resources/textures/gui/sprites/hud/heart/full.png"); //9x9
-        halfHeartTexture = loadTexture("src/main/resources/textures/gui/sprites/hud/heart/half.png"); //9x9
-        hungerContainerTexture = loadTexture("src/main/resources/textures/gui/sprites/hud/food_empty.png"); //9x9
-        fullHungerTexture = loadTexture("src/main/resources/textures/gui/sprites/hud/food_full.png"); //9x9
-        halfHungerTexture = loadTexture("src/main/resources/textures/gui/sprites/hud/food_half.png"); //9x9
+        experienceBarEmptyTexture = loadTexture(hudPath("experience_bar_background.png")); //182x5
+        heartContainerTexture = loadTexture(hudPath("heart/container.png")); //9x9
+        fullHeartTexture = loadTexture(hudPath("heart/full.png")); //9x9
+        halfHeartTexture = loadTexture(hudPath("heart/half.png")); //9x9
+        hungerContainerTexture = loadTexture(hudPath("food_empty.png")); //9x9
+        fullHungerTexture = loadTexture(hudPath("food_full.png")); //9x9
+        halfHungerTexture = loadTexture(hudPath("food_half.png")); //9x9
 
         hotbar = new Picture("hotbar");
         hotbar.setTexture(assetManager, hotbarTexture, true);
@@ -199,5 +202,9 @@ public class PlayerGUI {
             hungerNode.attachChild(fullHunger);
         }
         //hungerNode.detachAllChildren();
+    }
+
+    private String hudPath(String path) {
+        return "src/main/resources/textures/gui/sprites/hud/" + path;
     }
 }
