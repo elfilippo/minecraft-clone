@@ -1,7 +1,5 @@
-fix not being able to walk directly below blocks
 add limiting block placing speed
 add block hardness, mining tool capability for future
-fix block placing/breaking lagging the game
 add selected block border
 improve movement (smoother)
 fix non-solid blocks breaking the game (mesh)

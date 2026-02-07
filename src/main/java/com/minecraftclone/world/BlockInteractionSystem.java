@@ -63,12 +63,21 @@ public final class BlockInteractionSystem {
     }
 
     private void tryPlace() {
-        if (selectedBlock == null) {
-            return;
-        }
+        if (selectedBlock == null) return;
 
         RaycastResult hit = raycastBlock();
         if (hit == null) {
+            // Place at max reach in empty space
+            Vector3f pos = camera.getLocation().add(camera.getDirection().normalize().mult(reachDistance));
+            int px = (int) Math.floor(pos.x);
+            int py = (int) Math.floor(pos.y);
+            int pz = (int) Math.floor(pos.z);
+
+            if (world.getBlock(px, py, pz) != null) return;
+            if (!selectedBlock.canBePlacedAt(world, px, py, pz)) return;
+            if (collidesWithPlayer(px, py, pz)) return;
+
+            world.setBlock(px, py, pz, selectedBlock);
             return;
         }
 
@@ -76,21 +85,9 @@ public final class BlockInteractionSystem {
         int py = hit.y + hit.ny;
         int pz = hit.z + hit.nz;
 
-        if (!world.isBlockLoaded(px, py, pz)) {
-            return;
-        }
-
-        if (world.getBlock(px, py, pz) != null) {
-            return;
-        }
-
-        if (!selectedBlock.canBePlacedAt(world, px, py, pz)) {
-            return;
-        }
-
-        if (collidesWithPlayer(px, py, pz)) {
-            return;
-        }
+        if (world.getBlock(px, py, pz) != null) return;
+        if (!selectedBlock.canBePlacedAt(world, px, py, pz)) return;
+        if (collidesWithPlayer(px, py, pz)) return;
 
         world.setBlock(px, py, pz, selectedBlock);
     }
@@ -103,6 +100,8 @@ public final class BlockInteractionSystem {
         Vector3f origin = camera.getLocation();
         Vector3f dir = camera.getDirection().normalize();
 
+        RaycastResult lastEmpty = null;
+
         for (float t = 0; t <= reachDistance; t += STEP) {
             Vector3f pos = origin.add(dir.mult(t));
 
@@ -110,31 +109,32 @@ public final class BlockInteractionSystem {
             int by = (int) Math.floor(pos.y);
             int bz = (int) Math.floor(pos.z);
 
-            if (!world.isBlockLoaded(bx, by, bz)) continue;
+            if (world.isBlockLoaded(bx, by, bz)) {
+                Block b = world.getBlock(bx, by, bz);
+                if (b != null) {
+                    float fx = pos.x - bx;
+                    float fy = pos.y - by;
+                    float fz = pos.z - bz;
 
-            Block b = world.getBlock(bx, by, bz);
-            if (b != null) {
-                // Determine which face we hit
-                float fx = pos.x - bx;
-                float fy = pos.y - by;
-                float fz = pos.z - bz;
+                    int nx = 0,
+                        ny = 0,
+                        nz = 0;
+                    float min = Math.min(Math.min(fx, 1 - fx), Math.min(Math.min(fy, 1 - fy), Math.min(fz, 1 - fz)));
+                    if (min == fx) nx = -1;
+                    else if (min == 1 - fx) nx = 1;
+                    else if (min == fy) ny = -1;
+                    else if (min == 1 - fy) ny = 1;
+                    else if (min == fz) nz = -1;
+                    else if (min == 1 - fz) nz = 1;
 
-                int nx = 0,
-                    ny = 0,
-                    nz = 0;
-                float min = Math.min(Math.min(fx, 1 - fx), Math.min(Math.min(fy, 1 - fy), Math.min(fz, 1 - fz)));
-                if (min == fx) nx = -1;
-                else if (min == 1 - fx) nx = 1;
-                else if (min == fy) ny = -1;
-                else if (min == 1 - fy) ny = 1;
-                else if (min == fz) nz = -1;
-                else if (min == 1 - fz) nz = 1;
-
-                return new RaycastResult(bx, by, bz, nx, ny, nz);
+                    return new RaycastResult(bx, by, bz, nx, ny, nz);
+                }
             }
+
+            lastEmpty = new RaycastResult(bx, by, bz, 0, 0, 0);
         }
 
-        return null;
+        return lastEmpty;
     }
 
     private boolean collidesWithPlayer(int x, int y, int z) {

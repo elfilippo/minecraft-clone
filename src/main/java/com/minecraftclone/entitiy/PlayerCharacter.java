@@ -10,12 +10,12 @@ import com.minecraftclone.input.ActionInput;
 
 public class PlayerCharacter {
 
-    public static final float HEIGHT = 1.8f;
-    public static final float RADIUS = 0.5f;
+    public static final float HEIGHT = 1f;
+    public static final float RADIUS = 0.4f;
     private final CharacterControl playerControl;
     private final Node playerNode;
 
-    private final float stepHeight = 0.2f;
+    private final float stepHeight = 0.1f;
     private final float speed = 0.15f;
     private final boolean debugEnabled = false;
     private final Vector3f walkDir = new Vector3f();

@@ -83,7 +83,7 @@ public class Main extends SimpleApplication {
         tps();
         timeAccumulator += tpf;
 
-        cam.setLocation(playerCharacter.getPlayerControl().getPhysicsLocation().add(0, 0.2f, 0));
+        cam.setLocation(playerCharacter.getPlayerControl().getPhysicsLocation().add(0, 0.6f, 0));
 
         world.update();
 
