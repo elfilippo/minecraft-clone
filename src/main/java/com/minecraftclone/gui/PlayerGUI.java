@@ -14,7 +14,7 @@ import java.util.List;
 
 public class PlayerGUI {
 
-    private int selectedSlot = 5;
+    private int selectedSlot = 1;
     private int scale = 3;
     private Picture hotbar;
     private Picture hotbarSelector;
@@ -50,18 +50,28 @@ public class PlayerGUI {
         hotbarSelector.setPosition(windowWidth / 2 - ((hotbar.getWidth() / 2) + 1 * scale), 0);
         guiNode.attachChild(hotbarSelector);
 
-        changeSlot(selectedSlot);
+        changeHotbarSlot(selectedSlot);
     }
 
-    public void changeSlot(int slot) {
+    public void changeHotbarSlot(int slot) {
         //nicht hinterfragen
-        selectedSlot = slot;
-        hotbarSelector.setPosition(
-            windowWidth / 2 -
-                ((hotbar.getWidth() / 2) + 1 * scale) -
-                (hotbar.getWidth() - 2 * scale) / 9 +
-                (((hotbar.getWidth() - 2 * scale) / 9) * slot),
-            0
-        );
+        if (slot <= 9 && slot >= 1) {
+            selectedSlot = slot;
+            hotbarSelector.setPosition(
+                windowWidth / 2 -
+                    ((hotbar.getWidth() / 2) + 1 * scale) -
+                    (hotbar.getWidth() - 2 * scale) / 9 +
+                    (((hotbar.getWidth() - 2 * scale) / 9) * slot),
+                0
+            );
+        }
+    }
+
+    public void hotbarSlotUp() {
+        changeHotbarSlot(selectedSlot + 1);
+    }
+
+    public void hotbarSlotDown() {
+        changeHotbarSlot(selectedSlot - 1);
     }
 }

@@ -23,6 +23,7 @@ public class PlayerCharacter {
     private final Vector3f walkDir = new Vector3f();
     private final ActionInput input;
     private final Camera cam;
+    private PlayerGUI gui;
 
     public PlayerCharacter(
         BulletAppState bulletAppState,
@@ -36,7 +37,7 @@ public class PlayerCharacter {
         this.cam = cam;
 
         try {
-            PlayerGUI gui = new PlayerGUI(settings, guiNode, assetManager);
+            gui = new PlayerGUI(settings, guiNode, assetManager);
         } catch (IOException e) {
             e.printStackTrace();
         }

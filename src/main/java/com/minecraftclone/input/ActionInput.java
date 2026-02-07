@@ -4,29 +4,27 @@ import com.jme3.input.controls.ActionListener;
 
 public class ActionInput implements ActionListener {
 
-    private boolean w, s, a, d, e, q, space, one, two, three, four, five, six, seven, eight, nine, mouseWheelUp, mouseWheelDown;
+    private boolean w, s, a, d, e, q, space, one, two, three, four, five, six, seven, eight, nine;
 
     @Override
-    public void onAction(String name, boolean isPressed, float tpf) {
+    public void onAction(String name, boolean pressed, float tpf) {
         switch (name) {
-            case "w" -> w = isPressed;
-            case "s" -> s = isPressed;
-            case "a" -> a = isPressed;
-            case "d" -> d = isPressed;
-            case "e" -> e = isPressed;
-            case "q" -> q = isPressed;
-            case "space" -> space = isPressed;
-            case "1" -> one = isPressed;
-            case "2" -> two = isPressed;
-            case "3" -> three = isPressed;
-            case "4" -> four = isPressed;
-            case "5" -> five = isPressed;
-            case "6" -> six = isPressed;
-            case "7" -> seven = isPressed;
-            case "8" -> eight = isPressed;
-            case "9" -> nine = isPressed;
-            case "mouseWheelUp" -> mouseWheelUp = isPressed;
-            case "mouseWheelDown" -> mouseWheelDown = isPressed;
+            case "w" -> w = pressed;
+            case "s" -> s = pressed;
+            case "a" -> a = pressed;
+            case "d" -> d = pressed;
+            case "e" -> e = pressed;
+            case "q" -> q = pressed;
+            case "space" -> space = pressed;
+            case "1" -> one = pressed;
+            case "2" -> two = pressed;
+            case "3" -> three = pressed;
+            case "4" -> four = pressed;
+            case "5" -> five = pressed;
+            case "6" -> six = pressed;
+            case "7" -> seven = pressed;
+            case "8" -> eight = pressed;
+            case "9" -> nine = pressed;
         }
     }
 
@@ -50,14 +48,6 @@ public class ActionInput implements ActionListener {
             case ' ' -> space;
             default -> false;
         };
-    }
-
-    public boolean getMouseWheelUp() {
-        return mouseWheelUp;
-    }
-
-    public boolean getMouseWheelUDown() {
-        return mouseWheelDown;
     }
 
     public ActionListener getActionListener() {
