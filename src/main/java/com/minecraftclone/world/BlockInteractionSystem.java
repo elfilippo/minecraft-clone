@@ -10,7 +10,7 @@ import com.minecraftclone.input.ActionInput;
 public final class BlockInteractionSystem {
 
     private static final float DEFAULT_REACH = 5.0f;
-    private static final float EPSILON = 0.001f;
+    private static final float STEP = 0.05f; // Ray step size
 
     private final World world;
     private final Camera camera;
@@ -53,60 +53,57 @@ public final class BlockInteractionSystem {
     // =========================
 
     private void tryBreak() {
-        System.out.println("Attempting to break block...");
-        long startTime = System.nanoTime();
-
-        RaycastResult hit = raycastBlocks();
-        if (hit == null) {
-            System.out.println("No block in reach to break.");
-            return;
-        }
-
-        if (!world.isBlockLoaded(hit.x, hit.y, hit.z)) {
-            System.out.println("Block is not loaded.");
-            return;
-        }
-
-        Block block = world.getBlock(hit.x, hit.y, hit.z);
-        if (block == null) return;
-        if (!block.isBreakable()) return;
+        RaycastResult hit = raycastBlock();
+        if (hit == null) return;
+        if (!world.isBlockLoaded(hit.x, hit.y, hit.z)) return;
+        Block b = world.getBlock(hit.x, hit.y, hit.z);
+        if (b == null || !b.isBreakable()) return;
 
         world.setBlock(hit.x, hit.y, hit.z, null);
-
-        long endTime = System.nanoTime();
-        System.out.println("Block broken successfully in " + ((endTime - startTime) / 1_000_000.0) + " ms");
     }
 
     private void tryPlace() {
-        if (selectedBlock == null) return;
+        if (selectedBlock == null) {
+            return;
+        }
 
-        RaycastResult hit = raycastBlocks();
-        if (hit == null) return;
+        RaycastResult hit = raycastBlock();
+        if (hit == null) {
+            return;
+        }
 
         int px = hit.x + hit.nx;
         int py = hit.y + hit.ny;
         int pz = hit.z + hit.nz;
 
-        if (!world.isBlockLoaded(px, py, pz)) return;
-        if (world.getBlock(px, py, pz) != null) return;
-        if (!selectedBlock.canBePlacedAt(world, px, py, pz)) return;
-        if (collidesWithPlayer(px, py, pz)) return;
+        if (!world.isBlockLoaded(px, py, pz)) {
+            return;
+        }
+
+        if (world.getBlock(px, py, pz) != null) {
+            return;
+        }
+
+        if (!selectedBlock.canBePlacedAt(world, px, py, pz)) {
+            return;
+        }
+
+        if (collidesWithPlayer(px, py, pz)) {
+            return;
+        }
 
         world.setBlock(px, py, pz, selectedBlock);
     }
 
     // =========================
-    // FAST AABB BLOCK RAYCAST
+    // RAYCAST USING AABB
     // =========================
 
-    private RaycastResult raycastBlocks() {
+    private RaycastResult raycastBlock() {
         Vector3f origin = camera.getLocation();
         Vector3f dir = camera.getDirection().normalize();
 
-        float step = 0.1f; // step size along ray
-        float maxDistance = reachDistance;
-
-        for (float t = 0; t <= maxDistance; t += step) {
+        for (float t = 0; t <= reachDistance; t += STEP) {
             Vector3f pos = origin.add(dir.mult(t));
 
             int bx = (int) Math.floor(pos.x);
@@ -117,25 +114,26 @@ public final class BlockInteractionSystem {
 
             Block b = world.getBlock(bx, by, bz);
             if (b != null) {
-                // Determine which face was hit for placement
-                int nx = 0,
-                    ny = 0,
-                    nz = 0;
-
+                // Determine which face we hit
                 float fx = pos.x - bx;
                 float fy = pos.y - by;
                 float fz = pos.z - bz;
 
-                if (fx < EPSILON) nx = -1;
-                else if (fx > 1 - EPSILON) nx = 1;
-                if (fy < EPSILON) ny = -1;
-                else if (fy > 1 - EPSILON) ny = 1;
-                if (fz < EPSILON) nz = -1;
-                else if (fz > 1 - EPSILON) nz = 1;
+                int nx = 0,
+                    ny = 0,
+                    nz = 0;
+                float min = Math.min(Math.min(fx, 1 - fx), Math.min(Math.min(fy, 1 - fy), Math.min(fz, 1 - fz)));
+                if (min == fx) nx = -1;
+                else if (min == 1 - fx) nx = 1;
+                else if (min == fy) ny = -1;
+                else if (min == 1 - fy) ny = 1;
+                else if (min == fz) nz = -1;
+                else if (min == 1 - fz) nz = 1;
 
                 return new RaycastResult(bx, by, bz, nx, ny, nz);
             }
         }
+
         return null;
     }
 
@@ -157,10 +155,6 @@ public final class BlockInteractionSystem {
 
         return overlapX && overlapY && overlapZ;
     }
-
-    // =========================
-    // INTERNAL STRUCT
-    // =========================
 
     private static final class RaycastResult {
 

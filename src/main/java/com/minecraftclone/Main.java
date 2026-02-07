@@ -75,7 +75,7 @@ public class Main extends SimpleApplication {
         blockInteraction = new BlockInteractionSystem(world, cam, actionInput);
 
         // Example: selected block (later this comes from hotbar)
-        blockInteraction.setSelectedBlock(Blocks.DIRT);
+        blockInteraction.setSelectedBlock(Blocks.DIAMOND_BLOCK);
     }
 
     @Override
