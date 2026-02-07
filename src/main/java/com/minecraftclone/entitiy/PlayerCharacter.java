@@ -25,6 +25,8 @@ public class PlayerCharacter {
     private final Camera cam;
     private PlayerGUI gui;
     private boolean eWasUp;
+    private int lives;
+    private int hunger;
 
     public PlayerCharacter(
         BulletAppState bulletAppState,
