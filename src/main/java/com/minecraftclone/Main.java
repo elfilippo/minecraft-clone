@@ -13,7 +13,7 @@ import com.minecraftclone.world.World;
 public class Main extends SimpleApplication {
 
     private float timeAccumulator;
-    private final float ticksPerSecond = 20f;
+    private final float ticksPerSecond = 40f;
     private float tickTime;
     private int totalTicks;
     private BitmapText tpsText;

@@ -9,7 +9,7 @@ import com.minecraftclone.input.ActionInput;
 
 public final class BlockInteractionSystem {
 
-    private static final float DEFAULT_REACH = 5.0f;
+    private static final float DEFAULT_REACH = 6.0f;
     private static final float STEP = 0.05f; // Ray step size
 
     private final World world;
@@ -20,6 +20,10 @@ public final class BlockInteractionSystem {
     private float reachDistance = DEFAULT_REACH;
     private boolean allowBreaking = true;
     private boolean allowPlacing = true;
+    private int ticksSinceBreak;
+    private int ticksSincePlace;
+    private int placeDelay = 8;
+    private int breakDelay = 4;
 
     public BlockInteractionSystem(World world, Camera camera, ActionInput input) {
         this.world = world;
@@ -28,8 +32,20 @@ public final class BlockInteractionSystem {
     }
 
     public void update() {
-        if (input.breakBlock() && allowBreaking) tryBreak();
-        if (input.placeBlock() && allowPlacing) tryPlace();
+        ticksSinceBreak += 1;
+        ticksSincePlace += 1;
+
+        if (input.breakBlock() && allowBreaking) {
+            tryBreak();
+            return;
+        }
+        if (input.placeBlock() && allowPlacing) {
+            tryPlace();
+            return;
+        }
+
+        if (input.breakBlockHeld() && allowBreaking && ticksSinceBreak > breakDelay) tryBreak();
+        if (input.placeBlockHeld() && allowPlacing && ticksSincePlace > placeDelay) tryPlace();
     }
 
     public void setSelectedBlock(Block block) {
@@ -60,36 +76,30 @@ public final class BlockInteractionSystem {
         if (b == null || !b.isBreakable()) return;
 
         world.setBlock(hit.x, hit.y, hit.z, null);
+        ticksSinceBreak = 0;
     }
 
     private void tryPlace() {
         if (selectedBlock == null) return;
 
         RaycastResult hit = raycastBlock();
-        if (hit == null) {
-            // Place at max reach in empty space
-            Vector3f pos = camera.getLocation().add(camera.getDirection().normalize().mult(reachDistance));
-            int px = (int) Math.floor(pos.x);
-            int py = (int) Math.floor(pos.y);
-            int pz = (int) Math.floor(pos.z);
-
-            if (world.getBlock(px, py, pz) != null) return;
-            if (!selectedBlock.canBePlacedAt(world, px, py, pz)) return;
-            if (collidesWithPlayer(px, py, pz)) return;
-
-            world.setBlock(px, py, pz, selectedBlock);
-            return;
-        }
+        if (hit == null) return; // Must hit a block to place against
 
         int px = hit.x + hit.nx;
         int py = hit.y + hit.ny;
         int pz = hit.z + hit.nz;
 
+        // Space must be empty
         if (world.getBlock(px, py, pz) != null) return;
+
+        // Block-specific placement rules
         if (!selectedBlock.canBePlacedAt(world, px, py, pz)) return;
+
+        // Player collision check
         if (collidesWithPlayer(px, py, pz)) return;
 
         world.setBlock(px, py, pz, selectedBlock);
+        ticksSincePlace = 0;
     }
 
     // =========================
@@ -99,8 +109,6 @@ public final class BlockInteractionSystem {
     private RaycastResult raycastBlock() {
         Vector3f origin = camera.getLocation();
         Vector3f dir = camera.getDirection().normalize();
-
-        RaycastResult lastEmpty = null;
 
         for (float t = 0; t <= reachDistance; t += STEP) {
             Vector3f pos = origin.add(dir.mult(t));
@@ -119,6 +127,7 @@ public final class BlockInteractionSystem {
                     int nx = 0,
                         ny = 0,
                         nz = 0;
+
                     float min = Math.min(Math.min(fx, 1 - fx), Math.min(Math.min(fy, 1 - fy), Math.min(fz, 1 - fz)));
                     if (min == fx) nx = -1;
                     else if (min == 1 - fx) nx = 1;
@@ -130,11 +139,10 @@ public final class BlockInteractionSystem {
                     return new RaycastResult(bx, by, bz, nx, ny, nz);
                 }
             }
-
-            lastEmpty = new RaycastResult(bx, by, bz, 0, 0, 0);
         }
 
-        return lastEmpty;
+        // No block hit
+        return null;
     }
 
     private boolean collidesWithPlayer(int x, int y, int z) {
