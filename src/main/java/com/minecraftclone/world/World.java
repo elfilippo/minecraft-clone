@@ -5,6 +5,7 @@ import com.jme3.bullet.BulletAppState;
 import com.minecraftclone.block.Block;
 import com.minecraftclone.player.PlayerCharacter;
 import com.minecraftclone.player.input.ActionInput;
+import com.minecraftclone.player.input.AnalogInput;
 import com.minecraftclone.player.input.KeyMapping;
 import com.minecraftclone.world.chunks.Chunk;
 import com.minecraftclone.world.chunks.ChunkManager;
@@ -25,11 +26,11 @@ public class World {
     // CONSTRUCTOR
     // =========================
 
-    public World(SimpleApplication app, ActionInput actionInput) {
+    public World(SimpleApplication app, ActionInput actionInput, AnalogInput analogInput) {
         this.app = app;
         bulletAppState = app.getStateManager().getState(BulletAppState.class);
 
-        new KeyMapping(app.getInputManager(), actionInput.getActionListener());
+        new KeyMapping(app.getInputManager(), actionInput, analogInput);
         playerCharacter = new PlayerCharacter(bulletAppState, actionInput, app.getCamera());
         app.getRootNode().attachChild(playerCharacter.getNode());
         chunkManager = new ChunkManager(app, this, 20); // render distance

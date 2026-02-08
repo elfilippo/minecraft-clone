@@ -15,20 +15,18 @@ separate rendering (visual blocks, chunk meshes, RenderEngine class) from blocks
 multithread chunk generation (rendering on main thread)
 ambient occlusion
 fix slight noise on block sides (taa?)
-Saving
-Items
-Entities
+saving
+items
+entities
 lod
 greedy meshing?
-Multiplayer?
+multiplayer?
 
 App (SimpleApplication)
 │
-├─ GameLoop
-│   └─ TickManager
-│       └─ Tickables
-│            ├─ World
-│            └─ (later: systems)
+├─ tick()
+│   ├─ EntityManager.tick()
+│   └─ Player.tick()
 │
 ├─ World   ← OWNS ALL GAME STATE
 │   │

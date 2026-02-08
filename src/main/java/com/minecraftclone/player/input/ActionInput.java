@@ -13,13 +13,8 @@ public class ActionInput implements ActionListener {
     private boolean breakBlockHeld;
     private boolean placeBlockHeld;
 
-    // These track taps
     private boolean breakBlockTapped;
     private boolean placeBlockTapped;
-
-    // =========================
-    // CONSTRUCTOR
-    // =========================
 
     @Override
     public void onAction(String name, boolean isPressed, float tpf) {
@@ -44,10 +39,6 @@ public class ActionInput implements ActionListener {
         }
     }
 
-    // =========================
-    // MOVEMENT
-    // =========================
-
     public boolean isForward() {
         return forward;
     }
@@ -68,10 +59,6 @@ public class ActionInput implements ActionListener {
         return jump;
     }
 
-    // =========================
-    // BLOCK INTERACTION
-    // =========================
-
     public boolean breakBlockHeld() {
         return breakBlockHeld;
     }
@@ -80,10 +67,9 @@ public class ActionInput implements ActionListener {
         return placeBlockHeld;
     }
 
-    // Tap methods — reset after being read
     public boolean breakBlock() {
         boolean tapped = breakBlockTapped;
-        breakBlockTapped = false; // Reset after reading
+        breakBlockTapped = false; //INFO: reset after reading
         return tapped;
     }
 
@@ -91,13 +77,5 @@ public class ActionInput implements ActionListener {
         boolean tapped = placeBlockTapped;
         placeBlockTapped = false;
         return tapped;
-    }
-
-    // =========================
-    // INTERNAL
-    // =========================
-
-    public ActionListener getActionListener() {
-        return this;
     }
 }
