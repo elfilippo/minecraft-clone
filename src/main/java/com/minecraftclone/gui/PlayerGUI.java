@@ -22,7 +22,6 @@ public class PlayerGUI {
     private boolean inventoryShown;
     private AssetManager assetManager;
     private Texture2D hotbarTexture, hotbarSelectorTexture, crosshairTexture, inventoryTexture, experienceBarEmptyTexture, heartContainerTexture, fullHeartTexture, halfHeartTexture, hungerContainerTexture, fullHungerTexture, halfHungerTexture;
-
     private Node hungerNode, heartNode;
 
     List<ItemInstance> slots = new ArrayList<>(9);
