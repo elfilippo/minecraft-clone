@@ -31,14 +31,15 @@ public class PlayerGUI {
     public PlayerGUI(AppSettings settings, Node guiNode, AssetManager assetManager) throws IOException {
         this.assetManager = assetManager;
         this.guiNode = guiNode;
-        heartContainerNode = new Node("heartContainerNode");
-        hungerContainerNode = new Node("hungerContainerNode");
-        containerNode = new Node("containerNode");
-        guiNode.attachChild(containerNode);
         hungerNode = new Node("hungerNode");
         heartNode = new Node("heartNode");
-        containerNode.attachChild(hungerNode);
-        containerNode.attachChild(heartNode);
+        guiNode.attachChild(hungerNode);
+        guiNode.attachChild(heartNode);
+
+        heartContainerNode = new Node("heartContainerNode");
+        heartNode.attachChild(heartContainerNode);
+        hungerContainerNode = new Node("hungerContainerNode");
+        hungerNode.attachChild(hungerContainerNode);
 
         windowWidth = settings.getWidth();
         windowHeight = settings.getHeight();
@@ -85,7 +86,7 @@ public class PlayerGUI {
                 windowWidth / 2 - ((hotbar.getWidth() / 2)) + 8 * scale * i,
                 experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHeight()
             );
-            containerNode.attachChild(heartContainer);
+            heartContainerNode.attachChild(heartContainer);
         }
 
         for (int i = 0; i < 10; i++) {
@@ -97,7 +98,7 @@ public class PlayerGUI {
                 windowWidth / 2 + 10 * scale + 8 * scale * i,
                 experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHeight()
             );
-            containerNode.attachChild(hungerContainer);
+            hungerContainerNode.attachChild(hungerContainer);
         }
 
         crosshair = new Picture("crosshair");
@@ -172,7 +173,7 @@ public class PlayerGUI {
                 windowWidth / 2 - ((hotbar.getWidth() / 2)) + 8 * scale * i,
                 experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHeight()
             );
-            guiNode.attachChild(fullHeart);
+            heartNode.attachChild(fullHeart);
         }
     }
 

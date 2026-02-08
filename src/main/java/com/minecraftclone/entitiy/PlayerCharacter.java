@@ -47,7 +47,7 @@ public class PlayerCharacter {
         }
 
         gui.setLife(life);
-        gui.setHunger(20);
+        gui.setHunger(hunger);
         bulletAppState.setDebugEnabled(debugEnabled);
 
         var shape = new CapsuleCollisionShape(0.5f, 1.8f);
