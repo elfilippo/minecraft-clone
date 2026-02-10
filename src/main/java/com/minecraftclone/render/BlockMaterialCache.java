@@ -13,7 +13,7 @@ public final class BlockMaterialCache {
     public static Material get(String texture, AssetManager assetManager) {
         return CACHE.computeIfAbsent(texture, name -> {
             Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-            Texture tex = assetManager.loadTexture("textures/blocks/" + name + ".png");
+            Texture tex = assetManager.loadTexture("textures/block/" + name + ".png");
             tex.setMagFilter(Texture.MagFilter.Nearest);
             tex.setMinFilter(Texture.MinFilter.Trilinear);
             mat.setTexture("ColorMap", tex);

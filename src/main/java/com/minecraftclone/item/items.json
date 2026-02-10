@@ -1,0 +1,8 @@
+{
+    "iron_sword": {
+        "stack_size": 1,
+        "damage": 5,
+        "durability": 250,
+        "texture": "resources/items/iron_sword.png"
+    }
+}
