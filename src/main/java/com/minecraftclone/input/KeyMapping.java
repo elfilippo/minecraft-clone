@@ -35,6 +35,8 @@ public class KeyMapping {
         bindKey("7", KeyInput.KEY_7);
         bindKey("8", KeyInput.KEY_8);
         bindKey("9", KeyInput.KEY_9);
+        bindKey("left", MouseInput.BUTTON_LEFT);
+        bindKey("right", MouseInput.BUTTON_RIGHT);
         bindMouse("mouseWheelUp", MouseInput.AXIS_WHEEL, true);
         bindMouse("mouseWheelDown", MouseInput.AXIS_WHEEL, false);
     }

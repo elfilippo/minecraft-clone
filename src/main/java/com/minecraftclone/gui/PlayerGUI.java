@@ -107,7 +107,6 @@ public class PlayerGUI {
             windowWidth / 2 - (((inventory.getWidth() - (80 * scale)) / 2)),
             windowHeight / 2 - (inventory.getHeight() - (90 * scale))
         );
-
         changeHotbarSlot(selectedSlot);
     }
 
