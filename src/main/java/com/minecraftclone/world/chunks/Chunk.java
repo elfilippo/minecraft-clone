@@ -50,6 +50,10 @@ public class Chunk {
         return blocks[x][y][z];
     }
 
+    /**
+     * Rebuilds the chunk mesh if not dirty.
+     * <p>
+     */
     public void rebuild(PhysicsSpace physicsSpace) {
         if (!dirty) return;
 
