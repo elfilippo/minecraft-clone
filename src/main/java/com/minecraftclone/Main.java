@@ -13,27 +13,25 @@ import com.minecraftclone.world.World;
 
 public class Main extends SimpleApplication {
 
+    //DOES: tps stuff
+    private static final float TICKS_PER_SECOND = 40f;
     private float timeAccumulator;
-    private final float ticksPerSecond = 40f;
     private float tickTime;
     private int totalTicks;
     private BitmapText tpsText;
     private long initialTime;
     private double timeActiveSeconds;
+
+    //DOES: objects
     private PlayerCharacter playerCharacter;
-
     private World world;
-
-    // =========================
-    // NEW
-    // =========================
-
     private ActionInput actionInput;
     private AnalogInput analogInput;
     private BlockInteractionSystem blockInteraction;
 
     public static void main(String[] args) {
-        var settings = new AppSettings(true);
+        //DOES: set app settings
+        AppSettings settings = new AppSettings(true);
         settings.setWindowSize(1920, 1080);
         settings.setSamples(4);
         settings.setTitle("minecraft-clone v0.2.0-alpha    © Mats O. & Filip M.");
@@ -46,51 +44,62 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         initialTime = System.nanoTime();
-        tickTime = 1f / ticksPerSecond;
+        tickTime = 1f / TICKS_PER_SECOND;
 
+        //DOES: render tps on screen
         tpsText = new BitmapText(guiFont);
         guiNode.attachChild(tpsText);
         tpsText.setLocalTranslation(10, settings.getHeight() - 20, 0);
 
-        //NOTE: Physics bulletAppState
+        //NOTE: physics object is bulletAppState
         var bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
 
-        //NOTE: Camera cam
+        //DOES: set up camera and anisotropic filter
+        //NOTE:  had to implement completely custom camera movement for vertical and horizontal clamping
+        //NOTE:  which was be much worse so sticking with flyCam for now
         flyCam.setEnabled(true);
         cam.setFrustumNear(0.2f);
         cam.setFov(70);
         getRenderer().setDefaultAnisotropicFilter(4);
 
-        //INFO: world owns all data
+        //INFO: for all bool inputs (keypresses etc.)
         actionInput = new ActionInput();
+
+        //INFO: only for inputs with amounts (mouse movement)
+        //DOES: nothing rn
         analogInput = new AnalogInput();
+
+        //DOES: set up world and player
+        //INFO: world owns all data
         world = new World(this, actionInput, analogInput);
         playerCharacter = world.getPlayerCharacter();
 
-        //NOTE: Render engine
-        //INFO: will render the world eventually, does nothing rn
+        //DOES: nothing rn, will render world eventually
         //new RenderEngine(rootNode, assetManager, bulletAppState);
 
-        // =========================
-        // BLOCK INTERACTION
-        // =========================
-
+        //DOES: raycast and break & place blocks
         blockInteraction = new BlockInteractionSystem(world, cam, actionInput);
 
-        // Example: selected block (later this comes from hotbar)
+        //NOTE: will be set by hotbar later
         blockInteraction.setSelectedBlock(Blocks.DIAMOND_BLOCK);
     }
 
     @Override
     public void simpleUpdate(float tpf) {
-        tps();
-        timeAccumulator += tpf;
+        //NOTE: update() methods are bound by fps, tick() by tps
 
+        //DOES: calculate & update tps
+        tps();
+
+        //DOES: set the camera to the player's pos
         cam.setLocation(playerCharacter.getPlayerControl().getPhysicsLocation().add(0, 0.6f, 0));
 
+        //DOES: queue & process missing chunks
         world.update();
 
+        //DOES: ticks unbound from framerate
+        timeAccumulator += tpf;
         while (timeAccumulator >= tickTime) {
             tick();
             timeAccumulator -= tickTime;
@@ -98,16 +107,20 @@ public class Main extends SimpleApplication {
     }
 
     private void tick() {
+        //NOTE: all tickables are called here
+
+        //DOES: used for tps calculation
         totalTicks++;
 
+        //DOES: update player (movement etc.)
         playerCharacter.tick();
+
+        //DOES: update entities
+        //NOTE: no entities yet lol
         //entityManager.tick();
 
-        // =========================
-        // BLOCK INTERACTION TICK
-        // =========================
-
-        blockInteraction.update();
+        //DOES: check for block interaction
+        blockInteraction.tick();
     }
 
     private void tps() {

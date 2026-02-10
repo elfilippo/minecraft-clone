@@ -31,7 +31,7 @@ public final class BlockInteractionSystem {
         this.input = input;
     }
 
-    public void update() {
+    public void tick() {
         ticksSinceBreak += 1;
         ticksSincePlace += 1;
 
