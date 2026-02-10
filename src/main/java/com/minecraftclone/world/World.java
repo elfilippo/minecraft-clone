@@ -15,6 +15,7 @@ import java.util.Map;
 
 public class World {
 
+    private static final int RENDER_DISTANCE = 20;
     private final SimpleApplication app;
     private final PlayerCharacter playerCharacter;
     private final BulletAppState bulletAppState;
@@ -22,29 +23,23 @@ public class World {
 
     private final Map<String, Chunk> chunks = new HashMap<>();
 
-    // =========================
-    // CONSTRUCTOR
-    // =========================
-
-    public World(SimpleApplication app, ActionInput actionInput, AnalogInput analogInput) {
+    public World(SimpleApplication app, ActionInput actionInput, AnalogInput analogInput, BulletAppState bulletAppState) {
         this.app = app;
-        bulletAppState = app.getStateManager().getState(BulletAppState.class);
+        this.bulletAppState = bulletAppState;
 
-        new KeyMapping(app.getInputManager(), actionInput, analogInput);
+        //DOES: create & attatch player
         playerCharacter = new PlayerCharacter(bulletAppState, actionInput, app.getCamera());
         app.getRootNode().attachChild(playerCharacter.getNode());
-        chunkManager = new ChunkManager(app, this, 20); // render distance
+
+        chunkManager = new ChunkManager(app, this, RENDER_DISTANCE); // render distance
     }
 
-    // =========================
-    // BLOCK ACCESS
-    // =========================
-
     public Block getBlock(int wx, int wy, int wz) {
-        Chunk c = getChunkAtWorld(wx, wy, wz);
-        if (c == null) return null;
+        Chunk chunk = getChunkAtWorld(wx, wy, wz);
+        if (chunk == null) return null;
 
-        return c.getBlock(Math.floorMod(wx, Chunk.SIZE), Math.floorMod(wy, Chunk.SIZE), Math.floorMod(wz, Chunk.SIZE));
+        //DOES: calculate chunk block is in and request it
+        return chunk.getBlock(Math.floorMod(wx, Chunk.SIZE), Math.floorMod(wy, Chunk.SIZE), Math.floorMod(wz, Chunk.SIZE));
     }
 
     public boolean isBlockLoaded(int wx, int wy, int wz) {

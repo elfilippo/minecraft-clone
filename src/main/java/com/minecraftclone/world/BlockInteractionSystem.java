@@ -102,41 +102,50 @@ public final class BlockInteractionSystem {
         ticksSincePlace = 0;
     }
 
-    // =========================
-    // RAYCAST USING AABB
-    // =========================
-
     private RaycastResult raycastBlock() {
         Vector3f origin = camera.getLocation();
-        Vector3f dir = camera.getDirection().normalize();
+        Vector3f facingDirection = camera.getDirection().normalize();
 
-        for (float t = 0; t <= reachDistance; t += STEP) {
-            Vector3f pos = origin.add(dir.mult(t));
+        //DOES: cast ray that goes along viewDirection until reachDistance is reached
+        for (float rayProgress = 0; rayProgress <= reachDistance; rayProgress += STEP) {
+            Vector3f rayPos = origin.add(facingDirection.mult(rayProgress));
 
-            int bx = (int) Math.floor(pos.x);
-            int by = (int) Math.floor(pos.y);
-            int bz = (int) Math.floor(pos.z);
+            //DOES: calculate block at ray position
+            int blockX = (int) Math.floor(rayPos.x);
+            int blockY = (int) Math.floor(rayPos.y);
+            int blockZ = (int) Math.floor(rayPos.z);
 
-            if (world.isBlockLoaded(bx, by, bz)) {
-                Block b = world.getBlock(bx, by, bz);
-                if (b != null) {
-                    float fx = pos.x - bx;
-                    float fy = pos.y - by;
-                    float fz = pos.z - bz;
+            //DOES: check if block is loaded
+            if (world.isBlockLoaded(blockX, blockY, blockZ)) {
+                Block block = world.getBlock(blockX, blockY, blockZ);
+                if (block != null) {
+                    //NOTE: local coordinates inside the block
+                    float inBlockX = rayPos.x - blockX;
+                    float inBlockY = rayPos.y - blockY;
+                    float inBlockZ = rayPos.z - blockZ;
 
-                    int nx = 0,
-                        ny = 0,
-                        nz = 0;
+                    //NOTE: normal vector (which side was hit)
+                    //NOTE: ex. (0,1,0) for top
+                    int normalX = 0,
+                        normalY = 0,
+                        normalZ = 0;
 
-                    float min = Math.min(Math.min(fx, 1 - fx), Math.min(Math.min(fy, 1 - fy), Math.min(fz, 1 - fz)));
-                    if (min == fx) nx = -1;
-                    else if (min == 1 - fx) nx = 1;
-                    else if (min == fy) ny = -1;
-                    else if (min == 1 - fy) ny = 1;
-                    else if (min == fz) nz = -1;
-                    else if (min == 1 - fz) nz = 1;
+                    //DOES: calculate closest distance from hit point to cube face
+                    float minDistance = Math.min(
+                        Math.min(inBlockX, 1 - inBlockX),
+                        Math.min(Math.min(inBlockY, 1 - inBlockY), Math.min(inBlockZ, 1 - inBlockZ))
+                    );
 
-                    return new RaycastResult(bx, by, bz, nx, ny, nz);
+                    //DOES: use minDistance to set normal vector (decide which face was hit)
+                    if (minDistance == inBlockX) normalX = -1;
+                    else if (minDistance == 1 - inBlockX) normalX = 1;
+                    else if (minDistance == inBlockY) normalY = -1;
+                    else if (minDistance == 1 - inBlockY) normalY = 1;
+                    else if (minDistance == inBlockZ) normalZ = -1;
+                    else if (minDistance == 1 - inBlockZ) normalZ = 1;
+
+                    //DOES: return RaycastResult with block position and face hit
+                    return new RaycastResult(blockX, blockY, blockZ, normalX, normalY, normalZ);
                 }
             }
         }
