@@ -11,6 +11,8 @@ import com.minecraftclone.player.input.AnalogInput;
 import com.minecraftclone.player.input.KeyMapping;
 import com.minecraftclone.world.BlockInteractionSystem;
 import com.minecraftclone.world.World;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main extends SimpleApplication {
 
@@ -34,6 +36,7 @@ public class Main extends SimpleApplication {
     private BlockInteractionSystem blockInteraction;
 
     public static void main(String[] args) {
+        disableWarnings();
         var settings = new AppSettings(true);
         settings.setWindowSize(1920, 1080);
         settings.setSamples(4);
@@ -118,5 +121,10 @@ public class Main extends SimpleApplication {
         double tps = (Math.floor((10 * totalTicks) / timeActiveSeconds)) / 10;
         if (timeActiveSeconds < 20) tps = Math.clamp(tps, 0, 40);
         tpsText.setText("TPS: " + tps);
+    }
+
+    private static void disableWarnings() {
+        Logger.getLogger("").setLevel(Level.SEVERE);
+        Logger.getLogger("").setLevel(Level.WARNING);
     }
 }
