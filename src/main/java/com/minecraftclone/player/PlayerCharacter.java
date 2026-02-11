@@ -39,7 +39,7 @@ public class PlayerCharacter {
 
         //TODO: move gui to RenderEngine
         try {
-            gui = new PlayerGUI(app, 1920, 1080);
+            gui = new PlayerGUI(app);
         } catch (IOException e) {
             e.printStackTrace();
         }

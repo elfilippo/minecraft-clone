@@ -11,7 +11,7 @@ import java.io.IOException;
 public class PlayerGUI {
 
     private int selectedSlot = 1;
-    private int scale = 4; //Info: only even numbers
+    private int scale; //Info: only even numbers
     private Picture hotbar, hotbarSelector, inventory, crosshair, experienceBarEmpty, heartContainer, fullHeart, halfHeart, hungerContainer, fullHunger, halfHunger;
     private int windowWidth, windowHeight;
     private ImageLoader imageLoader = new ImageLoader();
@@ -20,9 +20,14 @@ public class PlayerGUI {
     private Texture2D hotbarTexture, hotbarSelectorTexture, crosshairTexture, inventoryTexture, experienceBarEmptyTexture, heartContainerTexture, fullHeartTexture, halfHeartTexture, hungerContainerTexture, fullHungerTexture, halfHungerTexture;
     private Node hungerNode, heartNode;
 
-    public PlayerGUI(SimpleApplication app, int windowWidth, int windowHeight) throws IOException {
-        this.windowWidth = windowWidth;
-        this.windowHeight = windowHeight;
+    public PlayerGUI(SimpleApplication app) throws IOException {
+        this.windowWidth = app.getViewPort().getCamera().getWidth();
+        this.windowHeight = app.getViewPort().getCamera().getHeight();
+        //DOES: Autoscaling
+        int scaleWidth = Math.round(windowWidth / 480);
+        int scaleHeight = Math.round(windowHeight / 270);
+        scale = (scaleWidth + scaleHeight) / 2;
+
         guiNode = app.getGuiNode();
         assetManager = app.getAssetManager();
 
