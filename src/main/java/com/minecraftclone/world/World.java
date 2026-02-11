@@ -27,7 +27,7 @@ public class World {
         this.bulletAppState = bulletAppState;
 
         //DOES: create & attatch player
-        playerCharacter = new PlayerCharacter(bulletAppState, actionInput, app.getCamera());
+        playerCharacter = new PlayerCharacter(bulletAppState, actionInput, app);
         app.getRootNode().attachChild(playerCharacter.getNode());
 
         chunkManager = new ChunkManager(app, this, RENDER_DISTANCE); // render distance

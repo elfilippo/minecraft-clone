@@ -141,8 +141,4 @@ public class Main extends SimpleApplication {
         Logger.getLogger("").setLevel(Level.SEVERE);
         Logger.getLogger("").setLevel(Level.WARNING);
     }
-
-    public static AppSettings getSettings() {
-        return settings;
-    }
 }

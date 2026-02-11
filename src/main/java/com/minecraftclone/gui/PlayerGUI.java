@@ -1,10 +1,10 @@
 package com.minecraftclone.gui;
 
+import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
-import com.minecraftclone.Main;
 import com.minecraftclone.util.ImageLoader;
 import java.io.IOException;
 
@@ -20,8 +20,12 @@ public class PlayerGUI {
     private Texture2D hotbarTexture, hotbarSelectorTexture, crosshairTexture, inventoryTexture, experienceBarEmptyTexture, heartContainerTexture, fullHeartTexture, halfHeartTexture, hungerContainerTexture, fullHungerTexture, halfHungerTexture;
     private Node hungerNode, heartNode;
 
-    public PlayerGUI() throws IOException {
-        System.out.println("hi");
+    public PlayerGUI(SimpleApplication app, int windowWidth, int windowHeight) throws IOException {
+        this.windowWidth = windowWidth;
+        this.windowHeight = windowHeight;
+        guiNode = app.getGuiNode();
+        assetManager = app.getAssetManager();
+
         //Does: Create different Nodes for different parts of the HUD
         inventoryNode = new Node("inventoryNode");
         guiNode.attachChild(inventoryNode);
@@ -31,9 +35,6 @@ public class PlayerGUI {
         heartNode = new Node("heartNode");
         guiNode.attachChild(hungerNode);
         guiNode.attachChild(heartNode);
-
-        windowWidth = Main.getSettings().getWidth();
-        windowHeight = Main.getSettings().getHeight();
 
         //Does: Create Texture Variables
         hotbarTexture = imageLoader.loadTexture2D(guiPath("sprites/hud/hotbar.png")); //182x22

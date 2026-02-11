@@ -162,7 +162,7 @@ public final class BlockInteractionSystem {
 
         Vector3f playerPos = player.getPhysicsLocation();
         float radius = PlayerCharacter.RADIUS;
-        float height = PlayerCharacter.HEIGHT;
+        float height = PlayerCharacter.STEP_HEIGHT;
         Vector3f playerMin = playerPos.add(-radius, -0.5f * height, -radius);
         Vector3f playerMax = playerPos.add(radius, 0.5f * height, radius);
 

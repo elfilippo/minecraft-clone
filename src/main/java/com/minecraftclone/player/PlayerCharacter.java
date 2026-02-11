@@ -1,16 +1,19 @@
 package com.minecraftclone.player;
 
+import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
+import com.minecraftclone.gui.PlayerGUI;
 import com.minecraftclone.player.input.ActionInput;
+import java.io.IOException;
 
 public class PlayerCharacter {
 
-    public static final float HEIGHT = 1f;
+    public static final float STEP_HEIGHT = 1f;
     public static final float RADIUS = 0.4f;
     private final CharacterControl playerControl;
     private final Node playerNode;
@@ -21,14 +24,29 @@ public class PlayerCharacter {
     private final Vector3f walkDir = new Vector3f();
     private final ActionInput input;
     private final Camera cam;
+    private PlayerGUI gui;
+    private boolean inventoryShown;
+    private int life = 13;
+    private int hunger = 13;
+    private SimpleApplication app;
 
-    public PlayerCharacter(BulletAppState bulletAppState, ActionInput input, Camera cam) {
+    public PlayerCharacter(BulletAppState bulletAppState, ActionInput input, SimpleApplication app) {
         this.input = input;
-        this.cam = cam;
+        this.app = app;
+        cam = app.getCamera();
+        inventoryShown = false;
 
+        //TODO: move gui to RenderEngine
+        try {
+            gui = new PlayerGUI(app, 1920, 1080);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        gui.setLife(life);
+        gui.setHunger(hunger);
         bulletAppState.setDebugEnabled(debugEnabled);
 
-        var shape = new CapsuleCollisionShape(RADIUS, HEIGHT);
+        var shape = new CapsuleCollisionShape(RADIUS, STEP_HEIGHT);
         var player = new CharacterControl(shape, stepHeight);
         player.setJumpSpeed(10f);
         player.setFallSpeed(20f);
@@ -51,13 +69,23 @@ public class PlayerCharacter {
         walkDir.set(0, 0, 0);
 
         if (input.isForward()) walkDir.addLocal(forward);
-        if (input.isBackward()) walkDir.addLocal(forward.negate());
         if (input.isLeft()) walkDir.addLocal(left);
+        if (input.isBackward()) walkDir.addLocal(forward.negate());
         if (input.isRight()) walkDir.addLocal(left.negate());
 
         playerControl.setWalkDirection(walkDir);
-
         if (input.isJump() && playerControl.onGround()) playerControl.jump();
+
+        for (int i = 0; i < 10; i++) {
+            if (input.isHotkey(i)) gui.changeHotbarSlot(i);
+        }
+
+        if (input.isFunctionKey("openInventory")) {
+            gui.setInventoryVisible(!inventoryShown);
+            app.getInputManager().setCursorVisible(!inventoryShown);
+            app.getFlyByCamera().setEnabled(inventoryShown);
+            inventoryShown = !inventoryShown;
+        }
     }
 
     public Node getNode() {
