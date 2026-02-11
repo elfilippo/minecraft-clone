@@ -20,8 +20,6 @@ public class KeyMapping {
         this.actionListener = actionListener;
         this.analogListener = analogListener;
 
-        //TODO: add all bindings in Analog - and ActionInput
-
         bindKeyAction("FORWARD", KeyInput.KEY_W);
         bindKeyAction("BACKWARD", KeyInput.KEY_S);
         bindKeyAction("LEFT", KeyInput.KEY_A);
