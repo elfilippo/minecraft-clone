@@ -29,11 +29,6 @@
     </dependency>
     <dependency>
       <groupId>org.jmonkeyengine</groupId>
-      <artifactId>jme3-desktop</artifactId>
-      <version>3.9.0-stable</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jmonkeyengine</groupId>
       <artifactId>jme3-lwjgl3</artifactId>
       <version>3.9.0-stable</version>
     </dependency>
@@ -52,12 +47,6 @@
       <artifactId>junit-jupiter</artifactId>
       <version>6.0.2</version>
       <scope>test</scope>
-    </dependency>
-  
-    <dependency>
-      <groupId>us.ihmc</groupId>
-      <artifactId>jme3-jbullet</artifactId>
-      <version>3.2.0-171209</version>
     </dependency>
   </dependencies>
 

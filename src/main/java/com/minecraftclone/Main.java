@@ -57,6 +57,8 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        System.out.println(getContext().getClass().getName());
+
         initialTime = System.nanoTime();
         tickTime = 1f / TICKS_PER_SECOND;
 
@@ -81,11 +83,11 @@ public class Main extends SimpleApplication {
         // Enable mouse look (this also hides + locks cursor correctly)
         flyCam.setEnabled(true);
         flyCam.setDragToRotate(false);
-        flyCam.setMoveSpeed(10f); // optional, same as normal FlyCam
-        flyCam.setRotationSpeed(1f); // optional
+        flyCam.setMoveSpeed(0f); // optional, same as normal FlyCam
 
         cam.setFrustumNear(0.2f);
         cam.setFov(70);
+        inputManager.setCursorVisible(false);
         getRenderer().setDefaultAnisotropicFilter(4);
 
         //INFO: for all bool inputs (keypresses etc.)
