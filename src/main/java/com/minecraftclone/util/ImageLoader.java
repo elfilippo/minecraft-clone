@@ -6,15 +6,15 @@ import com.jme3.texture.Texture;
 import com.jme3.texture.Texture2D;
 import com.jme3.texture.image.ColorSpace;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import javax.imageio.ImageIO;
 
-public class ImageLoader {
+class ImageLoader {
 
-    private Image loadImage(String path) throws IOException {
-        BufferedImage bufferedImage = ImageIO.read(new File(path));
+    private static Image loadImage(InputStream stream) throws IOException {
+        BufferedImage bufferedImage = ImageIO.read(stream);
 
         int width = bufferedImage.getWidth();
         int height = bufferedImage.getHeight();
@@ -36,8 +36,8 @@ public class ImageLoader {
         return new Image(Format.RGBA8, width, height, buffer, ColorSpace.sRGB);
     }
 
-    public Texture2D loadTexture2D(String path) throws IOException {
-        Texture2D texture = new Texture2D(loadImage(path));
+    public static Texture2D loadTexture2D(InputStream stream) throws IOException {
+        Texture2D texture = new Texture2D(loadImage(stream));
         texture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
         texture.setMagFilter(Texture.MagFilter.Nearest);
         return texture;

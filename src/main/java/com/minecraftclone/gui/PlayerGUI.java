@@ -5,7 +5,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
-import com.minecraftclone.util.ImageLoader;
+import com.minecraftclone.util.TextureManager;
 import java.io.IOException;
 
 public class PlayerGUI {
@@ -15,7 +15,6 @@ public class PlayerGUI {
     private Picture hotbar, hotbarSelector, inventory, crosshair, experienceBarEmpty, heartContainer, fullHeart, halfHeart, hungerContainer;
     private Picture fullHunger, halfHunger;
     private int windowWidth, windowHeight;
-    private ImageLoader imageLoader = new ImageLoader();
     private Node guiNode, inventoryNode, containerNode;
     private AssetManager assetManager;
     private Texture2D hotbarTexture, hotbarSelectorTexture, crosshairTexture, inventoryTexture, experienceBarEmptyTexture, heartContainerTexture;
@@ -52,17 +51,17 @@ public class PlayerGUI {
         hotbarNode.attachChild(heartNode);
 
         //Does: Create Texture Variables
-        hotbarTexture = imageLoader.loadTexture2D(guiPath("sprites/hud/hotbar.png")); //182x22
-        hotbarSelectorTexture = imageLoader.loadTexture2D(guiPath("sprites/hud/hotbar_selection.png")); //24x23
-        crosshairTexture = imageLoader.loadTexture2D(guiPath("sprites/hud/crosshair.png")); //15x15
-        inventoryTexture = imageLoader.loadTexture2D(guiPath("container/inventory.png")); //256x256
-        experienceBarEmptyTexture = imageLoader.loadTexture2D(guiPath("sprites/hud/experience_bar_background.png")); //182x5
-        heartContainerTexture = imageLoader.loadTexture2D(guiPath("sprites/hud/heart/container.png")); //9x9
-        fullHeartTexture = imageLoader.loadTexture2D(guiPath("sprites/hud/heart/full.png")); //9x9
-        halfHeartTexture = imageLoader.loadTexture2D(guiPath("sprites/hud/heart/half.png")); //9x9
-        hungerContainerTexture = imageLoader.loadTexture2D(guiPath("sprites/hud/food_empty.png")); //9x9
-        fullHungerTexture = imageLoader.loadTexture2D(guiPath("sprites/hud/food_full.png")); //9x9
-        halfHungerTexture = imageLoader.loadTexture2D(guiPath("sprites/hud/food_half.png")); //9x9
+        hotbarTexture = TextureManager.getGuiTexture("/sprites/hud/hotbar"); //182x22
+        hotbarSelectorTexture = TextureManager.getGuiTexture("/sprites/hud/hotbar_selection"); //24x23
+        crosshairTexture = TextureManager.getGuiTexture("/sprites/hud/crosshair"); //15x15
+        inventoryTexture = TextureManager.getGuiTexture("/container/inventory"); //256x256
+        experienceBarEmptyTexture = TextureManager.getGuiTexture("/sprites/hud/experience_bar_background"); //182x5
+        heartContainerTexture = TextureManager.getGuiTexture("/sprites/hud/heart/container"); //9x9
+        fullHeartTexture = TextureManager.getGuiTexture("/sprites/hud/heart/full"); //9x9
+        halfHeartTexture = TextureManager.getGuiTexture("/sprites/hud/heart/half"); //9x9
+        hungerContainerTexture = TextureManager.getGuiTexture("/sprites/hud/food_empty"); //9x9
+        fullHungerTexture = TextureManager.getGuiTexture("/sprites/hud/food_full"); //9x9
+        halfHungerTexture = TextureManager.getGuiTexture("/sprites/hud/food_half"); //9x9
 
         //Does: Create different Elements of the HUD
         inventory = new Picture("inventory");

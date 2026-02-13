@@ -1,44 +1,49 @@
 package com.minecraftclone.item;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.io.Reader;
-import java.lang.reflect.Type;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import org.yaml.snakeyaml.Yaml;
 
 public class ItemRegistry {
 
+    private static final Map<String, Item> ITEMS = new HashMap<>();
+
+    static {
+        loadItems();
+    }
+
     public static Map<String, Item> loadItems() {
-        Gson gson = new Gson();
-        try (Reader reader = Files.newBufferedReader(Paths.get("items.json"))) {
-            // Step 1: Read JSON into a Map<String, Item>
-            Type type = new TypeToken<Map<String, Item>>() {}.getType();
-            Map<String, Item> rawItems = gson.fromJson(reader, type);
+        Yaml yaml = new Yaml();
+        InputStream inputStream = ItemRegistry.class.getClassLoader().getResourceAsStream("items.yml");
 
-            // Step 2: Assign the JSON key as the item's ID
-            Map<String, Item> itemsWithId = new HashMap<>();
-            for (Map.Entry<String, Item> entry : rawItems.entrySet()) {
-                String id = entry.getKey();
-                Item item = entry.getValue();
+        Map<String, Object> data = yaml.load(inputStream);
+        Map<String, Object> itemsSection = (Map<String, Object>) data.get("items");
 
-                // Make a new Item object that includes the ID
-                Item itemWithId = new Item(
-                    id,
-                    item.getStack_size(),
-                    item.getDamage(),
-                    item.getDurability(),
-                    item.getTexture()
-                );
-                itemsWithId.put(id, itemWithId);
-            }
+        for (String key : itemsSection.keySet()) {
+            Map<String, Object> itemData = (Map<String, Object>) itemsSection.get(key);
 
-            return itemsWithId;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new HashMap<>(); // return empty map on error
+            Item item = new Item(
+                key,
+                ItemType.valueOf((String) itemData.get("type")),
+                (Integer) itemData.get("maxStack"),
+                (String) itemData.get("name"),
+                (Integer) itemData.get("baseDurability"),
+                (Integer) itemData.get("baseDamage"),
+                (Integer) itemData.get("miningEfficiency")
+            );
+
+            ITEMS.put(key, item);
         }
+
+        return ITEMS;
+    }
+
+    public static Item get(String id) {
+        return ITEMS.get(id);
+    }
+
+    public static Map<String, Item> getAll() {
+        return Map.copyOf(ITEMS);
     }
 }
