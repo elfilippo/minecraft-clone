@@ -240,10 +240,6 @@ public class PlayerGUI {
         }
     }
 
-    private String guiPath(String path) {
-        return "src/main/resources/textures/gui/" + path;
-    }
-
     private void toggleHotbar() {
         if (hotbarOpen) {
             guiNode.attachChild(hotbarNode);
