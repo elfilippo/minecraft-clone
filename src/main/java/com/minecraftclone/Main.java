@@ -9,6 +9,7 @@ import com.minecraftclone.player.PlayerCharacter;
 import com.minecraftclone.player.input.ActionInput;
 import com.minecraftclone.player.input.AnalogInput;
 import com.minecraftclone.player.input.KeyMapping;
+import com.minecraftclone.render.ClampedFlyByCamera;
 import com.minecraftclone.world.BlockInteractionSystem;
 import com.minecraftclone.world.World;
 import java.awt.Dimension;
@@ -29,6 +30,7 @@ public class Main extends SimpleApplication {
     public static boolean fullscreen = true;
     public static int screen_width = 1280;
     public static int screen_height = 720;
+    private boolean initialized = false;
 
     //DOES: tps stuff
     private static final float TICKS_PER_SECOND = 40f;
@@ -56,6 +58,8 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        System.out.println(getContext().getClass().getName());
+
         initialTime = System.nanoTime();
         tickTime = 1f / TICKS_PER_SECOND;
 
@@ -71,9 +75,20 @@ public class Main extends SimpleApplication {
         //DOES: set up camera and anisotropic filter
         //NOTE:  had to implement completely custom camera movement for vertical and horizontal clamping
         //NOTE:  which was be much worse so sticking with flyCam for now
+        flyCam.setEnabled(false);
+        flyCam.unregisterInput();
+
+        flyCam = new ClampedFlyByCamera(cam);
+        flyCam.registerWithInput(inputManager);
+
+        // Enable mouse look (this also hides + locks cursor correctly)
         flyCam.setEnabled(true);
+        flyCam.setDragToRotate(false);
+        flyCam.setMoveSpeed(0f); // optional, same as normal FlyCam
+
         cam.setFrustumNear(0.2f);
         cam.setFov(70);
+        inputManager.setCursorVisible(false);
         getRenderer().setDefaultAnisotropicFilter(4);
 
         //INFO: for all bool inputs (keypresses etc.)
@@ -101,13 +116,17 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleUpdate(float tpf) {
-        //NOTE: update() methods are bound by fps, tick() by tps
+        //DOES: run once and set cursor visibility
+        //INFO: is necessary to skip simpleInit because something fucks cursor visibility up there
+        //INFO: can be removed later when starting screen is added
+        init();
 
         //DOES: calculate & update tps
+        //INFO: update() methods are bound by fps, tick() by tps
         tps();
 
-        //DOES: set the camera to the player's pos
-        cam.setLocation(playerCharacter.getPlayerControl().getPhysicsLocation().add(0, 0.6f, 0));
+        //DOES: set the camera to the eye height of player's pos
+        cam.setLocation(playerCharacter.getPlayerControl().getPhysicsLocation().add(0, PlayerCharacter.EYE_OFFSET, 0));
 
         //DOES: queue & process missing chunks
         world.update();
@@ -154,6 +173,10 @@ public class Main extends SimpleApplication {
 
         settings = new AppSettings(true);
         settings.setTitle("minecraft-clone " + VERSION + "                  © Mats O. & Filip M.");
+        settings.setVSync(true);
+
+        //DOES: set max frame rate (vsync caps at 60 by default)
+        settings.setFrequency(100000);
 
         //DOES: set anti aliasing
         settings.setSamples(4);
@@ -165,6 +188,13 @@ public class Main extends SimpleApplication {
             settings.setFullscreen(true);
         } else {
             settings.setWindowSize(screen_width, screen_height);
+        }
+    }
+
+    private void init() {
+        if (!initialized) {
+            inputManager.setCursorVisible(false);
+            initialized = true;
         }
     }
 }

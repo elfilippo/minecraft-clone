@@ -2,7 +2,7 @@ package com.minecraftclone.player;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
+import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
@@ -15,8 +15,9 @@ import java.io.IOException;
 public class PlayerCharacter {
 
     public static final float STEP_HEIGHT = 0.1f;
-    public static final float RADIUS = 0.4f;
-    public static final float HEIGHT = 1.2f;
+    public static final float WIDTH = 0.7f;
+    public static final float HEIGHT = 1.8f;
+    public static final float EYE_OFFSET = HEIGHT * 0.35f;
     private final CharacterControl playerControl;
     private final Node playerNode;
 
@@ -43,7 +44,7 @@ public class PlayerCharacter {
         gui.setHunger(hunger);
         bulletAppState.setDebugEnabled(debugEnabled);
 
-        var shape = new CapsuleCollisionShape(RADIUS, HEIGHT);
+        var shape = new BoxCollisionShape(new Vector3f(WIDTH / 2f, HEIGHT / 2f, WIDTH / 2f));
         var player = new CharacterControl(shape, STEP_HEIGHT);
         player.setJumpSpeed(10f);
         player.setFallSpeed(40f);

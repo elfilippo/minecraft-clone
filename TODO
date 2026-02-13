@@ -1,30 +1,48 @@
-move GUI to RenderEngine
-add hotbar scrolling
-only create meshes for chunks around Player
-unload chunks
-set initial player pos to top coordinate of chunk
-dont render invisible chunks (data more separate from rendering)
-add block hardness, mining tool capability for future
-add selected block border
-improve movement (smoother)
-fix non-solid blocks breaking the game (mesh)
-figure out stepHeight
-add proper comments
-add other block actions (using, etc.)
-clear blockMaterialCache items
-compact blocks.java (json, hashmap, etc?), merge with block cache ? (hashmap with loaded blocks)
-separate rendering (visual blocks, chunk meshes, RenderEngine class) from blocks in memory (Chunk class)
-multithread chunk generation (rendering on main thread)
-ambient occlusion
-fix slight noise on block sides (taa?)
-saving
-items
-entities
-lod
+[[todo list entry guide]]
 
+[name] {(prio) 0-4} entry (claryfication if needed)
+0 = very high (absolutely needs done before next release)
+1 = high      (ideally before next release)
+2 = medium    (target for future release)
+3 = low       (consider for future release)
+4 = very low  (add sometime)
+not binding besides prio 0, just suggestions
+
+[[todo list]]
+
+[both] {2} add proper comments
+[filp] {0} move GUI to RenderEngine 
+[filp] {1} add block selection 
+[filp] {1} unload chunks 
+[filp] {2} fix non-solid blocks breaking the game (mesh)
+[filp] {2} only create meshes for chunks around Player (simulation distance) 
+[filp] {2} separate rendering (visual blocks, chunk meshes, RenderEngine class) from blocks in memory (Chunk class)
+[filp] {3} dont render invisible chunks (data more separate from rendering) 
+[free] {1} add sound (to block breaking/placing for now)
+[free] {1} set initial player pos to top coordinate of chunk 
+[free] {2} compact blocks.java (json, hashmap, etc?), merge with block cache ? (hashmap with loaded blocks)
+[free] {2} figure out stepHeight (if to use, how to do stairs)
+[free] {2} multithread chunk generation (rendering on main thread)
+[free] {2} saving
+[free] {3} add block hardness, mining tool capability for future 
+[free] {3} clear blockMaterialCache items
+[free] {3} entities
+[free] {3} improve movement (smoother) 
+[free] {3} lod
+[free] {4} ambient occlusion
+[free] {4} fix slight noise on block sides (taa?)
+[mats] {1} add hotbar scrolling 
+[mats] {2} items
+[mats] {3} add other block actions (using, etc.)
+
+
+[[ideas:]]
 add lower and upper camera bound (so no camera backflips)?
 greedy meshing?
 multiplayer?
+
+[[architecture]]
+update when changes are made ideally
 
 App (SimpleApplication)
 │

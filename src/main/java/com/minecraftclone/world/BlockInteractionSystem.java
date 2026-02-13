@@ -1,6 +1,5 @@
 package com.minecraftclone.world;
 
-import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.minecraftclone.block.Block;
@@ -11,7 +10,7 @@ import com.minecraftclone.player.input.ActionInput;
 public final class BlockInteractionSystem {
 
     private static final float DEFAULT_REACH = 6.0f;
-    private static final float STEP = 0.05f; // Ray step size
+    private static final float RAY_STEP = 0.02f; // Ray step size
 
     private final World world;
     private final Camera camera;
@@ -24,7 +23,7 @@ public final class BlockInteractionSystem {
     private int ticksSinceBreak;
     private int ticksSincePlace;
     private int placeDelay = 8;
-    private int breakDelay = 4;
+    private int breakDelay = 8;
 
     public BlockInteractionSystem(World world, Camera camera, ActionInput input) {
         this.world = world;
@@ -103,12 +102,20 @@ public final class BlockInteractionSystem {
         ticksSincePlace = 0;
     }
 
+    /**
+     * gets block player is looking at if within range
+     * @return coordinates and normals of first hit block as RaycastResult
+     */
     private RaycastResult raycastBlock() {
         Vector3f origin = camera.getLocation();
         Vector3f facingDirection = camera.getDirection().normalize();
 
+        int lastBlockX = (int) Math.floor(origin.x);
+        int lastBlockY = (int) Math.floor(origin.y);
+        int lastBlockZ = (int) Math.floor(origin.z);
+
         //DOES: cast ray that goes along viewDirection until reachDistance is reached
-        for (float rayProgress = 0; rayProgress <= reachDistance; rayProgress += STEP) {
+        for (float rayProgress = 0; rayProgress <= reachDistance; rayProgress += RAY_STEP) {
             Vector3f rayPos = origin.add(facingDirection.mult(rayProgress));
 
             //DOES: calculate block at ray position
@@ -116,61 +123,67 @@ public final class BlockInteractionSystem {
             int blockY = (int) Math.floor(rayPos.y);
             int blockZ = (int) Math.floor(rayPos.z);
 
+            //DOES: skip checks if in same block
+            if (blockX == lastBlockX && blockY == lastBlockY && blockZ == lastBlockZ) continue;
+
             //DOES: check if block is loaded
             if (world.isBlockLoaded(blockX, blockY, blockZ)) {
                 Block block = world.getBlock(blockX, blockY, blockZ);
                 if (block != null) {
-                    //NOTE: local coordinates inside the block
-                    float inBlockX = rayPos.x - blockX;
-                    float inBlockY = rayPos.y - blockY;
-                    float inBlockZ = rayPos.z - blockZ;
-
                     //NOTE: normal vector (which side was hit)
                     //NOTE: ex. (0,1,0) for top
                     int normalX = 0,
                         normalY = 0,
                         normalZ = 0;
 
-                    //DOES: calculate closest distance from hit point to cube face
-                    float minDistance = Math.min(
-                        Math.min(inBlockX, 1 - inBlockX),
-                        Math.min(Math.min(inBlockY, 1 - inBlockY), Math.min(inBlockZ, 1 - inBlockZ))
-                    );
-
-                    //DOES: use minDistance to set normal vector (decide which face was hit)
-                    if (minDistance == inBlockX) normalX = -1;
-                    else if (minDistance == 1 - inBlockX) normalX = 1;
-                    else if (minDistance == inBlockY) normalY = -1;
-                    else if (minDistance == 1 - inBlockY) normalY = 1;
-                    else if (minDistance == inBlockZ) normalZ = -1;
-                    else if (minDistance == 1 - inBlockZ) normalZ = 1;
+                    //DOES: set normals based on what block ray was last in
+                    if (lastBlockX == blockX + 1) normalX = 1;
+                    else if (lastBlockX == blockX - 1) normalX = -1;
+                    else if (lastBlockY == blockY + 1) normalY = 1;
+                    else if (lastBlockY == blockY - 1) normalY = -1;
+                    else if (lastBlockZ == blockZ + 1) normalZ = 1;
+                    else if (lastBlockZ == blockZ - 1) normalZ = -1;
 
                     //DOES: return RaycastResult with block position and face hit
                     return new RaycastResult(blockX, blockY, blockZ, normalX, normalY, normalZ);
+                } else {
+                    lastBlockX = blockX;
+                    lastBlockY = blockY;
+                    lastBlockZ = blockZ;
                 }
+            } else {
+                lastBlockX = blockX;
+                lastBlockY = blockY;
+                lastBlockZ = blockZ;
             }
         }
-
-        // No block hit
+        //CASE: no block hit
         return null;
     }
 
-    private boolean collidesWithPlayer(int x, int y, int z) {
-        //FIXME: player can't build up & can glitch
-        CharacterControl player = world.getPlayerCharacter().getPlayerControl();
+    /**
+     * checks if the given block would collide with the player
+     * @param blockX
+     * @param blockY
+     * @param blockZ
+     * @return
+     */
+    private boolean collidesWithPlayer(int blockX, int blockY, int blockZ) {
+        Vector3f pPos = world.getPlayerCharacter().getPlayerControl().getPhysicsLocation();
 
-        Vector3f blockMin = new Vector3f(x, y, z);
-        Vector3f blockMax = blockMin.add(1, 1, 1);
+        float pHalfWidth = PlayerCharacter.WIDTH / 2f;
+        float pHalfHeight = PlayerCharacter.HEIGHT / 2f;
 
-        Vector3f playerPos = player.getPhysicsLocation();
-        float radius = PlayerCharacter.RADIUS;
-        float height = PlayerCharacter.STEP_HEIGHT;
-        Vector3f playerMin = playerPos.add(-radius, -0.5f * height, -radius);
-        Vector3f playerMax = playerPos.add(radius, 0.5f * height, radius);
+        float pMinX = pPos.x - pHalfWidth;
+        float pMaxX = pPos.x + pHalfWidth;
+        float pMinY = pPos.y - pHalfHeight;
+        float pMaxY = pPos.y + pHalfHeight;
+        float pMinZ = pPos.z - pHalfWidth;
+        float pMaxZ = pPos.z + pHalfWidth;
 
-        boolean overlapX = blockMin.x < playerMax.x && blockMax.x > playerMin.x;
-        boolean overlapY = blockMin.y < playerMax.y && blockMax.y > playerMin.y;
-        boolean overlapZ = blockMin.z < playerMax.z && blockMax.z > playerMin.z;
+        boolean overlapX = pMinX < (blockX + 1) && pMaxX > blockX;
+        boolean overlapY = pMinY < (blockY + 1) && pMaxY > blockY;
+        boolean overlapZ = pMinZ < (blockZ + 1) && pMaxZ > blockZ;
 
         return overlapX && overlapY && overlapZ;
     }
