@@ -20,8 +20,8 @@ public class PlayerGUI {
     private Texture2D hotbarTexture, hotbarSelectorTexture, crosshairTexture, inventoryTexture, experienceBarEmptyTexture, heartContainerTexture;
     private Texture2D fullHeartTexture, halfHeartTexture, hungerContainerTexture, fullHungerTexture, halfHungerTexture;
     private Node hungerNode, heartNode, hotbarNode;
-    private boolean inventoryOpen = false;
-    private boolean hotbarOpen = true;
+    private boolean hotbarVisible = true;
+    private boolean inventoryVisible = false;
     private SimpleApplication app;
 
     public PlayerGUI(SimpleApplication app) throws IOException {
@@ -128,9 +128,6 @@ public class PlayerGUI {
         }
 
         changeHotbarSlot(selectedSlot);
-
-        //INFO: no idea why, but this is necessary to do once in init
-        toggleInventory();
     }
 
     public void changeHotbarSlot(int slot) {
@@ -147,17 +144,16 @@ public class PlayerGUI {
         }
     }
 
-    public void toggleInventory() {
+    public void setInventoryVisibility(boolean visibility) {
         //Does: set the Visibility of the Inventory
-        if (inventoryOpen) {
+        if (visibility) {
             guiNode.attachChild(inventory);
         } else {
             inventory.removeFromParent();
         }
-        app.getInputManager().setCursorVisible(inventoryOpen);
-        app.getFlyByCamera().setEnabled(!inventoryOpen);
-        toggleHotbar();
-        inventoryOpen = !inventoryOpen;
+        app.getInputManager().setCursorVisible(visibility);
+        app.getFlyByCamera().setEnabled(!visibility);
+        setHotbarVisibility(!visibility);
     }
 
     public void setLife(int life) {
@@ -240,12 +236,12 @@ public class PlayerGUI {
         }
     }
 
-    private void toggleHotbar() {
-        if (hotbarOpen) {
+    private void setHotbarVisibility(boolean visibility) {
+        if (visibility) {
             guiNode.attachChild(hotbarNode);
         } else {
             hotbarNode.removeFromParent();
         }
-        hotbarOpen = !hotbarOpen;
+        hotbarVisible = visibility;
     }
 }

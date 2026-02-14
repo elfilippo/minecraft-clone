@@ -1,5 +1,6 @@
 package com.minecraftclone.item;
 
+import com.minecraftclone.util.RegistryHelper;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,11 +19,11 @@ public class ItemRegistry {
 
         InputStream inputStream = ItemRegistry.class.getClassLoader().getResourceAsStream("items.yml");
 
-        Map<String, Object> data = asStringMap(yaml.load(inputStream));
-        Map<String, Object> itemsSection = asStringMap(data.get("items"));
+        Map<String, Object> data = RegistryHelper.asStringMap(yaml.load(inputStream));
+        Map<String, Object> itemsSection = RegistryHelper.asStringMap(data.get("items"));
 
         for (String key : itemsSection.keySet()) {
-            Map<String, Object> itemData = asStringMap(itemsSection.get(key));
+            Map<String, Object> itemData = RegistryHelper.asStringMap(itemsSection.get(key));
 
             Item item = new Item(
                 key,
@@ -46,20 +47,5 @@ public class ItemRegistry {
 
     public static Map<String, Item> getAll() {
         return Map.copyOf(ITEMS);
-    }
-
-    private static Map<String, Object> asStringMap(Object object) {
-        if (!(object instanceof Map<?, ?> raw)) {
-            throw new IllegalStateException("Invalid YAML structure: expected a map");
-        }
-
-        Map<String, Object> stringMap = new HashMap<>();
-        for (Map.Entry<?, ?> e : raw.entrySet()) {
-            if (!(e.getKey() instanceof String key)) {
-                throw new IllegalStateException("Invalid YAML: non-string key");
-            }
-            stringMap.put(key, e.getValue());
-        }
-        return stringMap;
     }
 }

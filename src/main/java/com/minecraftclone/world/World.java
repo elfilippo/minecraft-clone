@@ -2,10 +2,12 @@ package com.minecraftclone.world;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
+import com.minecraftclone.Main;
 import com.minecraftclone.block.Block;
 import com.minecraftclone.player.PlayerCharacter;
 import com.minecraftclone.player.input.ActionInput;
 import com.minecraftclone.player.input.AnalogInput;
+import com.minecraftclone.render.RenderEngine;
 import com.minecraftclone.world.chunks.Chunk;
 import com.minecraftclone.world.chunks.ChunkManager;
 import com.minecraftclone.world.chunks.ChunkPos;
@@ -19,15 +21,17 @@ public class World {
     private final PlayerCharacter playerCharacter;
     private final BulletAppState bulletAppState;
     private final ChunkManager chunkManager;
+    private final RenderEngine render;
 
     private final Map<String, Chunk> chunks = new HashMap<>();
 
-    public World(SimpleApplication app, ActionInput actionInput, AnalogInput analogInput, BulletAppState bulletAppState) {
+    public World(Main app, ActionInput actionInput, AnalogInput analogInput, BulletAppState bulletAppState) {
         this.app = app;
         this.bulletAppState = bulletAppState;
 
         //DOES: create & attatch player
         playerCharacter = new PlayerCharacter(bulletAppState, actionInput, app);
+        render = new RenderEngine(app, playerCharacter);
         app.getRootNode().attachChild(playerCharacter.getNode());
 
         chunkManager = new ChunkManager(app, this, RENDER_DISTANCE);
@@ -124,6 +128,7 @@ public class World {
 
     public void update() {
         chunkManager.update(playerCharacter.getPlayerControl().getPhysicsLocation());
+        render.guiUpdate();
     }
 
     public boolean hasChunk(ChunkPos pos) {

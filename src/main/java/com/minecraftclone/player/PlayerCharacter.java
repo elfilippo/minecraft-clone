@@ -7,10 +7,8 @@ import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
-import com.minecraftclone.gui.PlayerGUI;
 import com.minecraftclone.player.input.Action;
 import com.minecraftclone.player.input.ActionInput;
-import java.io.IOException;
 
 public class PlayerCharacter {
 
@@ -26,22 +24,15 @@ public class PlayerCharacter {
     private final Vector3f walkDir = new Vector3f();
     private final ActionInput input;
     private final Camera cam;
-    private PlayerGUI gui;
     private int life = 13;
     private int hunger = 13;
+    private int hotbarSlot = 1;
+    private boolean inventoryVisible = false;
 
     public PlayerCharacter(BulletAppState bulletAppState, ActionInput input, SimpleApplication app) {
         this.input = input;
         cam = app.getCamera();
 
-        //TODO: move gui to RenderEngine
-        try {
-            gui = new PlayerGUI(app);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        gui.setLife(life);
-        gui.setHunger(hunger);
         bulletAppState.setDebugEnabled(debugEnabled);
 
         var shape = new BoxCollisionShape(new Vector3f(WIDTH / 2f, HEIGHT / 2f, WIDTH / 2f));
@@ -75,17 +66,17 @@ public class PlayerCharacter {
         playerControl.setWalkDirection(walkDir);
         if (input.isHeld(Action.JUMP) && playerControl.onGround()) playerControl.jump();
 
-        if (input.isTapped(Action.HOTBAR_1)) gui.changeHotbarSlot(1);
-        if (input.isTapped(Action.HOTBAR_2)) gui.changeHotbarSlot(2);
-        if (input.isTapped(Action.HOTBAR_3)) gui.changeHotbarSlot(3);
-        if (input.isTapped(Action.HOTBAR_4)) gui.changeHotbarSlot(4);
-        if (input.isTapped(Action.HOTBAR_5)) gui.changeHotbarSlot(5);
-        if (input.isTapped(Action.HOTBAR_6)) gui.changeHotbarSlot(6);
-        if (input.isTapped(Action.HOTBAR_7)) gui.changeHotbarSlot(7);
-        if (input.isTapped(Action.HOTBAR_8)) gui.changeHotbarSlot(8);
-        if (input.isTapped(Action.HOTBAR_9)) gui.changeHotbarSlot(9);
+        if (input.isTapped(Action.HOTBAR_1)) hotbarSlot = 1;
+        if (input.isTapped(Action.HOTBAR_2)) hotbarSlot = 2;
+        if (input.isTapped(Action.HOTBAR_3)) hotbarSlot = 3;
+        if (input.isTapped(Action.HOTBAR_4)) hotbarSlot = 4;
+        if (input.isTapped(Action.HOTBAR_5)) hotbarSlot = 5;
+        if (input.isTapped(Action.HOTBAR_6)) hotbarSlot = 6;
+        if (input.isTapped(Action.HOTBAR_7)) hotbarSlot = 7;
+        if (input.isTapped(Action.HOTBAR_8)) hotbarSlot = 8;
+        if (input.isTapped(Action.HOTBAR_9)) hotbarSlot = 9;
 
-        if (input.isTapped(Action.TOGGLE_INVENTORY)) gui.toggleInventory();
+        if (input.isTapped(Action.TOGGLE_INVENTORY)) inventoryVisible = !inventoryVisible;
     }
 
     public Node getNode() {
@@ -98,5 +89,21 @@ public class PlayerCharacter {
 
     public Vector3f getPosition() {
         return playerControl.getPhysicsLocation();
+    }
+
+    public int getLife() {
+        return life;
+    }
+
+    public int getHunger() {
+        return hunger;
+    }
+
+    public int getHotbarSlot() {
+        return hotbarSlot;
+    }
+
+    public boolean getinventoryVisible() {
+        return inventoryVisible;
     }
 }

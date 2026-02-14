@@ -2,6 +2,8 @@ package com.minecraftclone.item;
 
 public class Item {
 
+    //INFO: Simple item class with getters
+
     private String id;
     private ItemType type;
     private int maxStack;
