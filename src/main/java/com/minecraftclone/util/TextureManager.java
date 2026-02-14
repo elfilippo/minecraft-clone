@@ -12,7 +12,6 @@ public class TextureManager {
 
     private static final Map<String, Texture2D> ITEM_CACHE = new HashMap<>();
     private static final Map<String, Texture2D> GUI_CACHE = new HashMap<>();
-    private static final Map<String, Texture2D> GUI_PICTURE_CACHE = new HashMap<>();
 
     public static Texture2D getItemTexture(String path) {
         if (ITEM_CACHE.containsKey(path)) {
