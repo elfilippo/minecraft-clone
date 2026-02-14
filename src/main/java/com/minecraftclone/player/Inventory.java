@@ -6,8 +6,11 @@ import java.util.List;
 
 public class Inventory {
 
-    List<ItemInstance> slots = new ArrayList<>(36);
+    List<ItemInstance> inventory = new ArrayList<>(36);
 
-    //TODO: Put inventory GUI code here
     //TODO: Find solution to getting cursor position
+
+    public List<ItemInstance> getInventory() {
+        return inventory;
+    }
 }

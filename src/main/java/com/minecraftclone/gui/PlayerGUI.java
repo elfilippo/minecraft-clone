@@ -11,7 +11,7 @@ import java.io.IOException;
 public class PlayerGUI {
 
     private int selectedSlot = 1;
-    private int scale; //Info: only even numbers
+    private int scale; //USAGE: only even numbers
     private Picture hotbar, hotbarSelector, inventory, crosshair, experienceBarEmpty, heartContainer, fullHeart, halfHeart, hungerContainer;
     private Picture fullHunger, halfHunger;
     private int windowWidth, windowHeight;
@@ -37,18 +37,17 @@ public class PlayerGUI {
 
         //Does: Create different Nodes for different parts of the HUD
         inventoryNode = new Node("inventoryNode");
-        guiNode.attachChild(inventoryNode);
         hotbarNode = new Node("hotbarNode");
-        guiNode.attachChild(hotbarNode);
         containerNode = new Node("containerNode");
-        hotbarNode.attachChild(containerNode);
-
         hungerNode = new Node("hungerNode");
         heartNode = new Node("heartNode");
+        guiNode.attachChild(inventoryNode);
+        guiNode.attachChild(hotbarNode);
+        hotbarNode.attachChild(containerNode);
         hotbarNode.attachChild(hungerNode);
         hotbarNode.attachChild(heartNode);
 
-        //Does: Create Texture Variables
+        //Does: Create Textures
         hotbarTexture = TextureManager.getGuiTexture("/sprites/hud/hotbar"); //182x22
         hotbarSelectorTexture = TextureManager.getGuiTexture("/sprites/hud/hotbar_selection"); //24x23
         crosshairTexture = TextureManager.getGuiTexture("/sprites/hud/crosshair"); //15x15
@@ -62,50 +61,32 @@ public class PlayerGUI {
         halfHungerTexture = TextureManager.getGuiTexture("/sprites/hud/food_half"); //9x9
 
         //Does: Create different Elements of the HUD
-        inventory = new Picture("inventory");
-        inventory.setTexture(assetManager, inventoryTexture, true);
-        inventory.setWidth(290 * scale);
-        inventory.setHeight(290 * scale);
+        inventory = TextureManager.createPicture(assetManager, inventoryTexture, "inventory", scale);
+        hotbar = TextureManager.createPicture(assetManager, hotbarTexture, "hotbar", scale);
+        hotbarSelector = TextureManager.createPicture(assetManager, hotbarSelectorTexture, "hotbarSelector", scale);
+        experienceBarEmpty = TextureManager.createPicture(assetManager, experienceBarEmptyTexture, "experienceBarEmpty", scale);
+        crosshair = TextureManager.createPicture(assetManager, crosshairTexture, "crosshair", scale);
+
+        //DOES: set position of HUD elements
         inventory.setPosition(
+            //FIXME: Inventory not properly centered
             windowWidth / 2 - (((inventory.getWidth() - (90 * scale)) / 2)),
             windowHeight / 2 - (inventory.getHeight() - (100 * scale))
         ); //Info: Inventory not attached so not visible
-
-        hotbar = new Picture("hotbar");
-        hotbar.setTexture(assetManager, hotbarTexture, true);
-        hotbar.setWidth(182 * scale);
-        hotbar.setHeight(22 * scale);
         hotbar.setPosition(windowWidth / 2 - (hotbar.getWidth() / 2), 0);
-        hotbarNode.attachChild(hotbar);
-
-        hotbarSelector = new Picture("hotbarSelector");
-        hotbarSelector.setTexture(assetManager, hotbarSelectorTexture, true);
-        hotbarSelector.setWidth(24 * scale);
-        hotbarSelector.setHeight(23 * scale);
         hotbarSelector.setPosition(windowWidth / 2 - ((hotbarSelector.getWidth() / 2)), 0);
-        hotbarNode.attachChild(hotbarSelector);
-
-        experienceBarEmpty = new Picture("experienceBarEmpty");
-        experienceBarEmpty.setTexture(assetManager, experienceBarEmptyTexture, true);
-        experienceBarEmpty.setWidth(182 * scale);
-        experienceBarEmpty.setHeight(5 * scale);
         experienceBarEmpty.setPosition(windowWidth / 2 - ((experienceBarEmpty.getWidth() / 2)), hotbar.getHeight() + scale * 2);
-        hotbarNode.attachChild(experienceBarEmpty);
-
-        //Does: Create Crosshair and inventory
-        crosshair = new Picture("crosshair");
-        crosshair.setTexture(assetManager, crosshairTexture, true);
-        crosshair.setWidth(15 * scale);
-        crosshair.setHeight(15 * scale);
         crosshair.setPosition(windowWidth / 2 - ((crosshair.getWidth() / 2)), windowHeight / 2 - ((crosshair.getHeight() / 2)));
+
+        //Does: Attach HUD Elemtents to GUI Node
+        hotbarNode.attachChild(hotbar);
+        hotbarNode.attachChild(hotbarSelector);
+        hotbarNode.attachChild(experienceBarEmpty);
         hotbarNode.attachChild(crosshair);
 
         //Does: Create Containers for Life and Hunger
         for (int i = 0; i < 10; i++) {
-            heartContainer = new Picture("heartContainer");
-            heartContainer.setTexture(assetManager, heartContainerTexture, true);
-            heartContainer.setWidth(9 * scale);
-            heartContainer.setHeight(9 * scale);
+            heartContainer = TextureManager.createPicture(assetManager, heartContainerTexture, "heartContainer", scale);
             heartContainer.setPosition(
                 windowWidth / 2 - ((hotbar.getWidth() / 2)) + 8 * scale * i,
                 experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHeight()
@@ -114,10 +95,7 @@ public class PlayerGUI {
         }
 
         for (int i = 0; i < 10; i++) {
-            hungerContainer = new Picture("hungerContainer");
-            hungerContainer.setTexture(assetManager, hungerContainerTexture, true);
-            hungerContainer.setWidth(9 * scale);
-            hungerContainer.setHeight(9 * scale);
+            hungerContainer = TextureManager.createPicture(assetManager, hungerContainerTexture, "hungerContainer", scale);
             hungerContainer.setPosition(
                 windowWidth / 2 + 10 * scale + 8 * scale * i,
                 experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHeight()
