@@ -5,7 +5,7 @@ import com.minecraftclone.world.World;
 
 public class Block {
 
-    private final boolean solid;
+    private final boolean full;
     private final String topTex;
     private final String bottomTex;
     private final String sideTex;
@@ -13,49 +13,49 @@ public class Block {
     private final BlockType type;
 
     /**
-     * Full constructor with custom geometry
+     * full constructor with sided textures and custom block type
      */
-    public Block(boolean solid, String topTex, String sideTex, String bottomTex, BlockGeometry geometry, BlockType type) {
-        this.solid = solid;
+    public Block(boolean full, String topTex, String sideTex, String bottomTex, BlockType type) {
+        this.full = full;
         this.topTex = topTex;
         this.sideTex = sideTex;
         this.bottomTex = bottomTex;
-        this.geometry = geometry;
         this.type = type;
+        this.geometry = getBlockGeometry(type);
     }
 
     /**
-     * Constructor for standard cube blocks with different textures
+     * constructor for cube blocks with sided textures
      */
-    public Block(boolean solid, String topTex, String sideTex, String bottomTex) {
-        this(solid, topTex, sideTex, bottomTex, MeshLibrary.CUBE, BlockType.CUBE);
+    public Block(boolean full, String topTex, String sideTex, String bottomTex) {
+        this(full, topTex, sideTex, bottomTex, BlockType.CUBE);
     }
 
     /**
-     * Constructor for blocks with same texture on all sides
+     * constructor for cube blocks with same texture on all sides
      */
-    public Block(boolean solid, String texture) {
-        this(solid, texture, texture, texture, MeshLibrary.CUBE, BlockType.CUBE);
+    public Block(boolean full, String texture) {
+        this(full, texture, texture, texture, BlockType.CUBE);
     }
 
     /**
-     * Constructor for cube blocks with custom geometry type
+     * constructor for blocks with custom block type
      */
-    public Block(boolean solid, String texture, BlockGeometry geometry, BlockType type) {
-        this(solid, texture, texture, texture, geometry, type);
+    public Block(boolean full, String texture, BlockType type) {
+        this(full, texture, texture, texture, type);
     }
 
-    public boolean isSolid() {
-        return solid;
+    public boolean isFull() {
+        return full;
     }
 
     public boolean isBreakable() {
-        //NOTE: always returns true for now
+        //NOTE: always returns true for now, hardness to be added later
         return true;
     }
 
     /**
-     * returns true, overwritten by child classes for block specific rules
+     * default true, overridden by child classes for block-specific rules
      * @param world
      * @param x
      * @param y
@@ -86,7 +86,30 @@ public class Block {
     }
 
     /**
-     * Enum for different block types
+     * gets block geometry from mesh library
+     * @param type
+     * @return
+     */
+    private BlockGeometry getBlockGeometry(BlockType type) {
+        //NOTE: needs to have extra logic for rotateable blocks
+        switch (type) {
+            case CUBE:
+                return MeshLibrary.CUBE;
+            case STAIRS:
+                return MeshLibrary.STAIRS_NORTH;
+            case SLAB:
+                return MeshLibrary.SLAB;
+            case FENCE:
+                return MeshLibrary.FENCE_POST;
+            case CUSTOM:
+                return MeshLibrary.CUBE;
+            default:
+                return MeshLibrary.CUBE;
+        }
+    }
+
+    /**
+     * enum for different block types
      */
     public enum BlockType {
         CUBE,

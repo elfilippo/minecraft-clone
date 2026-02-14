@@ -5,9 +5,10 @@ import com.minecraftclone.block.Block.BlockType;
 public class Blocks {
 
     //INFO: only pngs, no data extensions
-    //public static final Block AIR = new Block(false, null, null, null);
 
-    public static final Block STAIRS = new Block(false, "oak_planks", MeshLibrary.STAIRS_NORTH, BlockType.STAIRS);
+    public static final Block STAIRS = new Block(false, "oak_planks", BlockType.STAIRS);
+    public static final Block SLAB = new Block(false, "oak_planks", BlockType.SLAB);
+    public static final Block FENCE = new Block(false, "oak_planks", BlockType.FENCE);
     public static final Block DIRT = new Block(true, "dirt", "dirt", "dirt");
     public static final Block STONE = new Block(true, "stone", "stone", "stone");
     public static final Block GRASS_BLOCK = new Block(true, "grass_block_top", "grass_block_side", "dirt");

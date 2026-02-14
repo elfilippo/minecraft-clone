@@ -189,6 +189,6 @@ public final class ChunkMeshBuilder {
         }
 
         // Non-solid blocks (like fences) are transparent for occlusion purposes
-        return !block.isSolid();
+        return !block.isFull();
     }
 }

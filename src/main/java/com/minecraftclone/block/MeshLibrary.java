@@ -15,6 +15,7 @@ public class MeshLibrary {
      * Represents a single face (quad) of a block
      */
     public static class Face {
+
         public final Vector3f[] vertices; // 4 vertices in CCW order
         public final Vector3f normal;
         public final Vector2f[] uvs; // 4 UV coordinates
@@ -34,13 +35,20 @@ public class MeshLibrary {
      * Enum for face directions to check occlusion
      */
     public enum FaceDirection {
-        UP, DOWN, NORTH, SOUTH, EAST, WEST, NONE
+        UP,
+        DOWN,
+        NORTH,
+        SOUTH,
+        EAST,
+        WEST,
+        NONE,
     }
 
     /**
      * Represents a complete block geometry
      */
     public static class BlockGeometry {
+
         private final List<Face> faces = new ArrayList<>();
 
         public void addFace(Vector3f[] vertices, Vector3f normal, Vector2f[] uvs, String textureKey, FaceDirection direction) {
@@ -57,8 +65,95 @@ public class MeshLibrary {
         new Vector2f(0, 0),
         new Vector2f(1, 0),
         new Vector2f(1, 1),
-        new Vector2f(0, 1)
+        new Vector2f(0, 1),
     };
+
+    // ==================== HELPER METHODS ====================
+
+    /**
+     * Creates UV coordinates for a partial face
+     * @param u1 left U coordinate (0-1)
+     * @param v1 bottom V coordinate (0-1)
+     * @param u2 right U coordinate (0-1)
+     * @param v2 top V coordinate (0-1)
+     */
+    private static Vector2f[] uvs(float u1, float v1, float u2, float v2) {
+        return new Vector2f[] { new Vector2f(u1, v1), new Vector2f(u2, v1), new Vector2f(u2, v2), new Vector2f(u1, v2) };
+    }
+
+    /**
+     * Creates a horizontal face (parallel to XZ plane)
+     * @param x1, z1 - first corner
+     * @param x2, z2 - opposite corner
+     * @param y - height
+     * @param up - true for upward facing, false for downward
+     */
+    private static Vector3f[] horizontalFace(float x1, float z1, float x2, float z2, float y, boolean up) {
+        if (up) {
+            return new Vector3f[] { new Vector3f(x1, y, z1), new Vector3f(x1, y, z2), new Vector3f(x2, y, z2), new Vector3f(x2, y, z1) };
+        } else {
+            return new Vector3f[] { new Vector3f(x1, y, z1), new Vector3f(x2, y, z1), new Vector3f(x2, y, z2), new Vector3f(x1, y, z2) };
+        }
+    }
+
+    /**
+     * Creates a vertical face parallel to XY plane (north/south)
+     */
+    private static Vector3f[] verticalFaceZ(float x1, float x2, float y1, float y2, float z, boolean north) {
+        if (north) {
+            return new Vector3f[] { new Vector3f(x1, y1, z), new Vector3f(x2, y1, z), new Vector3f(x2, y2, z), new Vector3f(x1, y2, z) };
+        } else {
+            return new Vector3f[] { new Vector3f(x2, y1, z), new Vector3f(x1, y1, z), new Vector3f(x1, y2, z), new Vector3f(x2, y2, z) };
+        }
+    }
+
+    /**
+     * Creates a vertical face parallel to YZ plane (east/west)
+     */
+    private static Vector3f[] verticalFaceX(float z1, float z2, float y1, float y2, float x, boolean east) {
+        if (east) {
+            return new Vector3f[] { new Vector3f(x, y1, z2), new Vector3f(x, y1, z1), new Vector3f(x, y2, z1), new Vector3f(x, y2, z2) };
+        } else {
+            return new Vector3f[] { new Vector3f(x, y1, z1), new Vector3f(x, y1, z2), new Vector3f(x, y2, z2), new Vector3f(x, y2, z1) };
+        }
+    }
+
+    /**
+     * Adds a rectangular box to geometry
+     */
+    private static void addBox(
+        BlockGeometry geom,
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float y2,
+        float z2,
+        String topTex,
+        String bottomTex,
+        String sideTex,
+        FaceDirection topDir,
+        FaceDirection bottomDir,
+        FaceDirection northDir,
+        FaceDirection southDir,
+        FaceDirection eastDir,
+        FaceDirection westDir
+    ) {
+        // Top
+        geom.addFace(horizontalFace(x1, z1, x2, z2, y2, true), Vector3f.UNIT_Y, STANDARD_UVS, topTex, topDir);
+        // Bottom
+        geom.addFace(horizontalFace(x1, z1, x2, z2, y1, false), Vector3f.UNIT_Y.negate(), STANDARD_UVS, bottomTex, bottomDir);
+        // North (+Z)
+        geom.addFace(verticalFaceZ(x1, x2, y1, y2, z2, true), Vector3f.UNIT_Z, STANDARD_UVS, sideTex, northDir);
+        // South (-Z)
+        geom.addFace(verticalFaceZ(x1, x2, y1, y2, z1, false), Vector3f.UNIT_Z.negate(), STANDARD_UVS, sideTex, southDir);
+        // East (+X)
+        geom.addFace(verticalFaceX(z1, z2, y1, y2, x2, true), Vector3f.UNIT_X, STANDARD_UVS, sideTex, eastDir);
+        // West (-X)
+        geom.addFace(verticalFaceX(z1, z2, y1, y2, x1, false), Vector3f.UNIT_X.negate(), STANDARD_UVS, sideTex, westDir);
+    }
+
+    // ==================== BLOCK GEOMETRIES ====================
 
     /**
      * Standard cube block (1x1x1)
@@ -67,91 +162,24 @@ public class MeshLibrary {
 
     private static BlockGeometry createCube() {
         BlockGeometry cube = new BlockGeometry();
-
-        // Top face (Y+)
-        cube.addFace(
-            new Vector3f[] {
-                new Vector3f(0, 1, 0),
-                new Vector3f(0, 1, 1),
-                new Vector3f(1, 1, 1),
-                new Vector3f(1, 1, 0)
-            },
-            Vector3f.UNIT_Y,
-            STANDARD_UVS,
+        addBox(
+            cube,
+            0,
+            0,
+            0,
+            1,
+            1,
+            1,
             "top",
-            FaceDirection.UP
-        );
-
-        // Bottom face (Y-)
-        cube.addFace(
-            new Vector3f[] {
-                new Vector3f(0, 0, 0),
-                new Vector3f(1, 0, 0),
-                new Vector3f(1, 0, 1),
-                new Vector3f(0, 0, 1)
-            },
-            Vector3f.UNIT_Y.negate(),
-            STANDARD_UVS,
             "bottom",
-            FaceDirection.DOWN
-        );
-
-        // North face (Z+)
-        cube.addFace(
-            new Vector3f[] {
-                new Vector3f(0, 0, 1),
-                new Vector3f(1, 0, 1),
-                new Vector3f(1, 1, 1),
-                new Vector3f(0, 1, 1)
-            },
-            Vector3f.UNIT_Z,
-            STANDARD_UVS,
             "side",
-            FaceDirection.NORTH
-        );
-
-        // South face (Z-)
-        cube.addFace(
-            new Vector3f[] {
-                new Vector3f(1, 0, 0),
-                new Vector3f(0, 0, 0),
-                new Vector3f(0, 1, 0),
-                new Vector3f(1, 1, 0)
-            },
-            Vector3f.UNIT_Z.negate(),
-            STANDARD_UVS,
-            "side",
-            FaceDirection.SOUTH
-        );
-
-        // East face (X+)
-        cube.addFace(
-            new Vector3f[] {
-                new Vector3f(1, 0, 1),
-                new Vector3f(1, 0, 0),
-                new Vector3f(1, 1, 0),
-                new Vector3f(1, 1, 1)
-            },
-            Vector3f.UNIT_X,
-            STANDARD_UVS,
-            "side",
-            FaceDirection.EAST
-        );
-
-        // West face (X-)
-        cube.addFace(
-            new Vector3f[] {
-                new Vector3f(0, 0, 0),
-                new Vector3f(0, 0, 1),
-                new Vector3f(0, 1, 1),
-                new Vector3f(0, 1, 0)
-            },
-            Vector3f.UNIT_X.negate(),
-            STANDARD_UVS,
-            "side",
+            FaceDirection.UP,
+            FaceDirection.DOWN,
+            FaceDirection.NORTH,
+            FaceDirection.SOUTH,
+            FaceDirection.EAST,
             FaceDirection.WEST
         );
-
         return cube;
     }
 
@@ -162,339 +190,67 @@ public class MeshLibrary {
 
     private static BlockGeometry createSlab() {
         BlockGeometry slab = new BlockGeometry();
-
-        // Top face
-        slab.addFace(
-            new Vector3f[] {
-                new Vector3f(0, 0.5f, 0),
-                new Vector3f(0, 0.5f, 1),
-                new Vector3f(1, 0.5f, 1),
-                new Vector3f(1, 0.5f, 0)
-            },
-            Vector3f.UNIT_Y,
-            STANDARD_UVS,
-            "top",
-            FaceDirection.UP
-        );
-
-        // Bottom face
-        slab.addFace(
-            new Vector3f[] {
-                new Vector3f(0, 0, 0),
-                new Vector3f(1, 0, 0),
-                new Vector3f(1, 0, 1),
-                new Vector3f(0, 0, 1)
-            },
-            Vector3f.UNIT_Y.negate(),
-            STANDARD_UVS,
-            "bottom",
-            FaceDirection.DOWN
-        );
-
-        // North face (half height)
-        slab.addFace(
-            new Vector3f[] {
-                new Vector3f(0, 0, 1),
-                new Vector3f(1, 0, 1),
-                new Vector3f(1, 0.5f, 1),
-                new Vector3f(0, 0.5f, 1)
-            },
-            Vector3f.UNIT_Z,
-            new Vector2f[] {
-                new Vector2f(0, 0),
-                new Vector2f(1, 0),
-                new Vector2f(1, 0.5f),
-                new Vector2f(0, 0.5f)
-            },
-            "side",
-            FaceDirection.NORTH
-        );
-
-        // South face
-        slab.addFace(
-            new Vector3f[] {
-                new Vector3f(1, 0, 0),
-                new Vector3f(0, 0, 0),
-                new Vector3f(0, 0.5f, 0),
-                new Vector3f(1, 0.5f, 0)
-            },
-            Vector3f.UNIT_Z.negate(),
-            new Vector2f[] {
-                new Vector2f(0, 0),
-                new Vector2f(1, 0),
-                new Vector2f(1, 0.5f),
-                new Vector2f(0, 0.5f)
-            },
-            "side",
-            FaceDirection.SOUTH
-        );
-
-        // East face
-        slab.addFace(
-            new Vector3f[] {
-                new Vector3f(1, 0, 1),
-                new Vector3f(1, 0, 0),
-                new Vector3f(1, 0.5f, 0),
-                new Vector3f(1, 0.5f, 1)
-            },
-            Vector3f.UNIT_X,
-            new Vector2f[] {
-                new Vector2f(0, 0),
-                new Vector2f(1, 0),
-                new Vector2f(1, 0.5f),
-                new Vector2f(0, 0.5f)
-            },
-            "side",
-            FaceDirection.EAST
-        );
-
-        // West face
-        slab.addFace(
-            new Vector3f[] {
-                new Vector3f(0, 0, 0),
-                new Vector3f(0, 0, 1),
-                new Vector3f(0, 0.5f, 1),
-                new Vector3f(0, 0.5f, 0)
-            },
-            Vector3f.UNIT_X.negate(),
-            new Vector2f[] {
-                new Vector2f(0, 0),
-                new Vector2f(1, 0),
-                new Vector2f(1, 0.5f),
-                new Vector2f(0, 0.5f)
-            },
-            "side",
-            FaceDirection.WEST
-        );
-
+        // Top face always visible (half height block)
+        slab.addFace(horizontalFace(0, 0, 1, 1, 0.5f, true), Vector3f.UNIT_Y, STANDARD_UVS, "top", FaceDirection.NONE);
+        // Bottom
+        slab.addFace(horizontalFace(0, 0, 1, 1, 0, false), Vector3f.UNIT_Y.negate(), STANDARD_UVS, "bottom", FaceDirection.DOWN);
+        // Sides (half height)
+        slab.addFace(verticalFaceZ(0, 1, 0, 0.5f, 1, true), Vector3f.UNIT_Z, uvs(0, 0, 1, 0.5f), "side", FaceDirection.NORTH);
+        slab.addFace(verticalFaceZ(0, 1, 0, 0.5f, 0, false), Vector3f.UNIT_Z.negate(), uvs(0, 0, 1, 0.5f), "side", FaceDirection.SOUTH);
+        slab.addFace(verticalFaceX(0, 1, 0, 0.5f, 1, true), Vector3f.UNIT_X, uvs(0, 0, 1, 0.5f), "side", FaceDirection.EAST);
+        slab.addFace(verticalFaceX(0, 1, 0, 0.5f, 0, false), Vector3f.UNIT_X.negate(), uvs(0, 0, 1, 0.5f), "side", FaceDirection.WEST);
         return slab;
     }
 
     /**
      * Stairs facing north (ascending in +Z direction)
-     * Two steps: bottom 0-0.5, top back half 0.5-1
      */
     public static final BlockGeometry STAIRS_NORTH = createStairsNorth();
 
     private static BlockGeometry createStairsNorth() {
         BlockGeometry stairs = new BlockGeometry();
 
-        // Bottom step (front half, full width)
-        // Top of bottom step
-        stairs.addFace(
-            new Vector3f[] {
-                new Vector3f(0, 0.5f, 0),
-                new Vector3f(0, 0.5f, 0.5f),
-                new Vector3f(1, 0.5f, 0.5f),
-                new Vector3f(1, 0.5f, 0)
-            },
-            Vector3f.UNIT_Y,
-            new Vector2f[] {
-                new Vector2f(0, 0),
-                new Vector2f(0, 0.5f),
-                new Vector2f(1, 0.5f),
-                new Vector2f(1, 0)
-            },
-            "top",
-            FaceDirection.NONE // Always visible
-        );
+        // Bottom step top (front half)
+        stairs.addFace(horizontalFace(0, 0, 1, 0.5f, 0.5f, true), Vector3f.UNIT_Y, uvs(0, 0, 1, 0.5f), "top", FaceDirection.NONE);
+        // Top step top (back half)
+        stairs.addFace(horizontalFace(0, 0.5f, 1, 1, 1, true), Vector3f.UNIT_Y, uvs(0, 0.5f, 1, 1), "top", FaceDirection.UP);
 
-        // Top step (back half)
-        // Top of top step
-        stairs.addFace(
-            new Vector3f[] {
-                new Vector3f(0, 1, 0.5f),
-                new Vector3f(0, 1, 1),
-                new Vector3f(1, 1, 1),
-                new Vector3f(1, 1, 0.5f)
-            },
-            Vector3f.UNIT_Y,
-            new Vector2f[] {
-                new Vector2f(0, 0.5f),
-                new Vector2f(0, 1),
-                new Vector2f(1, 1),
-                new Vector2f(1, 0.5f)
-            },
-            "top",
-            FaceDirection.UP
-        );
-
-        // Bottom face (full)
-        stairs.addFace(
-            new Vector3f[] {
-                new Vector3f(0, 0, 0),
-                new Vector3f(1, 0, 0),
-                new Vector3f(1, 0, 1),
-                new Vector3f(0, 0, 1)
-            },
-            Vector3f.UNIT_Y.negate(),
-            STANDARD_UVS,
-            "bottom",
-            FaceDirection.DOWN
-        );
+        // Bottom (full)
+        stairs.addFace(horizontalFace(0, 0, 1, 1, 0, false), Vector3f.UNIT_Y.negate(), STANDARD_UVS, "bottom", FaceDirection.DOWN);
 
         // North face (back, full height)
-        stairs.addFace(
-            new Vector3f[] {
-                new Vector3f(0, 0, 1),
-                new Vector3f(1, 0, 1),
-                new Vector3f(1, 1, 1),
-                new Vector3f(0, 1, 1)
-            },
-            Vector3f.UNIT_Z,
-            STANDARD_UVS,
-            "side",
-            FaceDirection.NORTH
-        );
+        stairs.addFace(verticalFaceZ(0, 1, 0, 1, 1, true), Vector3f.UNIT_Z, STANDARD_UVS, "side", FaceDirection.NORTH);
 
-        // South face (front, half height - bottom step)
-        stairs.addFace(
-            new Vector3f[] {
-                new Vector3f(1, 0, 0),
-                new Vector3f(0, 0, 0),
-                new Vector3f(0, 0.5f, 0),
-                new Vector3f(1, 0.5f, 0)
-            },
-            Vector3f.UNIT_Z.negate(),
-            new Vector2f[] {
-                new Vector2f(0, 0),
-                new Vector2f(1, 0),
-                new Vector2f(1, 0.5f),
-                new Vector2f(0, 0.5f)
-            },
-            "side",
-            FaceDirection.SOUTH
-        );
+        // South face (front, half height)
+        stairs.addFace(verticalFaceZ(0, 1, 0, 0.5f, 0, false), Vector3f.UNIT_Z.negate(), uvs(0, 0, 1, 0.5f), "side", FaceDirection.SOUTH);
 
-        // Vertical face between steps (step riser) - this is the FRONT face of the upper step
-        stairs.addFace(
-            new Vector3f[] {
-                new Vector3f(1, 0.5f, 0.5f),
-                new Vector3f(0, 0.5f, 0.5f),
-                new Vector3f(0, 1, 0.5f),
-                new Vector3f(1, 1, 0.5f)
-            },
-            new Vector3f(0, 0, -1),
-            new Vector2f[] {
-                new Vector2f(0, 0.5f),
-                new Vector2f(1, 0.5f),
-                new Vector2f(1, 1),
-                new Vector2f(0, 1)
-            },
-            "side",
-            FaceDirection.NONE // Always visible
-        );
+        // Step riser (vertical face between steps)
+        stairs.addFace(verticalFaceZ(0, 1, 0.5f, 1, 0.5f, false), new Vector3f(0, 0, -1), uvs(0, 0.5f, 1, 1), "side", FaceDirection.NONE);
 
-        // East face - Bottom part (front lower section)
-        stairs.addFace(
-            new Vector3f[] {
-                new Vector3f(1, 0, 0.5f),
-                new Vector3f(1, 0, 0),
-                new Vector3f(1, 0.5f, 0),
-                new Vector3f(1, 0.5f, 0.5f)
-            },
-            Vector3f.UNIT_X,
-            new Vector2f[] {
-                new Vector2f(0.5f, 0), // middle-bottom
-                new Vector2f(1, 0),    // front-bottom
-                new Vector2f(1, 0.5f),  // front-mid
-                new Vector2f(0.5f, 0.5f) // middle-mid
-            },
-            "side",
-            FaceDirection.EAST
-        );
-        
-        // East face - Top part (back upper section)
-        stairs.addFace(
-            new Vector3f[] {
-                new Vector3f(1, 0.5f, 1),
-                new Vector3f(1, 0.5f, 0.5f),
-                new Vector3f(1, 1, 0.5f),
-                new Vector3f(1, 1, 1)
-            },
-            Vector3f.UNIT_X,
-            new Vector2f[] {
-                new Vector2f(0, 0.5f),    // back-mid
-                new Vector2f(0.5f, 0.5f), // middle-mid
-                new Vector2f(0.5f, 1),     // middle-top
-                new Vector2f(0, 1)       // back-top
-            },
-            "side",
-            FaceDirection.EAST
-        );
-        
-        // East face - Diagonal connector (fills the gap)
-        stairs.addFace(
-            new Vector3f[] {
-                new Vector3f(1, 0, 1),
-                new Vector3f(1, 0, 0.5f),
-                new Vector3f(1, 0.5f, 0.5f),
-                new Vector3f(1, 0.5f, 1)
-            },
-            Vector3f.UNIT_X,
-            new Vector2f[] {
-                new Vector2f(0, 0),    // back-bottom
-                new Vector2f(0.5f, 0), // middle-bottom
-                new Vector2f(0.5f, 0.5f), // middle-mid
-                new Vector2f(0, 0.5f) // back-mid
-            },
-            "side",
-            FaceDirection.EAST
-        );
+        // East face (3 parts: bottom front, top back, diagonal connector)
+        stairs.addFace(verticalFaceX(0, 0.5f, 0, 0.5f, 1, true), Vector3f.UNIT_X, uvs(0.5f, 0, 1, 0.5f), "side", FaceDirection.EAST);
+        stairs.addFace(verticalFaceX(0.5f, 1, 0.5f, 1, 1, true), Vector3f.UNIT_X, uvs(0, 0.5f, 0.5f, 1), "side", FaceDirection.EAST);
+        stairs.addFace(verticalFaceX(0.5f, 1, 0, 0.5f, 1, true), Vector3f.UNIT_X, uvs(0, 0, 0.5f, 0.5f), "side", FaceDirection.EAST);
 
-        // West face - Bottom part (front lower section)
+        // West face (3 parts: bottom front, top back, diagonal connector)
         stairs.addFace(
-            new Vector3f[] {
-                new Vector3f(0, 0, 0),
-                new Vector3f(0, 0, 0.5f),
-                new Vector3f(0, 0.5f, 0.5f),
-                new Vector3f(0, 0.5f, 0)
-            },
+            verticalFaceX(0, 0.5f, 0, 0.5f, 0, false),
             Vector3f.UNIT_X.negate(),
-            new Vector2f[] {
-                new Vector2f(1, 0),      // front-bottom
-                new Vector2f(0.5f, 0),   // middle-bottom
-                new Vector2f(0.5f, 0.5f), // middle-mid
-                new Vector2f(1, 0.5f)   // front-mid
-            },
+            uvs(0.5f, 0, 1, 0.5f),
             "side",
             FaceDirection.WEST
         );
-        
-        // West face - Top part (back upper section)
         stairs.addFace(
-            new Vector3f[] {
-                new Vector3f(0, 0.5f, 0.5f),
-                new Vector3f(0, 0.5f, 1),
-                new Vector3f(0, 1, 1),
-                new Vector3f(0, 1, 0.5f)
-            },
+            verticalFaceX(0.5f, 1, 0.5f, 1, 0, false),
             Vector3f.UNIT_X.negate(),
-            new Vector2f[] {
-                new Vector2f(0.5f, 0.5f), // middle-mid
-                new Vector2f(0, 0.5f),    // back-mid
-                new Vector2f(0, 1),        // back-top
-                new Vector2f(0.5f, 1)    // middle-top
-            },
+            uvs(0, 0.5f, 0.5f, 1),
             "side",
             FaceDirection.WEST
         );
-        
-        // West face - Diagonal connector (fills the gap)
         stairs.addFace(
-            new Vector3f[] {
-                new Vector3f(0, 0, 0.5f),
-                new Vector3f(0, 0, 1),
-                new Vector3f(0, 0.5f, 1),
-                new Vector3f(0, 0.5f, 0.5f)
-            },
+            verticalFaceX(0.5f, 1, 0, 0.5f, 0, false),
             Vector3f.UNIT_X.negate(),
-            new Vector2f[] {
-                new Vector2f(0.5f, 0),    // middle-bottom
-                new Vector2f(0, 0),       // back-bottom
-                new Vector2f(0, 0.5f),     // back-mid
-                new Vector2f(0.5f, 0.5f) // middle-mid
-            },
+            uvs(0, 0, 0.5f, 0.5f),
             "side",
             FaceDirection.WEST
         );
@@ -503,106 +259,41 @@ public class MeshLibrary {
     }
 
     /**
-     * Fence post (thin vertical post with cross-section)
+     * Fence post (thin vertical post)
      */
     public static final BlockGeometry FENCE_POST = createFencePost();
 
     private static BlockGeometry createFencePost() {
         BlockGeometry fence = new BlockGeometry();
-        float thickness = 0.125f; // 2/16 blocks
-        float center = 0.5f;
-        float min = center - thickness;
-        float max = center + thickness;
+        float t = 0.125f; // thickness (2/16 blocks)
+        float min = 0.5f - t;
+        float max = 0.5f + t;
 
-        // Top face
-        fence.addFace(
-            new Vector3f[] {
-                new Vector3f(min, 1, min),
-                new Vector3f(min, 1, max),
-                new Vector3f(max, 1, max),
-                new Vector3f(max, 1, min)
-            },
-            Vector3f.UNIT_Y,
-            STANDARD_UVS,
+        addBox(
+            fence,
+            min,
+            0,
+            min,
+            max,
+            1,
+            max,
             "top",
-            FaceDirection.UP
-        );
-
-        // Bottom face
-        fence.addFace(
-            new Vector3f[] {
-                new Vector3f(min, 0, min),
-                new Vector3f(max, 0, min),
-                new Vector3f(max, 0, max),
-                new Vector3f(min, 0, max)
-            },
-            Vector3f.UNIT_Y.negate(),
-            STANDARD_UVS,
             "bottom",
-            FaceDirection.DOWN
-        );
-
-        // North face
-        fence.addFace(
-            new Vector3f[] {
-                new Vector3f(min, 0, max),
-                new Vector3f(max, 0, max),
-                new Vector3f(max, 1, max),
-                new Vector3f(min, 1, max)
-            },
-            Vector3f.UNIT_Z,
-            STANDARD_UVS,
             "side",
+            FaceDirection.UP,
+            FaceDirection.DOWN,
+            FaceDirection.NONE,
+            FaceDirection.NONE,
+            FaceDirection.NONE,
             FaceDirection.NONE
         );
-
-        // South face
-        fence.addFace(
-            new Vector3f[] {
-                new Vector3f(max, 0, min),
-                new Vector3f(min, 0, min),
-                new Vector3f(min, 1, min),
-                new Vector3f(max, 1, min)
-            },
-            Vector3f.UNIT_Z.negate(),
-            STANDARD_UVS,
-            "side",
-            FaceDirection.NONE
-        );
-
-        // East face
-        fence.addFace(
-            new Vector3f[] {
-                new Vector3f(max, 0, max),
-                new Vector3f(max, 0, min),
-                new Vector3f(max, 1, min),
-                new Vector3f(max, 1, max)
-            },
-            Vector3f.UNIT_X,
-            STANDARD_UVS,
-            "side",
-            FaceDirection.NONE
-        );
-
-        // West face
-        fence.addFace(
-            new Vector3f[] {
-                new Vector3f(min, 0, min),
-                new Vector3f(min, 0, max),
-                new Vector3f(min, 1, max),
-                new Vector3f(min, 1, min)
-            },
-            Vector3f.UNIT_X.negate(),
-            STANDARD_UVS,
-            "side",
-            FaceDirection.NONE
-        );
-
         return fence;
     }
 
+    // ==================== ROTATION UTILITIES ====================
+
     /**
-     * Utility: Rotate a block geometry around Y axis
+     * Rotate a block geometry around Y axis
      * @param geometry Original geometry
      * @param rotations Number of 90-degree rotations (0-3)
      * @return New rotated geometry
@@ -641,7 +332,7 @@ public class MeshLibrary {
             return dir;
         }
 
-        FaceDirection[] directions = {FaceDirection.SOUTH, FaceDirection.EAST, FaceDirection.NORTH, FaceDirection.WEST};
+        FaceDirection[] directions = { FaceDirection.SOUTH, FaceDirection.EAST, FaceDirection.NORTH, FaceDirection.WEST };
         int index = 0;
         for (int i = 0; i < directions.length; i++) {
             if (directions[i] == dir) {
