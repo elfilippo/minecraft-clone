@@ -58,7 +58,6 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-
         initialTime = System.nanoTime();
         tickTime = 1f / TICKS_PER_SECOND;
 
@@ -110,7 +109,7 @@ public class Main extends SimpleApplication {
         blockInteraction = new BlockInteractionSystem(world, cam, actionInput);
 
         //NOTE: will be set by hotbar later
-        blockInteraction.setSelectedBlock(Blocks.DIAMOND_BLOCK);
+        blockInteraction.setSelectedBlock(Blocks.STAIRS);
     }
 
     @Override
