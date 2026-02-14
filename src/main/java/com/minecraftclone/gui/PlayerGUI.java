@@ -51,7 +51,7 @@ public class PlayerGUI {
         hotbarTexture = TextureManager.getGuiTexture("/sprites/hud/hotbar"); //182x22
         hotbarSelectorTexture = TextureManager.getGuiTexture("/sprites/hud/hotbar_selection"); //24x23
         crosshairTexture = TextureManager.getGuiTexture("/sprites/hud/crosshair"); //15x15
-        inventoryTexture = TextureManager.getGuiTexture("/container/inventory"); //256x256
+        inventoryTexture = TextureManager.getGuiTexture("/container/inventory"); //256x256 (176x166) //Info: For some reason the inventory texture file is larger than it needs to be
         experienceBarEmptyTexture = TextureManager.getGuiTexture("/sprites/hud/experience_bar_background"); //182x5
         heartContainerTexture = TextureManager.getGuiTexture("/sprites/hud/heart/container"); //9x9
         fullHeartTexture = TextureManager.getGuiTexture("/sprites/hud/heart/full"); //9x9
@@ -69,9 +69,8 @@ public class PlayerGUI {
 
         //DOES: set position of HUD elements
         inventory.setPosition(
-            //FIXME: Inventory not properly centered
-            windowWidth / 2 - (((inventory.getWidth() - (90 * scale)) / 2)),
-            windowHeight / 2 - (inventory.getHeight() - (100 * scale))
+            windowWidth / 2 - (((inventory.getWidth() - (80 * scale)) / 2)),
+            windowHeight / 2 - (inventory.getHeight() - (90 * scale))
         ); //Info: Inventory not attached so not visible
         hotbar.setPosition(windowWidth / 2 - (hotbar.getWidth() / 2), 0);
         hotbarSelector.setPosition(windowWidth / 2 - ((hotbarSelector.getWidth() / 2)), 0);
