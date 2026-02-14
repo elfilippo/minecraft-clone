@@ -26,7 +26,5 @@ public class RenderEngine {
         gui.setHunger(player.getHunger());
         gui.changeHotbarSlot(player.getHotbarSlot());
         gui.setInventoryVisibility(player.getinventoryVisible());
-
-        for (int i = 0; i < 9; i++) {}
     }
 }
