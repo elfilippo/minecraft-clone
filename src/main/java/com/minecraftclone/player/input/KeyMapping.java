@@ -15,6 +15,12 @@ public class KeyMapping {
     private ActionListener actionListener;
     private AnalogListener analogListener;
 
+    /**
+     * initializes keymappings
+     * @param keys
+     * @param actionListener
+     * @param analogListener
+     */
     public KeyMapping(InputManager keys, ActionListener actionListener, AnalogListener analogListener) {
         this.keys = keys;
         this.actionListener = actionListener;
@@ -31,15 +37,12 @@ public class KeyMapping {
         bindKeyAction("SNEAK", KeyInput.KEY_LSHIFT);
         bindKeyAction("PAUSE", KeyInput.KEY_ESCAPE);
 
-        bindKeyAction("HOTBAR_1", KeyInput.KEY_1);
-        bindKeyAction("HOTBAR_2", KeyInput.KEY_2);
-        bindKeyAction("HOTBAR_3", KeyInput.KEY_3);
-        bindKeyAction("HOTBAR_4", KeyInput.KEY_4);
-        bindKeyAction("HOTBAR_5", KeyInput.KEY_5);
-        bindKeyAction("HOTBAR_6", KeyInput.KEY_6);
-        bindKeyAction("HOTBAR_7", KeyInput.KEY_7);
-        bindKeyAction("HOTBAR_8", KeyInput.KEY_8);
-        bindKeyAction("HOTBAR_9", KeyInput.KEY_9);
+        //DOES: iterate over hotbar names to simplify it
+        for (int i = 0; i < 9; i++) {
+            //INFO: KeyInput.Keyx is equal to int x+2, so 2 gets added to i to get the correct keycode
+            //INFO: hotbar string names start with HOTBAR_1, so 1 gets added to i to get the correct name
+            bindKeyAction("HOTBAR_" + (i + 1), i + 2);
+        }
 
         bindMouseAction("PLACE_BLOCK", MouseInput.BUTTON_RIGHT);
         bindMouseAction("BREAK_BLOCK", MouseInput.BUTTON_LEFT);

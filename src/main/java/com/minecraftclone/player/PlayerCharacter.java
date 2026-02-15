@@ -51,6 +51,8 @@ public class PlayerCharacter {
     }
 
     public void tick() {
+        //DOES: walk movement
+        //NOTE: some kind of interpolation to be added for smoother movement
         Vector3f forward = cam.getDirection().clone();
         forward.setY(0).normalizeLocal().multLocal(speed);
         Vector3f left = cam.getLeft().clone();
@@ -63,6 +65,7 @@ public class PlayerCharacter {
         if (input.isHeld(Action.BACKWARD)) walkDir.addLocal(forward.negate());
         if (input.isHeld(Action.RIGHT)) walkDir.addLocal(left.negate());
 
+        //DOES: jumping
         playerControl.setWalkDirection(walkDir);
         if (input.isHeld(Action.JUMP) && playerControl.onGround()) playerControl.jump();
 
@@ -78,7 +81,7 @@ public class PlayerCharacter {
             Action.HOTBAR_9,
         };
 
-        //DOES: iterate through hotbar slots and switches to them if key tapped
+        //DOES: iterate through hotbar slots and switch to them if key tapped
         for (int i = 0; i < hotbar.length; i++) {
             if (input.isTapped(hotbar[i])) hotbarSlot = i + 1;
         }

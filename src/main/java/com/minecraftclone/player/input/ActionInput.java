@@ -17,11 +17,12 @@ public class ActionInput implements ActionListener {
 
     @Override
     public void onAction(String name, boolean isPressed, float tpf) {
+        //?: what does this do and why?
         actions.get(Action.valueOf(name)).update(isPressed);
     }
 
     /**
-     * Returns if the Specified Keybinding is held
+     * returns if the Specified Keybinding is held
      * @param action
      * @return
      */
@@ -30,7 +31,7 @@ public class ActionInput implements ActionListener {
     }
 
     /**
-     * Returns if the Specified Keybinding is tapped
+     * returns if the Specified Keybinding is tapped
      * @param action
      * @return
      */
