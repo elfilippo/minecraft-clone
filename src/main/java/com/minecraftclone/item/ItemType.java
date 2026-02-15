@@ -1,7 +1,7 @@
 package com.minecraftclone.item;
 
 public enum ItemType {
-    //INFO: All possible Item types
+    //INFO: all possible Item types
     SWORD,
     PICKAXE,
     AXE,

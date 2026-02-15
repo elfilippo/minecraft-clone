@@ -8,7 +8,7 @@ public class ActionInput implements ActionListener {
 
     private final Map<Action, InputState> actions = new HashMap<>();
 
-    //DOES: Puts every Playerinput into the Hashmap actions
+    //DOES: put every player input into the actions map
     public ActionInput() {
         for (Action action : Action.values()) {
             actions.put(action, new InputState());
