@@ -23,4 +23,12 @@ public class ItemInstance {
     public void subtractStackSize(int stacksize) {
         this.stackSize = this.stackSize - stacksize;
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
 }
