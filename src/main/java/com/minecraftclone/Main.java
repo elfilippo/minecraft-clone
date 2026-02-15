@@ -3,10 +3,6 @@ package com.minecraftclone;
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.font.BitmapText;
-import com.jme3.light.DirectionalLight;
-import com.jme3.math.Vector3f;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.plugins.OBJLoader;
 import com.jme3.system.AppSettings;
 import com.minecraftclone.block.Blocks;
 import com.minecraftclone.player.PlayerCharacter;
@@ -114,15 +110,6 @@ public class Main extends SimpleApplication {
 
         //NOTE: will be set by hotbar later
         blockInteraction.setSelectedBlock(Blocks.STAIRS);
-
-        assetManager.registerLoader(OBJLoader.class, "obj");
-        Spatial kafka = assetManager.loadModel("/models/3DModels/kafkaV0/kafkaV0.obj");
-        kafka.setLocalScale(0.1f);
-        kafka.setLocalTranslation(10, 10, 10);
-        rootNode.attachChild(kafka);
-        DirectionalLight sun = new DirectionalLight();
-        sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f).normalizeLocal());
-        rootNode.addLight(sun);
     }
 
     @Override
