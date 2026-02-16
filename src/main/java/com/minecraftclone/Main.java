@@ -58,14 +58,14 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-
+        guiFont = assetManager.loadFont("font/regular.fnt");
         initialTime = System.nanoTime();
         tickTime = 1f / TICKS_PER_SECOND;
 
         //DOES: render tps on screen
         tpsText = new BitmapText(guiFont);
         guiNode.attachChild(tpsText);
-        tpsText.setLocalTranslation(10, settings.getHeight() - 20, 0);
+        tpsText.setLocalTranslation(0, cam.getHeight(), 0);
 
         //NOTE: physics object is bulletAppState
         var bulletAppState = new BulletAppState();
