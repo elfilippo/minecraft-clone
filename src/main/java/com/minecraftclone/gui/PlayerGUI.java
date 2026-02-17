@@ -4,6 +4,7 @@ import com.minecraftclone.Main;
 import com.minecraftclone.item.ItemInstance;
 import java.io.IOException;
 
+//Todo: Make text scalable and iprove scaling
 public class PlayerGUI {
 
     private int windowWidth, windowHeight;
