@@ -33,8 +33,7 @@ public class PlayerGUI {
         inventoryList = new ArrayList<>();
     private List<BitmapText> inventoryItemCountList = new ArrayList<>(),
         hotbarItemCountList = new ArrayList<>();
-    private List<Vector3f> inventoryTextAnchor = new ArrayList<>(),
-        hotbarTextAnchor = new ArrayList<>();
+    private List<Vector3f> inventoryTextAnchor = new ArrayList<>();
 
     private TextureManager textureManager;
     private BitmapFont font;
