@@ -4,7 +4,7 @@ import com.minecraftclone.Main;
 import com.minecraftclone.item.ItemInstance;
 import java.io.IOException;
 
-//Todo: Make text scalable and improve scaling
+//Fixme: Text does not scale with screen resolution
 public class PlayerGUI {
 
     private HUD hud;
@@ -15,31 +15,54 @@ public class PlayerGUI {
         int windowWidth = main.getCamera().getWidth();
         int windowHeight = main.getCamera().getHeight();
 
-        //DOES: Autoscale for HUD elements based on screen resolution
+        //Does: Autoscale for GUI based on screen resolution
         int scale = Math.min(windowWidth / 480, windowHeight / 270);
         scale = Math.max(1, scale);
 
+        //Does: Creates GUI elements
         inventoryGUI = new InventoryGUI(main, scale);
         hud = new HUD(main, scale);
     }
 
+    /**
+     * Displays an item in the Inventory
+     * @param row Specifies a Row in the inventory where the Item should be displayed. 1 is the Hotbar
+     * @param column Specifies a Column in the inventory where the Item should be displayed
+     * @param item Specifies the item that should be displayed at the given Position
+     */
     public void inventoryDisplayItem(int row, int column, ItemInstance item) {
         inventoryGUI.displayItem(row, column, item);
         hud.updateHotbarDisplayItem(inventoryGUI.getInventoryList(), inventoryGUI.getInventoryTextList());
     }
 
+    /**
+     * Sets the number of hearts that should be displayed in the HUD
+     * @param life Specifies the number of hearts that should be displayed in the HUD
+     */
     public void setLife(int life) {
         hud.setLife(life);
     }
 
+    /**
+     * Sets the number of hunger bars that should be displayed in the HUD
+     * @param hunger Specifies the number of hunger bars that should be displayed in the HUD
+     */
     public void setHunger(int hunger) {
         hud.setHunger(hunger);
     }
 
+    /**
+     * Changes the Position of the Hotbar-Selector
+     * @param slot Slot where the Hotbar-Selector is displayed
+     */
     public void changeHotbarSelectedSlot(int slot) {
         hud.changeHotbarSelectedSlot(slot);
     }
 
+    /**
+     * Changes the visibility of the Inventory. Also makes the Cursor moveable
+     * @param visible Specifies the visibility to be either true or false
+     */
     public void setInventoryVisibility(boolean visible) {
         inventoryGUI.setInventoryVisibility(visible);
     }
