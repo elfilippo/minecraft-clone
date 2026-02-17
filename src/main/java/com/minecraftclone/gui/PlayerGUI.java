@@ -4,7 +4,6 @@ import com.minecraftclone.Main;
 import com.minecraftclone.item.ItemInstance;
 import java.io.IOException;
 
-//Fixme: Text does not scale with screen resolution
 public class PlayerGUI {
 
     private HUD hud;
@@ -18,6 +17,7 @@ public class PlayerGUI {
         //Does: Autoscale for GUI based on screen resolution
         int scale = Math.min(windowWidth / 480, windowHeight / 270);
         scale = Math.max(1, scale);
+        System.out.println(scale);
 
         //Does: Creates GUI elements
         inventoryGUI = new InventoryGUI(main, scale);

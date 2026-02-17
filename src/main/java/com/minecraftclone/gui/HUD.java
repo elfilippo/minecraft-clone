@@ -19,6 +19,7 @@ class HUD {
     private Node hotbarNode, containerNode, hungerNode, heartNode;
 
     private int scale, halfWidth, halfHeight;
+    private float fontScale;
 
     private List<Picture> hearts = new ArrayList<>(),
         hungerBars = new ArrayList<>(),
@@ -35,6 +36,7 @@ class HUD {
         BitmapFont font = main.getguiFont();
         this.asset = main.getAssetManager();
         this.scale = scale;
+        fontScale = scale / 4f;
 
         halfWidth = main.getCamera().getWidth() / 2;
         halfHeight = main.getCamera().getHeight() / 2;
@@ -117,7 +119,7 @@ class HUD {
             hotbarList.add(slot);
 
             BitmapText text = new BitmapText(font);
-            text.setLocalTranslation((halfWidth - (hotbar.getWidth()) / 2) + scale * (20 + 20 * i), 2 * scale + text.getHeight(), 0);
+            text.setLocalTranslation((halfWidth - (hotbar.getWidth()) / 2) + scale * (20 + 20 * i), 2 * scale, 0);
 
             hotbarNode.attachChild(text);
             hotbarTextList.add(text);
@@ -182,12 +184,14 @@ class HUD {
             Picture slot = hotbarList.get(i);
 
             BitmapText text = hotbarTextList.get(i);
+            text.setLocalScale(fontScale);
             Vector3f anchor = hotbarTextAnchorList.get(i);
 
             slot.setMaterial(invPic.get(i).getMaterial());
 
             text.setText(invText.get(i).getText());
-            text.setLocalTranslation(anchor.x - text.getLineWidth(), anchor.y, anchor.z);
+            System.out.println(fontScale);
+            text.setLocalTranslation(anchor.x - text.getLineWidth() * fontScale, anchor.y + text.getHeight() * fontScale, anchor.z);
         }
     }
 }

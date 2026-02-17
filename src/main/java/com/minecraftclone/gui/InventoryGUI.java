@@ -22,24 +22,28 @@ class InventoryGUI {
     private AssetManager asset;
     private TextureManager textureManager;
     private Node guiNode;
+
     private BitmapFont font;
+    private float fontScale;
 
     private Node inventoryNode, inventoryItemsNode;
     private Texture2D inventoryTexture, blankTexture;
     private Picture inventory;
 
-    private int halfWidth, halfHeight, windowWidth, windowHeight;
+    private int scale, halfWidth, halfHeight, windowWidth, windowHeight;
 
     private List<Picture> inventoryList = new ArrayList<>();
     private List<BitmapText> inventoryTextList = new ArrayList<>();
     private List<Vector3f> inventoryTextAnchorList = new ArrayList<>();
 
     InventoryGUI(Main main, int scale) {
+        this.scale = scale;
         this.guiNode = main.getGuiNode();
         this.asset = main.getAssetManager();
         font = main.getguiFont();
         flyByCamera = main.getFlyByCamera();
         inputManager = main.getInputManager();
+        fontScale = scale / 4f;
 
         windowWidth = main.getCamera().getWidth();
         windowHeight = main.getCamera().getHeight();
@@ -76,7 +80,7 @@ class InventoryGUI {
                     BitmapText text = new BitmapText(font);
                     text.setLocalTranslation(
                         (windowWidth - inventory.getWidth()) / 2 + scale * (65 + 18 * i0),
-                        (windowHeight + inventory.getHeight()) / 2 - 204 * scale + text.getHeight(),
+                        (windowHeight + inventory.getHeight()) / 2 - 204 * scale,
                         0
                     );
                     inventoryItemsNode.attachChild(text);
@@ -94,7 +98,7 @@ class InventoryGUI {
                     BitmapText text = new BitmapText(font);
                     text.setLocalTranslation(
                         (windowWidth - inventory.getWidth()) / 2 + scale * (65 + 18 * i0),
-                        (windowHeight + inventory.getHeight()) / 2 - scale * (128 + 18 * i) + text.getHeight(),
+                        (windowHeight + inventory.getHeight()) / 2 - scale * (128 + 18 * i),
                         0
                     );
                     inventoryItemsNode.attachChild(text);
@@ -122,10 +126,11 @@ class InventoryGUI {
             if (column >= 1 && column <= 9) {
                 Picture slot = inventoryList.get(column - 1 + 9 * (row - 1));
                 BitmapText text = inventoryTextList.get(column - 1 + 9 * (row - 1));
+                text.setLocalScale(fontScale);
                 Vector3f anchor = inventoryTextAnchorList.get(column - 1 + 9 * (row - 1));
 
                 if (!String.valueOf(item.getStackSize()).equals("1")) text.setText(String.valueOf(item.getStackSize()));
-                text.setLocalTranslation(anchor.x - text.getLineWidth(), anchor.y, anchor.z);
+                text.setLocalTranslation(anchor.x - text.getLineWidth() * fontScale, anchor.y + text.getHeight() * fontScale, anchor.z);
                 slot.setTexture(asset, TextureManager.getItemTexture(item.getId()), true);
             }
         }
