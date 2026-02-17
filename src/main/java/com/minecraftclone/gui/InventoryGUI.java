@@ -81,7 +81,7 @@ public class InventoryGUI {
                     inventoryTextList.add(text);
                     inventoryTextAnchorList.add(text.getLocalTranslation().clone());
 
-                    Picture slot = textureManager.createPicture(TextureManager.getItemTexture("diamond_sword"), "blank", 16 * scale); //Usage: Customscale needs to be multiplied by scale otherwise it breaks scalability
+                    Picture slot = textureManager.createPicture(blankTexture, "blank", 16 * scale); //Usage: Customscale needs to be multiplied by scale otherwise it breaks scalability
                     slot.setPosition(
                         (windowWidth - inventory.getWidth()) / 2 + scale * (48 + 18 * i0),
                         (windowHeight + inventory.getHeight()) / 2 - 203 * scale
@@ -100,7 +100,7 @@ public class InventoryGUI {
                     inventoryTextList.add(text);
                     inventoryTextAnchorList.add(text.getLocalTranslation().clone());
 
-                    Picture slot = textureManager.createPicture(TextureManager.getItemTexture("diamond_sword"), "blank", 16 * scale); //Usage: Customscale needs to be multiplied by scale otherwise it breaks scalability
+                    Picture slot = textureManager.createPicture(blankTexture, "blank", 16 * scale); //Usage: Customscale needs to be multiplied by scale otherwise it breaks scalability
                     slot.setPosition(
                         (windowWidth - inventory.getWidth()) / 2 + scale * (48 + 18 * i0),
                         (windowHeight + inventory.getHeight()) / 2 - scale * (127 + 18 * i)
