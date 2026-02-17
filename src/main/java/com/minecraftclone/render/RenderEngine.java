@@ -29,7 +29,7 @@ public class RenderEngine {
     public void guiUpdate() {
         gui.setLife(player.getLife());
         gui.setHunger(player.getHunger());
-        gui.changeHotbarSlot(player.getHotbarSlot());
+        gui.changeHotbarSelectedSlot(player.getHotbarSlot());
         gui.setInventoryVisibility(player.getinventoryVisible());
     }
 }
