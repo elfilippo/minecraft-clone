@@ -3,7 +3,7 @@ package com.minecraftclone.gui;
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
-import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
@@ -27,12 +27,14 @@ public class PlayerGUI {
     private Picture hotbar, hotbarSelector, inventory, crosshair, experienceBarEmpty, heartContainer, heart, hungerContainer, hunger;
     private Node guiNode, inventoryNode, containerNode, hungerNode, heartNode, hotbarNode, inventoryItemsNode;
 
-    private List<Picture> hearts = new ArrayList<>();
-    private List<Picture> hungerBars = new ArrayList<>();
-    private List<Picture> hotbarList = new ArrayList<>();
-    private List<Picture> inventoryList = new ArrayList<>();
-    private List<BitmapText> inventoryTextList = new ArrayList<>();
-    private List<BitmapText> hotbarTextList = new ArrayList<>();
+    private List<Picture> hearts = new ArrayList<>(),
+        hungerBars = new ArrayList<>(),
+        hotbarList = new ArrayList<>(),
+        inventoryList = new ArrayList<>();
+    private List<BitmapText> inventoryItemCountList = new ArrayList<>(),
+        hotbarItemCountList = new ArrayList<>();
+    private List<Vector3f> inventoryTextAnchor = new ArrayList<>(),
+        hotbarTextAnchor = new ArrayList<>();
 
     private TextureManager textureManager;
     private BitmapFont font;
@@ -145,15 +147,15 @@ public class PlayerGUI {
             for (int i0 = 0; i0 < 9; i0++) {
                 if (i == 0) {
                     BitmapText text = new BitmapText(font);
-                    text.setText("12");
-                    text.setColor(new ColorRGBA(1f, 1f, 1f, 1f));
                     text.setLocalTranslation(
-                        (windowWidth - inventory.getWidth()) / 2 + scale * (64 + 18 * i0) - text.getLineWidth(),
-                        (windowHeight + inventory.getHeight()) / 2 - 203 * scale + text.getHeight(),
+                        (windowWidth - inventory.getWidth()) / 2 + scale * (65 + 18 * i0),
+                        (windowHeight + inventory.getHeight()) / 2 - 204 * scale + text.getHeight(),
                         0
                     );
+
                     inventoryItemsNode.attachChild(text);
-                    inventoryTextList.add(text);
+                    inventoryItemCountList.add(text);
+                    inventoryTextAnchor.add(text.getLocalTranslation().clone());
 
                     Picture slot = textureManager.createPicture(blankTexture, "blank", 16 * scale); //Usage: Customscale needs to be multiplied by scale otherwise it breaks scalability
                     slot.setPosition(
@@ -164,15 +166,15 @@ public class PlayerGUI {
                     inventoryList.add(slot);
                 } else {
                     BitmapText text = new BitmapText(font);
-                    text.setText("AB");
-                    text.setColor(new ColorRGBA(1f, 1f, 1f, 1f));
                     text.setLocalTranslation(
-                        (windowWidth - inventory.getWidth()) / 2 + scale * (64 + 18 * i0) - text.getLineWidth(),
-                        (windowHeight + inventory.getHeight()) / 2 - scale * (127 + 18 * i) + text.getHeight(),
+                        (windowWidth - inventory.getWidth()) / 2 + scale * (65 + 18 * i0),
+                        (windowHeight + inventory.getHeight()) / 2 - scale * (128 + 18 * i) + text.getHeight(),
                         0
                     );
+
                     inventoryItemsNode.attachChild(text);
-                    inventoryTextList.add(text);
+                    inventoryItemCountList.add(text);
+                    inventoryTextAnchor.add(text.getLocalTranslation().clone());
 
                     Picture slot = textureManager.createPicture(blankTexture, "blank", 16 * scale); //Usage: Customscale needs to be multiplied by scale otherwise it breaks scalability
                     slot.setPosition(
@@ -188,15 +190,11 @@ public class PlayerGUI {
         //Does: Generate invisible Pictures on top of hotbar slots to be replaced with visible items
         for (int i = 0; i < 9; i++) {
             BitmapText text = new BitmapText(font);
-            text.setText("09");
-            text.setColor(new ColorRGBA(1f, 1f, 1f, 1f));
-            text.setLocalTranslation(
-                (windowWidth - hotbar.getWidth()) / 2 + scale * (19 + 20 * i) - text.getLineWidth(),
-                3 * scale + text.getHeight(),
-                0
-            );
+            text.setLocalTranslation((windowWidth - hotbar.getWidth()) / 2 + scale * (20 + 20 * i), 2 * scale + text.getHeight(), 0);
+
             hotbarNode.attachChild(text);
-            hotbarTextList.add(text);
+            hotbarItemCountList.add(text);
+            inventoryTextAnchor.add(text.getLocalTranslation().clone());
 
             Picture slot = textureManager.createPicture(blankTexture, "blank", 16 * scale); //Usage: Customscale needs to be multiplied by scale otherwise it breaks scalability
             slot.setPosition((windowWidth - hotbar.getWidth()) / 2 + scale * (3 + 20 * i), 3 * scale);
@@ -273,10 +271,15 @@ public class PlayerGUI {
         //Info: The items displayed in the Hotbar are copied from those in the inventoryList, because the inventory also has a Hotbar
         //Does: Checks for differences between the inventory hotbar and real hotbar and if they are not the same displays the item in the inventory hotbar in the hotbar
         for (int i = 0; i < 9; i++) {
-            if (hotbarList.get(i).getMaterial() != inventoryList.get(i).getMaterial()) {
-                Picture slot = hotbarList.get(i);
-                slot.setMaterial(inventoryList.get(i).getMaterial());
-            }
+            Picture slot = hotbarList.get(i);
+
+            BitmapText text = hotbarItemCountList.get(i);
+            Vector3f anchor = inventoryTextAnchor.get(i + 36);
+
+            slot.setMaterial(inventoryList.get(i).getMaterial());
+
+            text.setText(inventoryItemCountList.get(i).getText());
+            text.setLocalTranslation(anchor.x - text.getLineWidth(), anchor.y, anchor.z);
         }
     }
 
@@ -285,6 +288,11 @@ public class PlayerGUI {
         if (row >= 1 && row <= 4) {
             if (column >= 1 && column <= 9) {
                 Picture slot = inventoryList.get(column - 1 + 9 * (row - 1));
+                BitmapText text = inventoryItemCountList.get(column - 1 + 9 * (row - 1));
+                Vector3f anchor = inventoryTextAnchor.get(column - 1 + 9 * (row - 1));
+
+                if (!String.valueOf(item.getStackSize()).equals("1")) text.setText(String.valueOf(item.getStackSize()));
+                text.setLocalTranslation(anchor.x - text.getLineWidth(), anchor.y, anchor.z);
                 slot.setTexture(assetManager, TextureManager.getItemTexture(item.getId()), true);
             }
         }

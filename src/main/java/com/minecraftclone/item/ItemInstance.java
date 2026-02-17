@@ -31,4 +31,8 @@ public class ItemInstance {
     public String getName() {
         return name;
     }
+
+    public int getStackSize() {
+        return stackSize;
+    }
 }
