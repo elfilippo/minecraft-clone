@@ -125,7 +125,7 @@ class HUD {
         }
     }
 
-    protected void setLife(int life) {
+    void setLife(int life) {
         //Does: Changes the heart textures in order to display the players life odd numbers make half hearts
         int fullHearts = life / 2;
         boolean hasHalfHeart = (life % 2 == 1);
@@ -143,7 +143,7 @@ class HUD {
         }
     }
 
-    protected void setHunger(int hunger) {
+    void setHunger(int hunger) {
         //Does: Changes the hunger textures in order to display the players hunger odd numbers make half hunger bars
         int fullHunger = hunger / 2;
         boolean hasHalfHunger = (hunger % 2 == 1);
@@ -161,7 +161,7 @@ class HUD {
         }
     }
 
-    protected void changeHotbarSelectedSlot(int slot) {
+    void changeHotbarSelectedSlot(int slot) {
         //Does: Change the Hotbarslot based of the given int slot
         if (slot <= 9 && slot >= 1) {
             //selectedSlot = slot;
@@ -175,7 +175,7 @@ class HUD {
         }
     }
 
-    protected void updateHotbarDisplayItem(List<Picture> invPic, List<BitmapText> invText) {
+    void updateHotbarDisplayItem(List<Picture> invPic, List<BitmapText> invText) {
         //Info: The items displayed in the Hotbar are copied from those in the inventoryList, because the inventory also has a Hotbar
         //Does: Checks for differences between the inventory hotbar and real hotbar and if they are not the same displays the item in the inventory hotbar in the hotbar
         for (int i = 0; i < 9; i++) {

@@ -15,7 +15,7 @@ import com.minecraftclone.util.TextureManager;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InventoryGUI {
+class InventoryGUI {
 
     private FlyByCamera flyByCamera;
     private InputManager inputManager;
@@ -105,7 +105,7 @@ public class InventoryGUI {
         }
     }
 
-    public void setInventoryVisibility(boolean visibility) {
+    void setInventoryVisibility(boolean visibility) {
         //Does: set the Visibility of the Inventory
         if (visibility) {
             guiNode.attachChild(inventoryItemsNode);
@@ -116,7 +116,7 @@ public class InventoryGUI {
         flyByCamera.setEnabled(!visibility); //Todo: nneds to be changed
     }
 
-    public void displayItem(int row, int column, ItemInstance item) {
+    void displayItem(int row, int column, ItemInstance item) {
         //Does: Shows an item in the inventory row 1 is the hotbar
         if (row >= 1 && row <= 4) {
             if (column >= 1 && column <= 9) {
@@ -131,11 +131,11 @@ public class InventoryGUI {
         }
     }
 
-    public List<Picture> getInventoryList() {
+    List<Picture> getInventoryList() {
         return inventoryList;
     }
 
-    public List<BitmapText> getInventoryTextList() {
+    List<BitmapText> getInventoryTextList() {
         return inventoryTextList;
     }
 }
