@@ -80,8 +80,8 @@ public class PlayerCharacter {
         if (input.isTapped(Action.HOTBAR_8)) hotbarSlot = 8;
         if (input.isTapped(Action.HOTBAR_9)) hotbarSlot = 9;
 
-        if (analog.getMouseWheelUp() != 0.0 && hotbarSlot < 9) hotbarSlot++;
-        if (analog.getMouseWheelDown() != 0.0f && hotbarSlot > 1) hotbarSlot--;
+        if (analog.getMouseWheelUp() != 0.0 && hotbarSlot > 1) hotbarSlot--;
+        if (analog.getMouseWheelDown() != 0.0f && hotbarSlot < 9) hotbarSlot++;
 
         if (input.isTapped(Action.TOGGLE_INVENTORY)) inventoryVisible = !inventoryVisible;
     }

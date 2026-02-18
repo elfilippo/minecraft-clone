@@ -44,8 +44,8 @@ public class KeyMapping {
         bindMouseAction("PLACE_BLOCK", MouseInput.BUTTON_RIGHT);
         bindMouseAction("BREAK_BLOCK", MouseInput.BUTTON_LEFT);
 
-        bindMouseAxis("INVENTORY_SLOT_UP", MouseInput.AXIS_WHEEL, true);
-        bindMouseAxis("INVENTORY_SLOT_DOWN", MouseInput.AXIS_WHEEL, false);
+        bindMouseAxis("INVENTORY_SLOT_DOWN", MouseInput.AXIS_WHEEL, true);
+        bindMouseAxis("INVENTORY_SLOT_UP", MouseInput.AXIS_WHEEL, false);
     }
 
     private void bindKeyAction(String name, int keyCode) {
