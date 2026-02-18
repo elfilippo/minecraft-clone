@@ -119,6 +119,7 @@ class HUD {
             hotbarList.add(slot);
 
             BitmapText text = new BitmapText(font);
+            text.setLocalScale(fontScale);
             text.setLocalTranslation((halfWidth - (hotbar.getWidth()) / 2) + scale * (20 + 20 * i), 2 * scale, 0);
 
             hotbarNode.attachChild(text);
@@ -184,7 +185,7 @@ class HUD {
             Picture slot = hotbarList.get(i);
 
             BitmapText text = hotbarTextList.get(i);
-            text.setLocalScale(fontScale);
+            //text.setLocalScale(fontScale);
             Vector3f anchor = hotbarTextAnchorList.get(i);
 
             slot.setMaterial(invPic.get(i).getMaterial());

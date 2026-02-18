@@ -78,6 +78,7 @@ class InventoryGUI {
                     inventoryList.add(slot);
 
                     BitmapText text = new BitmapText(font);
+                    text.setLocalScale(fontScale);
                     text.setLocalTranslation(
                         (windowWidth - inventory.getWidth()) / 2 + scale * (65 + 18 * i0),
                         (windowHeight + inventory.getHeight()) / 2 - 204 * scale,
@@ -96,6 +97,7 @@ class InventoryGUI {
                     inventoryList.add(slot);
 
                     BitmapText text = new BitmapText(font);
+                    text.setLocalScale(fontScale);
                     text.setLocalTranslation(
                         (windowWidth - inventory.getWidth()) / 2 + scale * (65 + 18 * i0),
                         (windowHeight + inventory.getHeight()) / 2 - scale * (128 + 18 * i),
@@ -126,7 +128,6 @@ class InventoryGUI {
             if (column >= 1 && column <= 9) {
                 Picture slot = inventoryList.get(column - 1 + 9 * (row - 1));
                 BitmapText text = inventoryTextList.get(column - 1 + 9 * (row - 1));
-                text.setLocalScale(fontScale);
                 Vector3f anchor = inventoryTextAnchorList.get(column - 1 + 9 * (row - 1));
 
                 if (!String.valueOf(item.getStackSize()).equals("1")) text.setText(String.valueOf(item.getStackSize()));
