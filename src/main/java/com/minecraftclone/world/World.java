@@ -30,7 +30,7 @@ public class World {
         this.bulletAppState = bulletAppState;
 
         //DOES: create & attatch player
-        playerCharacter = new PlayerCharacter(bulletAppState, actionInput, app);
+        playerCharacter = new PlayerCharacter(bulletAppState, actionInput, analogInput, app);
         render = new RenderEngine(app, playerCharacter);
         app.getRootNode().attachChild(playerCharacter.getNode());
 

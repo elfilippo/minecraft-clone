@@ -9,6 +9,7 @@ import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
 import com.minecraftclone.player.input.Action;
 import com.minecraftclone.player.input.ActionInput;
+import com.minecraftclone.player.input.AnalogInput;
 
 public class PlayerCharacter {
 
@@ -23,14 +24,16 @@ public class PlayerCharacter {
     private final boolean debugEnabled = false;
     private final Vector3f walkDir = new Vector3f();
     private final ActionInput input;
+    private final AnalogInput analog;
     private final Camera cam;
     private int life = 13;
     private int hunger = 13;
     private int hotbarSlot = 1;
     private boolean inventoryVisible = false;
 
-    public PlayerCharacter(BulletAppState bulletAppState, ActionInput input, SimpleApplication app) {
+    public PlayerCharacter(BulletAppState bulletAppState, ActionInput input, AnalogInput analogInput, SimpleApplication app) {
         this.input = input;
+        this.analog = analogInput;
         cam = app.getCamera();
 
         bulletAppState.setDebugEnabled(debugEnabled);
@@ -51,6 +54,7 @@ public class PlayerCharacter {
     }
 
     public void tick() {
+        System.out.println(hotbarSlot);
         Vector3f forward = cam.getDirection().clone();
         forward.setY(0).normalizeLocal().multLocal(speed);
         Vector3f left = cam.getLeft().clone();
@@ -76,8 +80,8 @@ public class PlayerCharacter {
         if (input.isTapped(Action.HOTBAR_8)) hotbarSlot = 8;
         if (input.isTapped(Action.HOTBAR_9)) hotbarSlot = 9;
 
-        if (input.isTapped(Action.INVENTORY_SLOT_UP)) System.out.println("crack");
-        if (input.isTapped(Action.INVENTORY_SLOT_UP)) System.out.println("crack");
+        if (analog.getMouseWheelUp() != 0.0 && hotbarSlot < 9) hotbarSlot++;
+        if (analog.getMouseWheelDown() != 0.0f && hotbarSlot > 1) hotbarSlot--;
 
         if (input.isTapped(Action.TOGGLE_INVENTORY)) inventoryVisible = !inventoryVisible;
     }

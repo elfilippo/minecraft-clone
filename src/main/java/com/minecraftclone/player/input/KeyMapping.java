@@ -19,7 +19,6 @@ public class KeyMapping {
         this.keys = keys;
         this.actionListener = actionListener;
         this.analogListener = analogListener;
-        //keys.deleteMapping("SIMPLEAPP_CameraPos");
 
         bindKeyAction("FORWARD", KeyInput.KEY_W);
         bindKeyAction("BACKWARD", KeyInput.KEY_S);
@@ -45,13 +44,8 @@ public class KeyMapping {
         bindMouseAction("PLACE_BLOCK", MouseInput.BUTTON_RIGHT);
         bindMouseAction("BREAK_BLOCK", MouseInput.BUTTON_LEFT);
 
-        bindMouseAxis("MouseX+", MouseInput.AXIS_X, false);
-        bindMouseAxis("MouseX-", MouseInput.AXIS_X, true);
-        bindMouseAxis("MouseY+", MouseInput.AXIS_Y, false);
-        bindMouseAxis("MouseY-", MouseInput.AXIS_Y, true);
-
-        bindMouseAxis("INVENTORY_SLOT_UP", MouseInput.AXIS_WHEEL, false);
-        bindMouseAxis("INVENTORY_SLOT_DOWN", MouseInput.AXIS_WHEEL, true);
+        bindMouseAxis("INVENTORY_SLOT_UP", MouseInput.AXIS_WHEEL, true);
+        bindMouseAxis("INVENTORY_SLOT_DOWN", MouseInput.AXIS_WHEEL, false);
     }
 
     private void bindKeyAction(String name, int keyCode) {

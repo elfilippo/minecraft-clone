@@ -101,7 +101,7 @@ public class Main extends SimpleApplication {
         //INFO: only for inputs with amounts (mouse movement)
         //DOES: nothing rn
         analogInput = new AnalogInput();
-        new KeyMapping(inputManager, actionInput, flyCam);
+        new KeyMapping(inputManager, actionInput, analogInput);
 
         //DOES: set up world and player
         //INFO: world owns all data

@@ -4,32 +4,25 @@ import com.jme3.input.controls.AnalogListener;
 
 public class AnalogInput implements AnalogListener {
 
-    private float mouseDX;
-    private float mouseDY;
-
     float mouseWheelUp, mouseWheelDown;
 
     @Override
     public void onAnalog(String name, float value, float tpf) {
         switch (name) {
-            case "MouseX+" -> mouseDX = value;
-            case "MouseX-" -> mouseDX = -value;
-            case "MouseY+" -> mouseDY = value;
-            case "MouseY-" -> mouseDY = -value;
-            case "mouseWheelUp" -> mouseWheelUp = value;
-            case "mouseWheelDown" -> mouseWheelDown = value;
+            case "INVENTORY_SLOT_UP" -> mouseWheelUp = value;
+            case "INVENTORY_SLOT_DOWN" -> mouseWheelDown = value;
         }
     }
 
-    public float consumeMouseDX() {
-        float dx = mouseDX;
-        mouseDX = 0;
-        return dx;
+    public float getMouseWheelDown() {
+        float temp = mouseWheelDown;
+        mouseWheelDown = 0f;
+        return temp;
     }
 
-    public float consumeMouseDY() {
-        float dy = mouseDY;
-        mouseDY = 0;
-        return dy;
+    public float getMouseWheelUp() {
+        float temp = mouseWheelUp;
+        mouseWheelUp = 0f;
+        return temp;
     }
 }
