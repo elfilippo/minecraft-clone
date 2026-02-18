@@ -18,7 +18,7 @@ import java.util.List;
 class InventoryGUI {
 
     //TODO: Create Blockitems
-    //IDEA: three textures that are transformed in a way to create an illusion of being 3d
+    //IDEA: three textures that are transformed in a way to create an illusion of being 3d (need to be darkened to make them more 3d)
     private FlyByCamera flyByCamera;
     private InputManager inputManager;
     private AssetManager asset;
