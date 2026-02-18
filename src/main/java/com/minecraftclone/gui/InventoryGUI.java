@@ -22,16 +22,14 @@ class InventoryGUI {
     private FlyByCamera flyByCamera;
     private InputManager inputManager;
     private AssetManager asset;
-    private TextureManager textureManager;
+
     private Node guiNode;
-
-    private BitmapFont font;
-    private float fontScale;
-
     private Node inventoryNode, inventoryItemsNode;
+
     private Texture2D inventoryTexture, blankTexture;
     private Picture inventory;
 
+    private float fontScale;
     private int halfWidth, halfHeight, windowWidth, windowHeight;
 
     private List<Picture> inventoryList = new ArrayList<>();
@@ -41,18 +39,18 @@ class InventoryGUI {
     InventoryGUI(Main main, int scale) {
         this.guiNode = main.getGuiNode();
         this.asset = main.getAssetManager();
-        this.font = main.getguiFont();
         this.flyByCamera = main.getFlyByCamera();
         this.inputManager = main.getInputManager();
         this.fontScale = scale / 4f;
+
+        BitmapFont font = main.getguiFont();
+        TextureManager textureManager = new TextureManager(asset, scale);
 
         //DOES: Create Variables for easier positioning of the HUD elements
         windowWidth = main.getCamera().getWidth();
         windowHeight = main.getCamera().getHeight();
         halfWidth = main.getViewPort().getCamera().getWidth() / 2;
         halfHeight = main.getViewPort().getCamera().getHeight() / 2;
-
-        textureManager = new TextureManager(asset, scale);
 
         //DOES: Create Nodes for layering and attach them
         inventoryItemsNode = new Node("inventoryItemsNode");
