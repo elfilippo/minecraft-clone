@@ -13,8 +13,11 @@ class Slot {
     Vector3f anchor;
     BitmapText text;
     Picture display;
+    UIHelper helper;
 
     Slot(UIHelper helper, float x, float y) {
+        this.helper = helper;
+
         display = helper.createPicture(helper.loadItemTexture2d("golden_apple"), "display");
         display.setPosition(x, y);
 
@@ -23,6 +26,8 @@ class Slot {
         text.setLocalTranslation(x, y, 0);
 
         anchor = text.getLocalTranslation().clone();
+        anchor.x = anchor.x + 16 * helper.getScale();
+        anchor.y = anchor.y + this.text.getHeight() * helper.getFontScale();
     }
 
     void setTexture(AssetManager asset, Texture2D texture) {
@@ -31,6 +36,7 @@ class Slot {
 
     void setText(String text) {
         this.text.setText(text);
+        this.text.setLocalTranslation(anchor.x - this.text.getLineWidth() * helper.getFontScale(), anchor.y, anchor.z);
     }
 
     void attach(Node node) {
