@@ -26,7 +26,7 @@ class Slot {
         text.setLocalTranslation(x, y, 0);
 
         anchor = text.getLocalTranslation().clone();
-        anchor.x = anchor.x + 16 * helper.getScale();
+        anchor.x = anchor.x + 16 * helper.getScale(); //FIXME: Magic number
         anchor.y = anchor.y + this.text.getHeight() * helper.getFontScale();
     }
 
@@ -40,11 +40,13 @@ class Slot {
     }
 
     void attach(Node node) {
+        //FIXME: Kinda ass
         node.attachChild(display);
         node.attachChild(text);
     }
 
     void detach(Node node) {
+        //FIXME: not detaching but cullhint
         node.detachChild(display);
         node.detachChild(text);
     }
