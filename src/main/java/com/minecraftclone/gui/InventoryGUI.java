@@ -11,7 +11,7 @@ import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
 import com.minecraftclone.Main;
 import com.minecraftclone.item.ItemInstance;
-import com.minecraftclone.util.TextureManager;
+import com.minecraftclone.util.UIHelper;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +22,7 @@ class InventoryGUI {
     private FlyByCamera flyByCamera;
     private InputManager inputManager;
     private AssetManager asset;
+    private UIHelper uiHelper;
 
     private Node guiNode;
     private Node inventoryNode, inventoryItemsNode;
@@ -43,7 +44,7 @@ class InventoryGUI {
         this.fontScale = scale / 4f;
 
         BitmapFont font = main.getguiFont();
-        TextureManager textureManager = new TextureManager(asset, scale);
+        uiHelper = new UIHelper(asset, scale, font);
 
         //DOES: Create Variables for easier positioning of the HUD elements
         int windowWidth = main.getCamera().getWidth();
@@ -58,11 +59,11 @@ class InventoryGUI {
         inventoryItemsNode.attachChild(inventoryNode);
 
         //DOES: Create Texture variables
-        inventoryTexture = TextureManager.getGuiTexture("container/inventory"); //256x256 (176x166) //Info: For some reason the inventory texture file is larger than it needs to be
-        blankTexture = TextureManager.getGuiTexture("blank"); //1x1
+        inventoryTexture = uiHelper.loadGUITexture2d("container/inventory"); //256x256 (176x166) //Info: For some reason the inventory texture file is larger than it needs to be
+        blankTexture = uiHelper.loadGUITexture2d("blank"); //1x1
 
         //DOES: Create the inventory and position it in the screens center
-        inventory = textureManager.createPicture(inventoryTexture, "inventory");
+        inventory = uiHelper.createPicture(inventoryTexture, "inventory");
         inventory.setPosition(halfWidth - (inventory.getWidth() / 2) + 40 * scale, halfHeight - (inventory.getHeight() / 2) - 45 * scale);
         inventoryNode.attachChild(inventory);
 
@@ -71,7 +72,7 @@ class InventoryGUI {
         for (int i = 0; i < 4; i++) {
             for (int i0 = 0; i0 < 9; i0++) {
                 if (i == 0) {
-                    Picture slot = textureManager.createPicture(blankTexture, "blank", 16 * scale); //Usage: Customscale needs to be multiplied by scale otherwise it breaks scalability
+                    Picture slot = uiHelper.createPicture(blankTexture, "blank", 16 * scale); //Usage: Customscale needs to be multiplied by scale otherwise it breaks scalability
                     slot.setPosition(
                         (windowWidth - inventory.getWidth()) / 2 + scale * (48 + 18 * i0),
                         (windowHeight + inventory.getHeight()) / 2 - 203 * scale
@@ -90,7 +91,7 @@ class InventoryGUI {
                     inventoryTextList.add(text);
                     inventoryTextAnchorList.add(text.getLocalTranslation().clone());
                 } else {
-                    Picture slot = textureManager.createPicture(blankTexture, "blank", 16 * scale); //Usage: Customscale needs to be multiplied by scale otherwise it breaks scalability
+                    Picture slot = uiHelper.createPicture(blankTexture, "blank", 16 * scale); //Usage: Customscale needs to be multiplied by scale otherwise it breaks scalability
                     slot.setPosition(
                         (windowWidth - inventory.getWidth()) / 2 + scale * (48 + 18 * i0),
                         (windowHeight + inventory.getHeight()) / 2 - scale * (127 + 18 * i)
@@ -146,7 +147,7 @@ class InventoryGUI {
                     text.setText("");
                 }
                 text.setLocalTranslation(anchor.x - text.getLineWidth() * fontScale, anchor.y + text.getHeight() * fontScale, anchor.z);
-                slot.setTexture(asset, TextureManager.getItemTexture(item.getId()), true);
+                slot.setTexture(asset, uiHelper.loadItemTexture2d(item.getId()), true);
             }
         }
     }

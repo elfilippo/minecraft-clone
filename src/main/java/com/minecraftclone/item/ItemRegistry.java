@@ -48,4 +48,8 @@ public class ItemRegistry {
     public static Map<String, Item> getAll() {
         return Map.copyOf(ITEMS);
     }
+
+    public static String getTexturePath(String id) {
+        return "textures/item/" + id + ".png";
+    }
 }

@@ -54,7 +54,6 @@ public class PlayerCharacter {
     }
 
     public void tick() {
-        System.out.println(hotbarSlot);
         Vector3f forward = cam.getDirection().clone();
         forward.setY(0).normalizeLocal().multLocal(speed);
         Vector3f left = cam.getLeft().clone();
