@@ -18,7 +18,7 @@ public class HUD {
     private Picture hotbar, experienceBarEmpty, hotbarSelector, crosshair;
     private Node hotbarNode, containerNode, hungerNode, heartNode;
 
-    private int scale, halfWidth;
+    private int scale, halfWidth, halfHeight;
 
     private List<Picture> hearts = new ArrayList<>(),
         hungerBars = new ArrayList<>();
@@ -35,7 +35,7 @@ public class HUD {
         this.scale = scale;
 
         halfWidth = main.getCamera().getWidth() / 2;
-        int halfHeight = main.getCamera().getHeight() / 2;
+        halfHeight = main.getCamera().getHeight() / 2;
 
         UIHelper uiHelper = new UIHelper(asset, scale, font);
 
