@@ -18,7 +18,7 @@ public class HUD {
     private Picture hotbar, experienceBarEmpty, hotbarSelector, crosshair;
     private Node hotbarNode, containerNode, hungerNode, heartNode;
 
-    private int scale, halfWidth, halfHeight;
+    private int scale, halfWidth;
 
     private List<Picture> hearts = new ArrayList<>(),
         hungerBars = new ArrayList<>();
@@ -35,7 +35,7 @@ public class HUD {
         this.scale = scale;
 
         halfWidth = main.getCamera().getWidth() / 2;
-        halfHeight = main.getCamera().getHeight() / 2;
+        int halfHeight = main.getCamera().getHeight() / 2;
 
         UIHelper uiHelper = new UIHelper(asset, scale, font);
 
@@ -194,11 +194,8 @@ public class HUD {
         for (int i = 0; i < 9; i++) {
             Slot slot = hotbarSlots.get(i);
 
-            //slot.setMaterial(invPic.get(i).getMaterial());
-            //slot.setTexture(asset, TextureManager.getItemTexture("golden_apple"));
-
+            slot.setTexture(slots.get(i).getTexture());
             slot.setText(slots.get(i).getText());
-            //text.setLocalTranslation(anchor.x - text.getLineWidth() * fontScale, anchor.y + text.getHeight() * fontScale, anchor.z);
         }
     }
 

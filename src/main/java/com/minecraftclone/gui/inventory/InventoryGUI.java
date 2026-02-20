@@ -6,7 +6,6 @@ import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
 import com.minecraftclone.Main;
 import com.minecraftclone.gui.display.InventorySlot;
@@ -26,10 +25,7 @@ public class InventoryGUI {
     private UIHelper uiHelper;
 
     private Node guiNode;
-    private Node inventoryNode, inventoryItemsNode;
-
-    private Texture2D inventoryTexture;
-    private Picture inventory;
+    private Node inventoryNode;
 
     private List<InventorySlot> inventorySlots = new ArrayList<>();
 
@@ -40,6 +36,7 @@ public class InventoryGUI {
         this.inputManager = main.getInputManager();
 
         BitmapFont font = main.getguiFont();
+
         uiHelper = new UIHelper(asset, scale, font);
 
         //DOES: Create Variables for easier positioning of the HUD elements
@@ -49,21 +46,13 @@ public class InventoryGUI {
         int halfHeight = main.getViewPort().getCamera().getHeight() / 2;
 
         //DOES: Create Nodes for layering and attach them
-        inventoryItemsNode = new Node("inventoryItemsNode");
         inventoryNode = new Node("inventoryNode");
-
-        guiNode.attachChild(inventoryItemsNode);
-        inventoryItemsNode.attachChild(inventoryNode);
-
-        //DOES: Create Texture variables
-        inventoryTexture = uiHelper.loadGUITexture2d("container/inventory"); //256x256 (176x166) //Info: For some reason the inventory texture file is larger than it needs to be
+        guiNode.attachChild(inventoryNode);
 
         //DOES: Create the inventory and position it in the screens center
-        inventory = uiHelper.createPicture(inventoryTexture, "inventory");
+        Picture inventory = uiHelper.createPicture(uiHelper.loadGUITexture2d("container/inventory"), "inventory");
         inventory.setPosition(halfWidth - (inventory.getWidth() / 2) + 40 * scale, halfHeight - (inventory.getHeight() / 2) - 45 * scale);
         inventoryNode.attachChild(inventory);
-
-        setInventoryVisibility(true);
 
         //TODO: Clean up magic Numbers (maybe define as constants)
         //DOES: Create invisible Textures on top of the item slots in the inventory so they can be replaced by textures of different items
@@ -75,7 +64,7 @@ public class InventoryGUI {
                         (windowWidth - inventory.getWidth()) / 2 + scale * (48 + 18 * i0),
                         (windowHeight + inventory.getHeight()) / 2 - 203 * scale
                     );
-                    slot.attachTo(inventoryItemsNode);
+                    slot.attachTo(inventoryNode);
                     inventorySlots.add(slot);
                 } else {
                     InventorySlot slot = new InventorySlot(
@@ -83,7 +72,7 @@ public class InventoryGUI {
                         (windowWidth - inventory.getWidth()) / 2 + scale * (48 + 18 * i0),
                         (windowHeight + inventory.getHeight()) / 2 - scale * (127 + 18 * i)
                     );
-                    slot.attachTo(inventoryItemsNode);
+                    slot.attachTo(inventoryNode);
                     inventorySlots.add(slot);
                 }
             }
@@ -96,12 +85,12 @@ public class InventoryGUI {
      */
     public void setInventoryVisibility(boolean visible) {
         if (visible) {
-            inventoryItemsNode.setCullHint(Spatial.CullHint.Inherit);
+            inventoryNode.setCullHint(Spatial.CullHint.Inherit);
         } else {
-            inventoryItemsNode.setCullHint(Spatial.CullHint.Always);
+            inventoryNode.setCullHint(Spatial.CullHint.Always);
         }
         inputManager.setCursorVisible(visible);
-        flyByCamera.setEnabled(!visible); //Todo: nneds to be changed
+        flyByCamera.setEnabled(!visible); //Todo: needs to be changed
     }
 
     /**
