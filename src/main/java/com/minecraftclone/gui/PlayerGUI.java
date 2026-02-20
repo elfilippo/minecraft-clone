@@ -1,6 +1,8 @@
 package com.minecraftclone.gui;
 
 import com.minecraftclone.Main;
+import com.minecraftclone.gui.hud.HUD;
+import com.minecraftclone.gui.inventory.InventoryGUI;
 import com.minecraftclone.item.ItemInstance;
 import java.io.IOException;
 
@@ -31,7 +33,7 @@ public class PlayerGUI {
      */
     public void inventoryDisplayItem(int row, int column, ItemInstance item) {
         inventoryGUI.displayItem(row, column, item);
-        hud.updateHotbarDisplayItem(inventoryGUI.getInventoryList(), inventoryGUI.getInventoryTextList());
+        hud.updateHotbarDisplayItem(inventoryGUI.getInventorySlots());
     }
 
     /**

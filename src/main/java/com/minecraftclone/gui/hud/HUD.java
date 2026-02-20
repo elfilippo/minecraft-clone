@@ -1,17 +1,18 @@
-package com.minecraftclone.gui;
+package com.minecraftclone.gui.hud;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
-import com.jme3.font.BitmapText;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
 import com.minecraftclone.Main;
+import com.minecraftclone.gui.display.InventorySlot;
+import com.minecraftclone.gui.display.Slot;
 import com.minecraftclone.util.UIHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-class HUD {
+public class HUD {
 
     private AssetManager asset;
     private Picture hotbar, experienceBarEmpty, hotbarSelector, crosshair;
@@ -27,7 +28,7 @@ class HUD {
 
     private int selectedSlot;
 
-    HUD(Main main, int scale) {
+    public HUD(Main main, int scale) {
         Node guiNode = main.getGuiNode();
         BitmapFont font = main.getguiFont();
         this.asset = main.getAssetManager();
@@ -54,6 +55,7 @@ class HUD {
         Texture2D hotbarSelectorTexture = uiHelper.loadGUITexture2d("sprites/hud/hotbar_selection"); //24x23
         Texture2D crosshairTexture = uiHelper.loadGUITexture2d("sprites/hud/crosshair"); //15x15
         Texture2D experienceBarEmptyTexture = uiHelper.loadGUITexture2d("sprites/hud/experience_bar_background"); //182x5
+
         Texture2D heartContainerTexture = uiHelper.loadGUITexture2d("sprites/hud/heart/container"); //9x9
         Texture2D hungerContainerTexture = uiHelper.loadGUITexture2d("sprites/hud/food_empty"); //9x9
 
@@ -115,7 +117,7 @@ class HUD {
         //DOES: Creates empty textures and text on top of the Hotbar to display items placed there
         for (int i = 0; i < 9; i++) {
             Slot slot = new Slot(uiHelper, (halfWidth - (hotbar.getWidth()) / 2) + scale * (3 + 20 * i), 3 * scale);
-            slot.attach(hotbarNode);
+            slot.attachTo(hotbarNode);
             hotbarSlots.add(slot);
         }
     }
@@ -124,7 +126,7 @@ class HUD {
      * Changes the heart textures in order to display the players life. odd numbers make half hearts
      * @param life hearts that should be displayed in the HUD
      */
-    void setLife(int life) {
+    public void setLife(int life) {
         int fullHearts = life / 2;
         boolean hasHalfHeart = (life % 2 == 1);
 
@@ -145,7 +147,7 @@ class HUD {
      * Changes the hunger bars textures in order to display the players hunger. odd numbers make half hearts
      * @param huger hunger bars that should be displayed in the HUD
      */
-    void setHunger(int hunger) {
+    public void setHunger(int hunger) {
         //Does: Changes the hunger textures in order to display the players hunger odd numbers make half hunger bars
         int fullHunger = hunger / 2;
         boolean hasHalfHunger = (hunger % 2 == 1);
@@ -167,7 +169,7 @@ class HUD {
      * Changes the displayed selected slot
      * @param slot Specifies the slot that should appear selected
      */
-    void changeHotbarSelectedSlot(int slot) {
+    public void changeHotbarSelectedSlot(int slot) {
         //Does: Change the Hotbarslot based of the given int slot
         if (slot <= 9 && slot >= 1) {
             selectedSlot = slot;
@@ -186,7 +188,7 @@ class HUD {
      * @param invPic List of all Item Pictures in the inventory
      * @param invText List of all Item Texts in the inventory
      */
-    void updateHotbarDisplayItem(List<Picture> invPic, List<BitmapText> invText) {
+    public void updateHotbarDisplayItem(List<InventorySlot> slots) {
         //Info: The items displayed in the Hotbar are copied from those in the inventoryList, because the inventory also has a Hotbar
         //Does: Checks for differences between the inventory hotbar and real hotbar and if they are not the same displays the item in the inventory hotbar in the hotbar
         for (int i = 0; i < 9; i++) {
@@ -195,7 +197,7 @@ class HUD {
             //slot.setMaterial(invPic.get(i).getMaterial());
             //slot.setTexture(asset, TextureManager.getItemTexture("golden_apple"));
 
-            slot.setText(invText.get(i).getText());
+            slot.setText(slots.get(i).getText());
             //text.setLocalTranslation(anchor.x - text.getLineWidth() * fontScale, anchor.y + text.getHeight() * fontScale, anchor.z);
         }
     }

@@ -1,21 +1,22 @@
-package com.minecraftclone.gui;
+package com.minecraftclone.gui.inventory;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
-import com.jme3.font.BitmapText;
 import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
 import com.minecraftclone.Main;
+import com.minecraftclone.gui.display.InventorySlot;
+import com.minecraftclone.gui.display.Slot;
 import com.minecraftclone.item.ItemInstance;
 import com.minecraftclone.util.UIHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-class InventoryGUI {
+public class InventoryGUI {
 
     //TODO: Create Blockitems
     //IDEA: three textures that are transformed in a way to create an illusion of being 3d (need to be darkened to make them more 3d)
@@ -27,21 +28,16 @@ class InventoryGUI {
     private Node guiNode;
     private Node inventoryNode, inventoryItemsNode;
 
-    private Texture2D inventoryTexture, blankTexture;
+    private Texture2D inventoryTexture;
     private Picture inventory;
 
-    private float fontScale;
+    private List<InventorySlot> inventorySlots = new ArrayList<>();
 
-    private List<Picture> inventoryList = new ArrayList<>();
-    private List<BitmapText> inventoryTextList = new ArrayList<>();
-    private List<Vector3f> inventoryTextAnchorList = new ArrayList<>();
-
-    InventoryGUI(Main main, int scale) {
+    public InventoryGUI(Main main, int scale) {
         this.guiNode = main.getGuiNode();
         this.asset = main.getAssetManager();
         this.flyByCamera = main.getFlyByCamera();
         this.inputManager = main.getInputManager();
-        this.fontScale = scale / 4f;
 
         BitmapFont font = main.getguiFont();
         uiHelper = new UIHelper(asset, scale, font);
@@ -56,59 +52,39 @@ class InventoryGUI {
         inventoryItemsNode = new Node("inventoryItemsNode");
         inventoryNode = new Node("inventoryNode");
 
+        guiNode.attachChild(inventoryItemsNode);
         inventoryItemsNode.attachChild(inventoryNode);
 
         //DOES: Create Texture variables
         inventoryTexture = uiHelper.loadGUITexture2d("container/inventory"); //256x256 (176x166) //Info: For some reason the inventory texture file is larger than it needs to be
-        blankTexture = uiHelper.loadGUITexture2d("blank"); //1x1
 
         //DOES: Create the inventory and position it in the screens center
         inventory = uiHelper.createPicture(inventoryTexture, "inventory");
         inventory.setPosition(halfWidth - (inventory.getWidth() / 2) + 40 * scale, halfHeight - (inventory.getHeight() / 2) - 45 * scale);
         inventoryNode.attachChild(inventory);
 
+        setInventoryVisibility(true);
+
         //TODO: Clean up magic Numbers (maybe define as constants)
         //DOES: Create invisible Textures on top of the item slots in the inventory so they can be replaced by textures of different items
         for (int i = 0; i < 4; i++) {
             for (int i0 = 0; i0 < 9; i0++) {
                 if (i == 0) {
-                    Picture slot = uiHelper.createPicture(blankTexture, "blank", 16 * scale); //Usage: Customscale needs to be multiplied by scale otherwise it breaks scalability
-                    slot.setPosition(
+                    InventorySlot slot = new InventorySlot(
+                        uiHelper,
                         (windowWidth - inventory.getWidth()) / 2 + scale * (48 + 18 * i0),
                         (windowHeight + inventory.getHeight()) / 2 - 203 * scale
                     );
-                    inventoryItemsNode.attachChild(slot);
-                    inventoryList.add(slot);
-
-                    BitmapText text = new BitmapText(font);
-                    text.setLocalScale(fontScale);
-                    text.setLocalTranslation(
-                        (windowWidth - inventory.getWidth()) / 2 + scale * (65 + 18 * i0),
-                        (windowHeight + inventory.getHeight()) / 2 - 204 * scale,
-                        0
-                    );
-                    inventoryItemsNode.attachChild(text);
-                    inventoryTextList.add(text);
-                    inventoryTextAnchorList.add(text.getLocalTranslation().clone());
+                    slot.attachTo(inventoryItemsNode);
+                    inventorySlots.add(slot);
                 } else {
-                    Picture slot = uiHelper.createPicture(blankTexture, "blank", 16 * scale); //Usage: Customscale needs to be multiplied by scale otherwise it breaks scalability
-                    slot.setPosition(
+                    InventorySlot slot = new InventorySlot(
+                        uiHelper,
                         (windowWidth - inventory.getWidth()) / 2 + scale * (48 + 18 * i0),
                         (windowHeight + inventory.getHeight()) / 2 - scale * (127 + 18 * i)
                     );
-                    inventoryItemsNode.attachChild(slot);
-                    inventoryList.add(slot);
-
-                    BitmapText text = new BitmapText(font);
-                    text.setLocalScale(fontScale);
-                    text.setLocalTranslation(
-                        (windowWidth - inventory.getWidth()) / 2 + scale * (65 + 18 * i0),
-                        (windowHeight + inventory.getHeight()) / 2 - scale * (128 + 18 * i),
-                        0
-                    );
-                    inventoryItemsNode.attachChild(text);
-                    inventoryTextList.add(text);
-                    inventoryTextAnchorList.add(text.getLocalTranslation().clone());
+                    slot.attachTo(inventoryItemsNode);
+                    inventorySlots.add(slot);
                 }
             }
         }
@@ -118,11 +94,11 @@ class InventoryGUI {
      * Changes the visibility of the Inventory. Also makes the Cursor moveable
      * @param visible Specifies the visibility to be either true or false
      */
-    void setInventoryVisibility(boolean visible) {
+    public void setInventoryVisibility(boolean visible) {
         if (visible) {
-            guiNode.attachChild(inventoryItemsNode);
+            inventoryItemsNode.setCullHint(Spatial.CullHint.Inherit);
         } else {
-            guiNode.detachChild(inventoryItemsNode);
+            inventoryItemsNode.setCullHint(Spatial.CullHint.Always);
         }
         inputManager.setCursorVisible(visible);
         flyByCamera.setEnabled(!visible); //Todo: nneds to be changed
@@ -134,29 +110,22 @@ class InventoryGUI {
      * @param column Specifies the column where the item should be displayed
      * @param item SPecifies the item that should be displayed
      */
-    void displayItem(int row, int column, ItemInstance item) {
+    public void displayItem(int row, int column, ItemInstance item) {
         if (row >= 1 && row <= 4) {
             if (column >= 1 && column <= 9) {
-                Picture slot = inventoryList.get(column - 1 + 9 * (row - 1));
-                BitmapText text = inventoryTextList.get(column - 1 + 9 * (row - 1));
-                Vector3f anchor = inventoryTextAnchorList.get(column - 1 + 9 * (row - 1));
+                Slot slot = inventorySlots.get(column - 1 + 9 * (row - 1));
 
                 if (item.getStackSize() > 1) {
-                    text.setText(String.valueOf(item.getStackSize()));
+                    slot.setText(String.valueOf(item.getStackSize()));
                 } else {
-                    text.setText("");
+                    slot.setText("");
                 }
-                text.setLocalTranslation(anchor.x - text.getLineWidth() * fontScale, anchor.y + text.getHeight() * fontScale, anchor.z);
-                slot.setTexture(asset, uiHelper.loadItemTexture2d(item.getId()), true);
+                slot.setTexture(uiHelper.loadItemTexture2d(item.getId()));
             }
         }
     }
 
-    List<Picture> getInventoryList() {
-        return inventoryList;
-    }
-
-    List<BitmapText> getInventoryTextList() {
-        return inventoryTextList;
+    public List<InventorySlot> getInventorySlots() {
+        return inventorySlots;
     }
 }
