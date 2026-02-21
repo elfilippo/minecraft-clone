@@ -9,19 +9,29 @@ import com.minecraftclone.player.input.ActionInput;
 
 public final class BlockInteractionSystem {
 
+    //IS: default max travel distance of ray
     private static final float DEFAULT_REACH = 6.0f;
-    private static final float RAY_STEP = 0.02f; // Ray step size
+
+    //IS: how often ray checks for block
+    private static final float RAY_STEP = 0.02f;
 
     private final World world;
     private final Camera camera;
     private final ActionInput input;
 
     private Block selectedBlock;
+
+    //INFO: to allow for modifying reach while ingame
     private float reachDistance = DEFAULT_REACH;
+
     private boolean allowBreaking = true;
     private boolean allowPlacing = true;
+
+    //INFO: to distinguish between holding and tapping place speeds
     private int ticksSinceBreak;
     private int ticksSincePlace;
+
+    //INFO: holding place and break delays in ticks
     private int placeDelay = 8;
     private int breakDelay = 8;
 
@@ -31,6 +41,9 @@ public final class BlockInteractionSystem {
         this.input = input;
     }
 
+    /**
+     * checks for block breaking and placing
+     */
     public void tick() {
         ticksSinceBreak += 1;
         ticksSincePlace += 1;
@@ -64,41 +77,52 @@ public final class BlockInteractionSystem {
         this.allowPlacing = value;
     }
 
-    // =========================
-    // BLOCK INTERACTION
-    // =========================
-
+    /**
+     * tries to break clostest block player is looking at
+     */
     private void tryBreak() {
         RaycastResult hit = raycastBlock();
+
+        //CASE: block not hit or unloaded
         if (hit == null) return;
         if (!world.isBlockLoaded(hit.x, hit.y, hit.z)) return;
-        Block b = world.getBlock(hit.x, hit.y, hit.z);
-        if (b == null || !b.isBreakable()) return;
+
+        Block block = world.getBlock(hit.x, hit.y, hit.z);
+
+        //CASE: block not there or not breakable
+        if (block == null || !block.isBreakable()) return;
 
         world.setBlock(hit.x, hit.y, hit.z, null);
         ticksSinceBreak = 0;
     }
 
+    /**
+     * tries to place block where player is looking
+     */
     private void tryPlace() {
         if (selectedBlock == null) return;
 
         RaycastResult hit = raycastBlock();
-        if (hit == null) return; // Must hit a block to place against
 
-        int px = hit.x + hit.nx;
-        int py = hit.y + hit.ny;
-        int pz = hit.z + hit.nz;
+        //CASE: no block hit
+        if (hit == null) return;
 
-        // Space must be empty
-        if (world.getBlock(px, py, pz) != null) return;
+        //DOES: get place position
+        int placeX = hit.x + hit.nx;
+        int placeY = hit.y + hit.ny;
+        int placeZ = hit.z + hit.nz;
 
-        // Block-specific placement rules
-        if (!selectedBlock.canBePlacedAt(world, px, py, pz)) return;
+        //CASE: block already present
+        if (world.getBlock(placeX, placeY, placeZ) != null) return;
 
-        // Player collision check
-        if (collidesWithPlayer(px, py, pz)) return;
+        //CASE: block can't be placed
+        //INFO: block-specific placement rules
+        if (!selectedBlock.canBePlacedAt(world, placeX, placeY, placeZ)) return;
 
-        world.setBlock(px, py, pz, selectedBlock);
+        //CASE: if block would collide with player
+        if (collidesWithPlayer(placeX, placeY, placeZ)) return;
+
+        world.setBlock(placeX, placeY, placeZ, selectedBlock);
         ticksSincePlace = 0;
     }
 
@@ -174,6 +198,7 @@ public final class BlockInteractionSystem {
         float pHalfWidth = PlayerCharacter.WIDTH / 2f;
         float pHalfHeight = PlayerCharacter.HEIGHT / 2f;
 
+        //DOES: create coordinates of player bounding box
         float pMinX = pPos.x - pHalfWidth;
         float pMaxX = pPos.x + pHalfWidth;
         float pMinY = pPos.y - pHalfHeight;
@@ -181,18 +206,33 @@ public final class BlockInteractionSystem {
         float pMinZ = pPos.z - pHalfWidth;
         float pMaxZ = pPos.z + pHalfWidth;
 
+        //DOES: check if any part of block overlaps bounding box
+        //CASE: true when overlaps
         boolean overlapX = pMinX < (blockX + 1) && pMaxX > blockX;
         boolean overlapY = pMinY < (blockY + 1) && pMaxY > blockY;
         boolean overlapZ = pMinZ < (blockZ + 1) && pMaxZ > blockZ;
 
+        //CASE: true when all are true
         return overlapX && overlapY && overlapZ;
     }
 
+    /**
+     * coordinates of raycast as immutable class
+     */
     private static final class RaycastResult {
 
         final int x, y, z;
         final int nx, ny, nz;
 
+        /**
+         * stores coordinates of raycast immutably
+         * @param x block x
+         * @param y block y
+         * @param z block z
+         * @param nx normal x
+         * @param ny normal y
+         * @param nz normal z
+         */
         RaycastResult(int x, int y, int z, int nx, int ny, int nz) {
             this.x = x;
             this.y = y;
