@@ -22,6 +22,7 @@ public class PlayerCharacter {
     private final float speed = 0.15f;
     private final boolean debugEnabled = false;
     private final Vector3f walkDir = new Vector3f();
+    private Vector3f previousPosition, currentPosition;
     private final ActionInput input;
     private final Camera cam;
     private int life = 13;
@@ -33,6 +34,7 @@ public class PlayerCharacter {
         this.input = input;
         cam = app.getCamera();
 
+        //DOES: set debug mode
         bulletAppState.setDebugEnabled(debugEnabled);
 
         var shape = new BoxCollisionShape(new Vector3f(WIDTH / 2f, HEIGHT / 2f, WIDTH / 2f));
@@ -46,11 +48,19 @@ public class PlayerCharacter {
         bulletAppState.getPhysicsSpace().add(player);
 
         player.setPhysicsLocation(new Vector3f(5, 20, 2));
+
+        previousPosition = player.getPhysicsLocation();
+        currentPosition = player.getPhysicsLocation();
+
         this.playerControl = player;
         this.playerNode = playerNode;
     }
 
     public void tick() {
+        //DOES: set previous and current position for camera interpolation
+        previousPosition.set(currentPosition);
+        currentPosition.set(playerControl.getPhysicsLocation());
+
         //DOES: walk movement
         //NOTE: some kind of interpolation to be added for smoother movement
         Vector3f forward = cam.getDirection().clone();
@@ -115,5 +125,16 @@ public class PlayerCharacter {
 
     public boolean getinventoryVisible() {
         return inventoryVisible;
+    }
+
+    /**
+     * interpolates between previous and current position
+     * @param alpha how far into the tick we are
+     * @return
+     */
+    public Vector3f getInterpolatedPosition(float alpha) {
+        //DOES: find position at distance fraction alpha between previous and current pos
+        //NOTE: ex. halfway between them at alpha 0.5
+        return new Vector3f().interpolateLocal(previousPosition, currentPosition, alpha);
     }
 }

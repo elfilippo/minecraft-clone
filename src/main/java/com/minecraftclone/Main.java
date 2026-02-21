@@ -4,6 +4,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
+import com.jme3.math.Vector3f;
 import com.jme3.system.AppSettings;
 import com.minecraftclone.block.Blocks;
 import com.minecraftclone.player.PlayerCharacter;
@@ -28,7 +29,7 @@ public class Main extends SimpleApplication {
 
     //DOES: settings
     public static AppSettings settings;
-    public static boolean fullscreen = false;
+    public static boolean fullscreen = true;
     public static int screen_width = 1920;
     public static int screen_height = 1080;
     private boolean initialized = false;
@@ -75,6 +76,7 @@ public class Main extends SimpleApplication {
         //NOTE: physics object is bulletAppState
         var bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
+        bulletAppState.getPhysicsSpace().setAccuracy(1f / TICKS_PER_SECOND);
 
         //DOES: disable default & set up custom camera
         flyCam.setEnabled(false);
@@ -122,9 +124,6 @@ public class Main extends SimpleApplication {
         //INFO: update() methods are bound by fps, tick() by tps
         tps();
 
-        //DOES: set the camera to the eye height of player's pos
-        cam.setLocation(playerCharacter.getPlayerControl().getPhysicsLocation().add(0, PlayerCharacter.EYE_OFFSET, 0));
-
         //DOES: queue & process missing chunks
         world.update();
 
@@ -134,6 +133,12 @@ public class Main extends SimpleApplication {
             tick();
             timeAccumulator -= tickTime;
         }
+
+        //DOES: set the camera to the eye height of player's interpolated pos
+        //INFO: player pos is interpolated for smoother movement, but tick-dependent coords
+        float alpha = timeAccumulator / tickTime;
+        Vector3f pInterpolatedPos = playerCharacter.getInterpolatedPosition(alpha);
+        cam.setLocation(pInterpolatedPos.add(0, PlayerCharacter.EYE_OFFSET, 0));
     }
 
     private void tick() {
