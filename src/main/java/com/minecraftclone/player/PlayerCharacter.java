@@ -28,6 +28,8 @@ public class PlayerCharacter {
     private int hunger = 13;
     private int hotbarSlot = 1;
     private boolean inventoryVisible = false;
+    private boolean console = false;
+    private char consoleInput;
 
     public PlayerCharacter(BulletAppState bulletAppState, ActionInput input, SimpleApplication app) {
         this.input = input;
@@ -77,6 +79,48 @@ public class PlayerCharacter {
         if (input.isTapped(Action.HOTBAR_9)) hotbarSlot = 9;
 
         if (input.isTapped(Action.TOGGLE_INVENTORY)) inventoryVisible = !inventoryVisible;
+
+        if (input.isTapped(Action.T)) console = true;
+
+        if (console) {
+            if (input.isTapped(Action.ONE)) consoleInput = '1';
+            if (input.isTapped(Action.TWO)) consoleInput = '2';
+            if (input.isTapped(Action.THREE)) consoleInput = '3';
+            if (input.isTapped(Action.FOUR)) consoleInput = '4';
+            if (input.isTapped(Action.FIVE)) consoleInput = '5';
+            if (input.isTapped(Action.SIX)) consoleInput = '6';
+            if (input.isTapped(Action.SEVEN)) consoleInput = '7';
+            if (input.isTapped(Action.EIGHT)) consoleInput = '8';
+            if (input.isTapped(Action.NINE)) consoleInput = '9';
+            if (input.isTapped(Action.ZERO)) consoleInput = '0';
+
+            if (input.isTapped(Action.A)) consoleInput = 'a';
+            if (input.isTapped(Action.B)) consoleInput = 'b';
+            if (input.isTapped(Action.C)) consoleInput = 'c';
+            if (input.isTapped(Action.D)) consoleInput = 'd';
+            if (input.isTapped(Action.E)) consoleInput = 'e';
+            if (input.isTapped(Action.F)) consoleInput = 'f';
+            if (input.isTapped(Action.G)) consoleInput = 'g';
+            if (input.isTapped(Action.H)) consoleInput = 'h';
+            if (input.isTapped(Action.I)) consoleInput = 'i';
+            if (input.isTapped(Action.J)) consoleInput = 'j';
+            if (input.isTapped(Action.K)) consoleInput = 'k';
+            if (input.isTapped(Action.M)) consoleInput = 'm';
+            if (input.isTapped(Action.N)) consoleInput = 'n';
+            if (input.isTapped(Action.L)) consoleInput = 'l';
+            if (input.isTapped(Action.O)) consoleInput = 'o';
+            if (input.isTapped(Action.P)) consoleInput = 'p';
+            if (input.isTapped(Action.Q)) consoleInput = 'q';
+            if (input.isTapped(Action.R)) consoleInput = 'r';
+            if (input.isTapped(Action.S)) consoleInput = 's';
+            if (input.isTapped(Action.T)) consoleInput = 't';
+            if (input.isTapped(Action.U)) consoleInput = 'u';
+            if (input.isTapped(Action.V)) consoleInput = 'v';
+            if (input.isTapped(Action.W)) consoleInput = 'w';
+            if (input.isTapped(Action.X)) consoleInput = 'x';
+            if (input.isTapped(Action.Y)) consoleInput = 'y';
+            if (input.isTapped(Action.Z)) consoleInput = 'z';
+        }
     }
 
     public Node getNode() {
@@ -105,5 +149,9 @@ public class PlayerCharacter {
 
     public boolean getinventoryVisible() {
         return inventoryVisible;
+    }
+
+    public char getConsoleInput() {
+        return consoleInput;
     }
 }

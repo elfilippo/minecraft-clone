@@ -230,6 +230,16 @@ public class PlayerGUI {
         game.getFlyByCamera().setEnabled(!visibility);
     }
 
+    public void openConsole(boolean open) {
+        if (open) {
+            BitmapText console = new BitmapText(font);
+            String consoleText = "";
+            console.setLocalTranslation(windowWidth / 2, windowHeight / 2, 0);
+            console.setText(consoleText);
+            guiNode.attachChild(console);
+        }
+    }
+
     public void setLife(int life) {
         //Does: Changes the heart textures in order to display the players life odd numbers make half hearts
         int fullHearts = life / 2;

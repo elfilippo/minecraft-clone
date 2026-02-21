@@ -20,6 +20,44 @@ public class KeyMapping {
         this.actionListener = actionListener;
         this.analogListener = analogListener;
 
+        bindKeyAction("A", KeyInput.KEY_A);
+        bindKeyAction("B", KeyInput.KEY_B);
+        bindKeyAction("C", KeyInput.KEY_C);
+        bindKeyAction("D", KeyInput.KEY_D);
+        bindKeyAction("E", KeyInput.KEY_E);
+        bindKeyAction("F", KeyInput.KEY_F);
+        bindKeyAction("G", KeyInput.KEY_G);
+        bindKeyAction("H", KeyInput.KEY_H);
+        bindKeyAction("I", KeyInput.KEY_I);
+        bindKeyAction("J", KeyInput.KEY_J);
+        bindKeyAction("K", KeyInput.KEY_K);
+        bindKeyAction("L", KeyInput.KEY_L);
+        bindKeyAction("M", KeyInput.KEY_M);
+        bindKeyAction("N", KeyInput.KEY_N);
+        bindKeyAction("O", KeyInput.KEY_O);
+        bindKeyAction("P", KeyInput.KEY_P);
+        bindKeyAction("Q", KeyInput.KEY_Q);
+        bindKeyAction("R", KeyInput.KEY_R);
+        bindKeyAction("S", KeyInput.KEY_S);
+        bindKeyAction("T", KeyInput.KEY_T);
+        bindKeyAction("U", KeyInput.KEY_U);
+        bindKeyAction("V", KeyInput.KEY_V);
+        bindKeyAction("W", KeyInput.KEY_W);
+        bindKeyAction("X", KeyInput.KEY_X);
+        bindKeyAction("Y", KeyInput.KEY_Y);
+        bindKeyAction("Z", KeyInput.KEY_Z);
+
+        bindKeyAction("ONE", KeyInput.KEY_1);
+        bindKeyAction("TWO", KeyInput.KEY_2);
+        bindKeyAction("THREE", KeyInput.KEY_3);
+        bindKeyAction("FOUR", KeyInput.KEY_4);
+        bindKeyAction("FIVE", KeyInput.KEY_5);
+        bindKeyAction("SIX", KeyInput.KEY_6);
+        bindKeyAction("SEVEN", KeyInput.KEY_7);
+        bindKeyAction("EIGHT", KeyInput.KEY_8);
+        bindKeyAction("NINE", KeyInput.KEY_9);
+        bindKeyAction("ZERO", KeyInput.KEY_0);
+
         bindKeyAction("FORWARD", KeyInput.KEY_W);
         bindKeyAction("BACKWARD", KeyInput.KEY_S);
         bindKeyAction("LEFT", KeyInput.KEY_A);

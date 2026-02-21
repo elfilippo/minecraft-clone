@@ -27,6 +27,7 @@ public class RenderEngine {
     }
 
     public void guiUpdate() {
+        gui.openConsole(player.getConsole());
         gui.setLife(player.getLife());
         gui.setHunger(player.getHunger());
         gui.changeHotbarSlot(player.getHotbarSlot());
