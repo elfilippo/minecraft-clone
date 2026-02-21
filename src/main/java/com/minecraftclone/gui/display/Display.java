@@ -11,30 +11,58 @@ public class Display {
     Picture display;
     UIHelper helper;
 
-    protected Display(UIHelper helper, float x, float y) {
+    public Display(UIHelper helper, Texture2D texture, int x, int y) {
         this.helper = helper;
 
+        display = helper.createPicture(texture, "display");
+        display.setPosition(x, y);
+    }
+
+    public Display(UIHelper helper, Texture2D texture) {
+        this.helper = helper;
+
+        display = helper.createPicture(texture, "display");
+    }
+
+    public Display(UIHelper helper, int x, int y) {
+        this.helper = helper;
         display = helper.createPicture(helper.loadItemTexture2d("golden_apple"), "display");
         display.setPosition(x, y);
     }
 
-    protected void setTexture(Texture2D texture) {
+    public void setTexture(Texture2D texture) {
         display.setTexture(helper.getAssetManager(), texture, true);
     }
 
-    protected void attachTo(Node node) {
+    public Texture2D getTexture() {
+        return (Texture2D) display.getMaterial().getTextureParam("Texture").getTextureValue();
+    }
+
+    public void attachTo(Node node) {
         node.attachChild(display);
     }
 
-    protected void detachFrom(Node node) {
+    public void detachFrom(Node node) {
         node.detachChild(display);
     }
 
-    protected void setVisible(boolean visible) {
+    public void setVisible(boolean visible) {
         if (visible) {
             display.setCullHint(Spatial.CullHint.Inherit);
         } else {
             display.setCullHint(Spatial.CullHint.Always);
         }
+    }
+
+    public int getWidth() {
+        return (int) display.getWidth();
+    }
+
+    public int getHeight() {
+        return (int) display.getHeight();
+    }
+
+    public void setPosition(int x, int y) {
+        display.setPosition(x, y);
     }
 }

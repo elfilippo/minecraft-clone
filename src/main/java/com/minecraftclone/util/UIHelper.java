@@ -10,12 +10,14 @@ import com.minecraftclone.item.ItemRegistry;
 public class UIHelper {
 
     AssetManager assetManager;
-    int scale;
+    int scale, width, height;
     BitmapFont font;
 
-    public UIHelper(AssetManager asset, int scale, BitmapFont font) {
+    public UIHelper(AssetManager asset, int scale, BitmapFont font, int width, int height) {
         this.assetManager = asset;
         this.scale = scale;
+        this.width = width;
+        this.height = height;
         this.font = font;
     }
 
@@ -64,5 +66,13 @@ public class UIHelper {
 
     public BitmapFont getFont() {
         return font;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 }

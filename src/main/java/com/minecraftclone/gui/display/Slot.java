@@ -12,7 +12,7 @@ public class Slot extends Display {
     Vector3f anchor;
     BitmapText text;
 
-    public Slot(UIHelper helper, float x, float y) {
+    public Slot(UIHelper helper, int x, int y) {
         super(helper, x, y);
         text = new BitmapText(helper.getFont());
         text.setLocalScale(helper.getFontScale());
@@ -20,7 +20,7 @@ public class Slot extends Display {
 
         anchor = text.getLocalTranslation().clone();
         anchor.x = anchor.x + 16 * helper.getScale(); //FIXME: Magic number
-        anchor.y = anchor.y + this.text.getHeight() * helper.getFontScale() - helper.getScale();
+        anchor.y = anchor.y + this.text.getHeight() * helper.getFontScale() - helper.getScale() - 1; //Fixme: -1?
     }
 
     public void setTexture(Texture2D texture) {

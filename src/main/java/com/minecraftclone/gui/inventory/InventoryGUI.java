@@ -37,7 +37,7 @@ public class InventoryGUI {
 
         BitmapFont font = main.getguiFont();
 
-        uiHelper = new UIHelper(asset, scale, font);
+        uiHelper = new UIHelper(asset, scale, font, 1920, 1080); //Fixme: magic numbers
 
         //DOES: Create Variables for easier positioning of the HUD elements
         int windowWidth = main.getCamera().getWidth();
@@ -61,16 +61,16 @@ public class InventoryGUI {
                 if (i == 0) {
                     InventorySlot slot = new InventorySlot(
                         uiHelper,
-                        (windowWidth - inventory.getWidth()) / 2 + scale * (48 + 18 * i0),
-                        (windowHeight + inventory.getHeight()) / 2 - 203 * scale
+                        (int) ((windowWidth - inventory.getWidth()) / 2 + scale * (48 + 18 * i0)),
+                        (int) ((windowHeight + inventory.getHeight()) / 2 - 203 * scale)
                     );
                     slot.attachTo(inventoryNode);
                     inventorySlots.add(slot);
                 } else {
                     InventorySlot slot = new InventorySlot(
                         uiHelper,
-                        (windowWidth - inventory.getWidth()) / 2 + scale * (48 + 18 * i0),
-                        (windowHeight + inventory.getHeight()) / 2 - scale * (127 + 18 * i)
+                        (int) ((windowWidth - inventory.getWidth()) / 2 + scale * (48 + 18 * i0)),
+                        (int) ((windowHeight + inventory.getHeight()) / 2 - scale * (127 + 18 * i))
                     );
                     slot.attachTo(inventoryNode);
                     inventorySlots.add(slot);

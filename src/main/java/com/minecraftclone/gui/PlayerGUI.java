@@ -56,8 +56,8 @@ public class PlayerGUI {
      * Changes the Position of the Hotbar-Selector
      * @param slot Slot where the Hotbar-Selector is displayed
      */
-    public void changeHotbarSelectedSlot(int slot) {
-        hud.changeHotbarSelectedSlot(slot);
+    public void setHotbarSelectedSlot(int slot) {
+        hud.setHotbarSelectedSlot(slot);
     }
 
     /**

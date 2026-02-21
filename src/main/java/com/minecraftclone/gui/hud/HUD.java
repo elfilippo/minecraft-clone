@@ -15,17 +15,16 @@ import java.util.List;
 public class HUD {
 
     private AssetManager asset;
-    private Picture hotbar, experienceBarEmpty, hotbarSelector, crosshair;
-    private Node hotbarNode, containerNode, hungerNode, heartNode;
+    private Picture experienceBarEmpty, crosshair;
+    private Node hudNode, statsNode;
 
     private int scale, halfWidth, halfHeight;
 
-    private List<Picture> hearts = new ArrayList<>(),
-        hungerBars = new ArrayList<>();
+    private HeartsDisplay heartsDisplay;
+    private HungerDisplay hungerDisplay;
+    private Hotbar hotbar;
+
     private List<Slot> hotbarSlots = new ArrayList<>();
-
-    private Texture2D fullHeartTexture, halfHeartTexture, fullHungerTexture, halfHungerTexture, blankTexture;
-
     private int selectedSlot;
 
     public HUD(Main main, int scale) {
@@ -35,89 +34,52 @@ public class HUD {
         this.scale = scale;
 
         halfWidth = main.getCamera().getWidth() / 2;
+        System.out.println(halfWidth);
         halfHeight = main.getCamera().getHeight() / 2;
 
-        UIHelper uiHelper = new UIHelper(asset, scale, font);
+        UIHelper uiHelper = new UIHelper(asset, scale, font, main.getCamera().getWidth(), main.getCamera().getHeight());
 
         //DOES: Create Nodes for layering and attach them
-        hotbarNode = new Node("hotbarNode");
-        containerNode = new Node("containerNode");
-        hungerNode = new Node("hungerNode");
-        heartNode = new Node("heartNode");
+        hudNode = new Node("hudNode");
+        statsNode = new Node("statsNode");
 
-        guiNode.attachChild(hotbarNode);
-        hotbarNode.attachChild(containerNode);
-        hotbarNode.attachChild(hungerNode);
-        hotbarNode.attachChild(heartNode);
+        guiNode.attachChild(hudNode);
+        hudNode.attachChild(statsNode);
 
         //DOES: Create Texture variables
-        Texture2D hotbarTexture = uiHelper.loadGUITexture2d("sprites/hud/hotbar"); //182x22
-        Texture2D hotbarSelectorTexture = uiHelper.loadGUITexture2d("sprites/hud/hotbar_selection"); //24x23
         Texture2D crosshairTexture = uiHelper.loadGUITexture2d("sprites/hud/crosshair"); //15x15
         Texture2D experienceBarEmptyTexture = uiHelper.loadGUITexture2d("sprites/hud/experience_bar_background"); //182x5
 
-        Texture2D heartContainerTexture = uiHelper.loadGUITexture2d("sprites/hud/heart/container"); //9x9
-        Texture2D hungerContainerTexture = uiHelper.loadGUITexture2d("sprites/hud/food_empty"); //9x9
-
-        fullHeartTexture = uiHelper.loadGUITexture2d("sprites/hud/heart/full"); //9x9
-        halfHeartTexture = uiHelper.loadGUITexture2d("sprites/hud/heart/half"); //9x9
-        fullHungerTexture = uiHelper.loadGUITexture2d("sprites/hud/food_full"); //9x9
-        halfHungerTexture = uiHelper.loadGUITexture2d("sprites/hud/food_half"); //9x9
-        blankTexture = uiHelper.loadGUITexture2d("blank"); //1x1
+        hotbar = new Hotbar(uiHelper, hudNode);
+        hotbar.getHotbar().setPosition(halfWidth - (hotbar.getHotbar().getWidth() / 2), 0);
 
         //DOES: Create Pictures to display in the GUI, positions them and attaches them to nodes
-        hotbar = uiHelper.createPicture(hotbarTexture, "hotbar");
-        hotbarSelector = uiHelper.createPicture(hotbarSelectorTexture, "hotbarSelector");
         experienceBarEmpty = uiHelper.createPicture(experienceBarEmptyTexture, "experienceBarEmpty");
         crosshair = uiHelper.createPicture(crosshairTexture, "crosshair");
 
-        hotbar.setPosition(halfWidth - (hotbar.getWidth() / 2), 0);
-        hotbarSelector.setPosition(halfWidth - ((hotbarSelector.getWidth() / 2)), 0);
-        experienceBarEmpty.setPosition(halfWidth - ((experienceBarEmpty.getWidth() / 2)), hotbar.getHeight() + scale * 2);
+        experienceBarEmpty.setPosition(halfWidth - ((experienceBarEmpty.getWidth() / 2)), hotbar.getHotbar().getHeight() + scale * 2);
         crosshair.setPosition(halfWidth - ((crosshair.getWidth() / 2)), halfHeight - ((crosshair.getHeight() / 2)));
 
-        hotbarNode.attachChild(hotbar);
-        hotbarNode.attachChild(hotbarSelector);
-        hotbarNode.attachChild(experienceBarEmpty);
-        hotbarNode.attachChild(crosshair);
+        hudNode.attachChild(experienceBarEmpty);
+        hudNode.attachChild(crosshair);
 
-        //DOES: Creates Heart containers and empty textures on top of them to be replaced by heart textures to display the players life
-        for (int i = 0; i < 10; i++) {
-            Picture heartContainer = uiHelper.createPicture(heartContainerTexture, "heartContainer");
-            heartContainer.setPosition(
-                halfWidth - ((hotbar.getWidth() / 2)) + 8 * scale * i,
-                experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHeight()
-            );
-            containerNode.attachChild(heartContainer);
-
-            Picture hungerContainer = uiHelper.createPicture(hungerContainerTexture, "hungerContainer");
-            hungerContainer.setPosition(
-                halfWidth + 10 * scale + 8 * scale * i,
-                experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHeight()
-            );
-            containerNode.attachChild(hungerContainer);
-
-            Picture heart = uiHelper.createPicture(fullHeartTexture, "fullHeart");
-            heart.setPosition(
-                halfWidth - ((hotbar.getWidth() / 2)) + 8 * scale * i,
-                experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHeight()
-            );
-            hearts.add(heart);
-            heartNode.attachChild(heart);
-
-            Picture hunger = uiHelper.createPicture(fullHungerTexture, "hunger");
-            hunger.setPosition(
-                halfWidth + hotbar.getWidth() / 2 - 8 * scale * i - 9 * scale,
-                experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHeight()
-            );
-            hungerBars.add(hunger);
-            hungerNode.attachChild(hunger);
-        }
+        heartsDisplay = new HeartsDisplay(
+            uiHelper,
+            (int) (halfWidth - (hotbar.getHotbar().getWidth() / 2)),
+            (int) (experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHotbar().getHeight()),
+            statsNode
+        );
+        hungerDisplay = new HungerDisplay(
+            uiHelper,
+            (int) (halfWidth + hotbar.getHotbar().getWidth() / 2 - 9 * scale),
+            (int) (experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHotbar().getHeight()),
+            statsNode
+        );
 
         //DOES: Creates empty textures and text on top of the Hotbar to display items placed there
         for (int i = 0; i < 9; i++) {
-            Slot slot = new Slot(uiHelper, (halfWidth - (hotbar.getWidth()) / 2) + scale * (3 + 20 * i), 3 * scale);
-            slot.attachTo(hotbarNode);
+            Slot slot = new Slot(uiHelper, (halfWidth - (hotbar.getHotbar().getWidth()) / 2) + scale * (3 + 20 * i), 3 * scale);
+            slot.attachTo(hudNode);
             hotbarSlots.add(slot);
         }
     }
@@ -127,20 +89,7 @@ public class HUD {
      * @param life hearts that should be displayed in the HUD
      */
     public void setLife(int life) {
-        int fullHearts = life / 2;
-        boolean hasHalfHeart = (life % 2 == 1);
-
-        for (int i = 0; i < hearts.size(); i++) {
-            Picture heart = hearts.get(i);
-
-            if (i < fullHearts) {
-                heart.setTexture(asset, fullHeartTexture, true);
-            } else if (i == fullHearts && hasHalfHeart) {
-                heart.setTexture(asset, halfHeartTexture, true);
-            } else {
-                heart.setTexture(asset, blankTexture, true);
-            }
-        }
+        heartsDisplay.setLife(life);
     }
 
     /**
@@ -148,39 +97,7 @@ public class HUD {
      * @param huger hunger bars that should be displayed in the HUD
      */
     public void setHunger(int hunger) {
-        //Does: Changes the hunger textures in order to display the players hunger odd numbers make half hunger bars
-        int fullHunger = hunger / 2;
-        boolean hasHalfHunger = (hunger % 2 == 1);
-
-        for (int i = 0; i < hungerBars.size(); i++) {
-            Picture hungerBar = hungerBars.get(i);
-
-            if (i < fullHunger) {
-                hungerBar.setTexture(asset, fullHungerTexture, true);
-            } else if (i == fullHunger && hasHalfHunger) {
-                hungerBar.setTexture(asset, halfHungerTexture, true);
-            } else {
-                hungerBar.setTexture(asset, blankTexture, true);
-            }
-        }
-    }
-
-    /**
-     * Changes the displayed selected slot
-     * @param slot Specifies the slot that should appear selected
-     */
-    public void changeHotbarSelectedSlot(int slot) {
-        //Does: Change the Hotbarslot based of the given int slot
-        if (slot <= 9 && slot >= 1) {
-            selectedSlot = slot;
-            hotbarSelector.setPosition(
-                halfWidth -
-                    ((hotbar.getWidth() / 2) + 1 * scale) -
-                    (hotbar.getWidth() - 2 * scale) / 9 +
-                    (((hotbar.getWidth() - 2 * scale) / 9) * slot),
-                0
-            );
-        }
+        hungerDisplay.setHunger(hunger);
     }
 
     /**
@@ -201,5 +118,19 @@ public class HUD {
 
     public int getSelectedSlot() {
         return selectedSlot;
+    }
+
+    /**
+     * Changes the displayed selected slot
+     * @param slot Specifies the slot that should appear selected
+     */
+    public void setHotbarSelectedSlot(int slot) {
+        if (slot <= 9 && slot >= 1) {
+            selectedSlot = slot;
+            hotbar.setSelectorPosition(
+                halfWidth - (hotbar.getHotbar().getWidth() / 2 + scale) + ((hotbar.getHotbar().getWidth() - 2 * scale) / 9) * (slot - 1),
+                0
+            );
+        }
     }
 }
