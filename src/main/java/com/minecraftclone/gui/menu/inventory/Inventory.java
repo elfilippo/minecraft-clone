@@ -1,4 +1,4 @@
-package com.minecraftclone.gui.menu;
+package com.minecraftclone.gui.menu.inventory;
 
 import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
@@ -24,8 +24,6 @@ public class Inventory {
 
     private Node guiNode;
     private Node inventoryNode;
-
-    private List<InventorySlot> inventorySlots = new ArrayList<>();
 
     private static final int OFFSETX = 40;
     private static final int OFFSETY = 45;
@@ -57,27 +55,6 @@ public class Inventory {
 
         //TODO: Clean up magic Numbers (maybe define as constants)
         //DOES: Create invisible Textures on top of the item slots in the inventory so they can be replaced by textures of different items
-        for (int i = 0; i < 4; i++) {
-            for (int i0 = 0; i0 < 9; i0++) {
-                if (i == 0) {
-                    InventorySlot slot = new InventorySlot(
-                        guiManager,
-                        (int) ((guiManager.getWindowWidth() - inventory.getWidth()) / 2 + guiManager.getScale() * (48 + 18 * i0)),
-                        (int) ((guiManager.getWindowHeight() + inventory.getHeight()) / 2 - 203 * guiManager.getScale())
-                    );
-                    slot.attachTo(inventoryNode);
-                    inventorySlots.add(slot);
-                } else {
-                    InventorySlot slot = new InventorySlot(
-                        guiManager,
-                        (int) ((guiManager.getWindowWidth() - inventory.getWidth()) / 2 + guiManager.getScale() * (48 + 18 * i0)),
-                        (int) ((guiManager.getWindowHeight() + inventory.getHeight()) / 2 - guiManager.getScale() * (127 + 18 * i))
-                    );
-                    slot.attachTo(inventoryNode);
-                    inventorySlots.add(slot);
-                }
-            }
-        }
     }
 
     /**

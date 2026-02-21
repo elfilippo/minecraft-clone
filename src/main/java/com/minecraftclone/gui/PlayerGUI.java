@@ -2,7 +2,7 @@ package com.minecraftclone.gui;
 
 import com.minecraftclone.Main;
 import com.minecraftclone.gui.hud.HeadsUpDisplay;
-import com.minecraftclone.gui.menu.Inventory;
+import com.minecraftclone.gui.menu.inventory.Inventory;
 import com.minecraftclone.item.ItemInstance;
 import java.io.IOException;
 
