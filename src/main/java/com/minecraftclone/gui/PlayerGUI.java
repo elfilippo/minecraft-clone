@@ -1,15 +1,15 @@
 package com.minecraftclone.gui;
 
 import com.minecraftclone.Main;
-import com.minecraftclone.gui.hud.HUD;
-import com.minecraftclone.gui.inventory.InventoryGUI;
+import com.minecraftclone.gui.hud.HeadsUpDisplay;
+import com.minecraftclone.gui.menu.Inventory;
 import com.minecraftclone.item.ItemInstance;
 import java.io.IOException;
 
 public class PlayerGUI {
 
-    private HUD hud;
-    private InventoryGUI inventoryGUI;
+    private HeadsUpDisplay hud;
+    private Inventory inventoryGUI;
 
     public PlayerGUI(Main main) throws IOException {
         //Does: Gets the window resolution
@@ -21,8 +21,8 @@ public class PlayerGUI {
         scale = Math.max(1, scale);
 
         //Does: Creates GUI elements
-        inventoryGUI = new InventoryGUI(main, scale);
-        hud = new HUD(main, scale);
+        inventoryGUI = new Inventory(main, scale);
+        hud = new HeadsUpDisplay(main, scale);
     }
 
     /**

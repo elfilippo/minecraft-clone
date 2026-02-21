@@ -12,7 +12,7 @@ import com.minecraftclone.util.UIHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HUD {
+public class HeadsUpDisplay {
 
     private AssetManager asset;
     private Picture experienceBarEmpty, crosshair;
@@ -27,7 +27,7 @@ public class HUD {
     private List<Slot> hotbarSlots = new ArrayList<>();
     private int selectedSlot;
 
-    public HUD(Main main, int scale) {
+    public HeadsUpDisplay(Main main, int scale) {
         Node guiNode = main.getGuiNode();
         BitmapFont font = main.getguiFont();
         this.asset = main.getAssetManager();

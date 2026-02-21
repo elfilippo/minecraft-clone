@@ -1,4 +1,4 @@
-package com.minecraftclone.gui.inventory;
+package com.minecraftclone.gui.menu;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
@@ -15,7 +15,7 @@ import com.minecraftclone.util.UIHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InventoryGUI {
+public class Inventory {
 
     //TODO: Create Blockitems
     //IDEA: three textures that are transformed in a way to create an illusion of being 3d (need to be darkened to make them more 3d)
@@ -29,7 +29,7 @@ public class InventoryGUI {
 
     private List<InventorySlot> inventorySlots = new ArrayList<>();
 
-    public InventoryGUI(Main main, int scale) {
+    public Inventory(Main main, int scale) {
         this.guiNode = main.getGuiNode();
         this.asset = main.getAssetManager();
         this.flyByCamera = main.getFlyByCamera();
