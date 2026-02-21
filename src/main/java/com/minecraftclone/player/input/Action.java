@@ -63,4 +63,8 @@ public enum Action {
     NINE,
     TEN,
     ZERO,
+
+    SPACE,
+    ENTER,
+    BACKSPACE,
 }

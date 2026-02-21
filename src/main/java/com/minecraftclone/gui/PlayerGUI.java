@@ -37,6 +37,8 @@ public class PlayerGUI {
 
     private TextureManager textureManager;
     private BitmapFont font;
+    private String consoleText, command;
+    private BitmapText console;
 
     public PlayerGUI(Main game) throws IOException {
         //Does: Gets the window resolution
@@ -232,11 +234,24 @@ public class PlayerGUI {
 
     public void openConsole(boolean open) {
         if (open) {
-            BitmapText console = new BitmapText(font);
-            String consoleText = "";
+            console = new BitmapText(font);
+            consoleText = "";
             console.setLocalTranslation(windowWidth / 2, windowHeight / 2, 0);
             console.setText(consoleText);
             guiNode.attachChild(console);
+        }
+    }
+
+    public void consoleTextAdd(char miristkeinnameeingefallen) {
+        consoleText = consoleText + miristkeinnameeingefallen;
+        console.setText(consoleText);
+    }
+
+    public void consoleCommandEnter(boolean jane) {
+        if (jane) {
+            System.out.println(consoleText);
+            command = consoleText;
+            consoleText = "\0";
         }
     }
 
@@ -306,5 +321,11 @@ public class PlayerGUI {
             }
         }
         updateHotbarDisplayItem();
+    }
+
+    public String getCommand() {
+        String kommando = command;
+        command = "\0";
+        return command;
     }
 }

@@ -20,6 +20,10 @@ public class KeyMapping {
         this.actionListener = actionListener;
         this.analogListener = analogListener;
 
+        bindKeyAction("ENTER", KeyInput.KEY_RETURN);
+        bindKeyAction("BACKSPACE", KeyInput.KEY_BACK);
+        bindKeyAction("SPACE", KeyInput.KEY_SPACE);
+
         bindKeyAction("A", KeyInput.KEY_A);
         bindKeyAction("B", KeyInput.KEY_B);
         bindKeyAction("C", KeyInput.KEY_C);

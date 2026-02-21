@@ -12,10 +12,12 @@ public class RenderEngine {
     PlayerGUI gui;
     Main app;
     PlayerCharacter player;
+    private boolean console;
 
     public RenderEngine(Main app, PlayerCharacter playerCharacter) {
         this.app = app;
         this.player = playerCharacter;
+        console = false;
         try {
             this.gui = new PlayerGUI(app);
         } catch (IOException e) {
@@ -27,10 +29,21 @@ public class RenderEngine {
     }
 
     public void guiUpdate() {
-        gui.openConsole(player.getConsole());
+        if (player.getConsole()) {
+            if (!console) {
+                gui.openConsole(player.getConsole());
+                console = true;
+            }
+            gui.consoleCommandEnter(player.getConsoleEnter());
+            gui.consoleTextAdd(player.getConsoleInput());
+        }
         gui.setLife(player.getLife());
         gui.setHunger(player.getHunger());
         gui.changeHotbarSlot(player.getHotbarSlot());
         gui.setInventoryVisibility(player.getinventoryVisible());
+
+        switch (gui.getCommand()) {
+            default -> 
+        }
     }
 }

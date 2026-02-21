@@ -30,6 +30,7 @@ public class PlayerCharacter {
     private boolean inventoryVisible = false;
     private boolean console = false;
     private char consoleInput;
+    private boolean consoleEnter = false;
 
     public PlayerCharacter(BulletAppState bulletAppState, ActionInput input, SimpleApplication app) {
         this.input = input;
@@ -83,6 +84,7 @@ public class PlayerCharacter {
         if (input.isTapped(Action.T)) console = true;
 
         if (console) {
+            if (input.isTapped(Action.ENTER)) consoleEnter = true;
             if (input.isTapped(Action.ONE)) consoleInput = '1';
             if (input.isTapped(Action.TWO)) consoleInput = '2';
             if (input.isTapped(Action.THREE)) consoleInput = '3';
@@ -120,6 +122,10 @@ public class PlayerCharacter {
             if (input.isTapped(Action.X)) consoleInput = 'x';
             if (input.isTapped(Action.Y)) consoleInput = 'y';
             if (input.isTapped(Action.Z)) consoleInput = 'z';
+
+            if (input.isTapped(Action.SPACE)) {
+                consoleInput = ' ';
+            }
         }
     }
 
@@ -152,6 +158,22 @@ public class PlayerCharacter {
     }
 
     public char getConsoleInput() {
-        return consoleInput;
+        char temp = consoleInput;
+        consoleInput = '\0';
+        return temp;
+    }
+
+    public boolean getConsoleEnter() {
+        if (consoleEnter) {
+            boolean temp = consoleEnter;
+            consoleEnter = false;
+            console = false;
+            return temp;
+        }
+        return false;
+    }
+
+    public boolean getConsole() {
+        return console;
     }
 }
