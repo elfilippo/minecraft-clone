@@ -5,7 +5,8 @@ import com.jme3.renderer.Camera;
 
 public class CustomCam extends FlyByCamera {
 
-    private float pitch = 0f; //NOTE: current vertical angle in radians
+    //IS: current vertical angle in radians
+    private float pitch = 0f;
     private final float minPitch = -(float) Math.PI / 2f + 0.01f;
     private final float maxPitch = (float) Math.PI / 2f - 0.01f;
 

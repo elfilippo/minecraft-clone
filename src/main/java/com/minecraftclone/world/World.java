@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class World {
 
-    private static final int RENDER_DISTANCE = 30;
+    private static final int RENDER_DISTANCE = 10;
     private final SimpleApplication app;
     private final PlayerCharacter playerCharacter;
     private final BulletAppState bulletAppState;
@@ -42,7 +42,11 @@ public class World {
         if (chunk == null) return null;
 
         //DOES: calculate chunk block is in and request it
-        return chunk.getBlock(Math.floorMod(worldX, Chunk.SIZE), Math.floorMod(worldY, Chunk.SIZE), Math.floorMod(worldZ, Chunk.SIZE));
+        return chunk.getBlock(
+            Math.floorMod(worldX, Chunk.SIZE),
+            Math.floorMod(worldY, Chunk.SIZE),
+            Math.floorMod(worldZ, Chunk.SIZE)
+        );
     }
 
     public boolean isBlockLoaded(int worldX, int worldY, int worldZ) {
@@ -67,7 +71,7 @@ public class World {
         int localY = Math.floorMod(worldY, Chunk.SIZE);
         int localZ = Math.floorMod(worldZ, Chunk.SIZE);
 
-        //TODO: figure out what ts is
+        //DOES: get chunk from map, create & attatch to root node if doesn't exist
         Chunk chunk = chunks.computeIfAbsent(key(chunkX, chunkY, chunkZ), k -> {
             Chunk c = new Chunk(chunkX, chunkY, chunkZ, app.getAssetManager());
             app.getRootNode().attachChild(c.getNode());

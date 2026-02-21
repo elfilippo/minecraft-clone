@@ -16,12 +16,12 @@ import java.util.Map;
 
 public class Chunk {
 
-    //NOTE: chunk size
+    //IS: chunk size
     public static final int SIZE = 32;
 
     private final int chunkX, chunkY, chunkZ;
 
-    //NOTE: block object stored in triple array of ints (local pos)
+    //IS: block object stored in triple array of ints (local pos)
     private final Block[][][] blocks = new Block[SIZE][SIZE][SIZE];
 
     private final Node chunkNode = new Node("Chunk");
@@ -78,8 +78,8 @@ public class Chunk {
         Map<String, Mesh> meshes = ChunkMeshBuilder.build(blocks);
 
         //DOES: remove old geometries
-        for (Geometry g : geometries.values()) {
-            g.removeFromParent();
+        for (Geometry geometry : geometries.values()) {
+            geometry.removeFromParent();
         }
         geometries.clear();
 

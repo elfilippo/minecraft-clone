@@ -1,5 +1,8 @@
 package com.minecraftclone.player.input;
 
+/**
+ * action enum for player input
+ */
 public enum Action {
     FORWARD,
     BACKWARD,

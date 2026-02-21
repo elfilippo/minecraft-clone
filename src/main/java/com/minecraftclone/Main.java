@@ -76,23 +76,16 @@ public class Main extends SimpleApplication {
         var bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
 
-        //DOES: set up camera and anisotropic filter
-        //NOTE:  had to implement completely custom camera movement for vertical and horizontal clamping
-        //NOTE:  which was be much worse so sticking with flyCam for now
+        //DOES: disable default & set up custom camera
         flyCam.setEnabled(false);
         flyCam.unregisterInput();
-
         flyCam = new CustomCam(cam);
         flyCam.registerWithInput(inputManager);
-
-        // Enable mouse look (this also hides + locks cursor correctly)
         flyCam.setEnabled(true);
-        flyCam.setDragToRotate(false);
-        flyCam.setMoveSpeed(0f); // optional, same as normal FlyCam
+        flyCam.setMoveSpeed(0f);
 
         cam.setFrustumNear(0.2f);
         cam.setFov(70);
-        inputManager.setCursorVisible(false);
         getRenderer().setDefaultAnisotropicFilter(4);
 
         //INFO: for all bool inputs (keypresses etc.)
@@ -115,7 +108,7 @@ public class Main extends SimpleApplication {
         blockInteraction = new BlockInteractionSystem(world, cam, actionInput);
 
         //NOTE: will be set by hotbar later
-        blockInteraction.setSelectedBlock(Blocks.DIAMOND_BLOCK);
+        blockInteraction.setSelectedBlock(Blocks.STAIRS);
     }
 
     @Override

@@ -1,9 +1,14 @@
 package com.minecraftclone.block;
 
+import com.minecraftclone.block.Block.BlockType;
+
 public class Blocks {
 
-    //only pngs
-    public static final Block AIR = new Block(false, null, null, null);
+    //INFO: only pngs, no file name extensions
+
+    public static final Block STAIRS = new Block(false, "oak_planks", BlockType.STAIRS);
+    public static final Block SLAB = new Block(false, "oak_planks", BlockType.SLAB);
+    public static final Block FENCE = new Block(false, "oak_planks", BlockType.FENCE);
     public static final Block DIRT = new Block(true, "dirt", "dirt", "dirt");
     public static final Block STONE = new Block(true, "stone", "stone", "stone");
     public static final Block GRASS_BLOCK = new Block(true, "grass_block_top", "grass_block_side", "dirt");
@@ -78,12 +83,22 @@ public class Blocks {
     public static final Block STAINED_CLAY_RED = new Block(true, "hardened_clay_stained_red");
     public static final Block STAINED_CLAY_BLACK = new Block(true, "hardened_clay_stained_black");
     public static final Block COAL_BLOCK = new Block(true, "coal_block");
-    public static final Block QUARTZ_BLOCK = new Block(true, "quartz_block_top", "quartz_block_side", "quartz_block_bottom");
+    public static final Block QUARTZ_BLOCK = new Block(
+        true,
+        "quartz_block_top",
+        "quartz_block_side",
+        "quartz_block_bottom"
+    );
     public static final Block PRISMARINE = new Block(true, "prismarine_rough");
     public static final Block PRISMARINE_BRICKS = new Block(true, "prismarine_bricks");
     public static final Block DARK_PRISMARINE = new Block(true, "dark_prismarine");
     public static final Block SEA_LANTERN = new Block(true, "sea_lantern");
     public static final Block RED_SAND = new Block(true, "red_sand");
-    public static final Block RED_SANDSTONE = new Block(true, "red_sandstone_top", "red_sandstone_normal", "red_sandstone_bottom");
+    public static final Block RED_SANDSTONE = new Block(
+        true,
+        "red_sandstone_top",
+        "red_sandstone_normal",
+        "red_sandstone_bottom"
+    );
     public static final Block OBSIDIAN = new Block(true, "obsidian");
 }

@@ -51,6 +51,8 @@ public class PlayerCharacter {
     }
 
     public void tick() {
+        //DOES: walk movement
+        //NOTE: some kind of interpolation to be added for smoother movement
         Vector3f forward = cam.getDirection().clone();
         forward.setY(0).normalizeLocal().multLocal(speed);
         Vector3f left = cam.getLeft().clone();
@@ -63,18 +65,26 @@ public class PlayerCharacter {
         if (input.isHeld(Action.BACKWARD)) walkDir.addLocal(forward.negate());
         if (input.isHeld(Action.RIGHT)) walkDir.addLocal(left.negate());
 
+        //DOES: jumping
         playerControl.setWalkDirection(walkDir);
         if (input.isHeld(Action.JUMP) && playerControl.onGround()) playerControl.jump();
 
-        if (input.isTapped(Action.HOTBAR_1)) hotbarSlot = 1;
-        if (input.isTapped(Action.HOTBAR_2)) hotbarSlot = 2;
-        if (input.isTapped(Action.HOTBAR_3)) hotbarSlot = 3;
-        if (input.isTapped(Action.HOTBAR_4)) hotbarSlot = 4;
-        if (input.isTapped(Action.HOTBAR_5)) hotbarSlot = 5;
-        if (input.isTapped(Action.HOTBAR_6)) hotbarSlot = 6;
-        if (input.isTapped(Action.HOTBAR_7)) hotbarSlot = 7;
-        if (input.isTapped(Action.HOTBAR_8)) hotbarSlot = 8;
-        if (input.isTapped(Action.HOTBAR_9)) hotbarSlot = 9;
+        Action[] hotbar = {
+            Action.HOTBAR_1,
+            Action.HOTBAR_2,
+            Action.HOTBAR_3,
+            Action.HOTBAR_4,
+            Action.HOTBAR_5,
+            Action.HOTBAR_6,
+            Action.HOTBAR_7,
+            Action.HOTBAR_8,
+            Action.HOTBAR_9,
+        };
+
+        //DOES: iterate through hotbar slots and switch to them if key tapped
+        for (int i = 0; i < hotbar.length; i++) {
+            if (input.isTapped(hotbar[i])) hotbarSlot = i + 1;
+        }
 
         if (input.isTapped(Action.TOGGLE_INVENTORY)) inventoryVisible = !inventoryVisible;
     }

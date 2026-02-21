@@ -5,6 +5,8 @@ import com.minecraftclone.block.Blocks;
 
 public final class TerrainGenerator {
 
+    //INFO: terrain generator is temporary, will be completely replaced later
+
     // tweak these freely
     private static final int BASE_HEIGHT = 8;
     private static final float HEIGHT_SCALE = 0.15f;

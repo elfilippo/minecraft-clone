@@ -10,16 +10,18 @@ not binding besides prio 0, just suggestions
 
 [[todo list]]
 
-[both] {2} add proper comments
-[filp] {0} move GUI to RenderEngine 
-[filp] {1} add block selection 
-[filp] {1} unload chunks 
-[filp] {2} fix non-solid blocks breaking the game (mesh)
-[filp] {2} only create meshes for chunks around Player (simulation distance) 
+[filp] {0} add block selection indicator
+[filp] {0} only create collision meshes for chunks around Player (simulation distance)
+[filp] {0} unload chunks
+[filp] {1} improve checking for visible faces (across chunk borders, etc.)
+[filp] {2} only create mesh for faces facing player when far away
 [filp] {2} separate rendering (visual blocks, chunk meshes, RenderEngine class) from blocks in memory (Chunk class)
+[filp] {3} add non-solid blocks
 [filp] {3} dont render invisible chunks (data more separate from rendering) 
+[filp] {3} only render chunks in view (y-axis as well)
 [free] {1} add sound (to block breaking/placing for now)
 [free] {1} set initial player pos to top coordinate of chunk 
+[free] {2} add proper world generation
 [free] {2} compact blocks.java (json, hashmap, etc?), merge with block cache ? (hashmap with loaded blocks)
 [free] {2} figure out stepHeight (if to use, how to do stairs)
 [free] {2} multithread chunk generation (rendering on main thread)
@@ -31,7 +33,9 @@ not binding besides prio 0, just suggestions
 [free] {3} lod
 [free] {4} ambient occlusion
 [free] {4} fix slight noise on block sides (taa?)
+[mats] {0} add commands
 [mats] {1} add hotbar scrolling 
+[mats] {2} add proper comments
 [mats] {2} items
 [mats] {3} add other block actions (using, etc.)
 
