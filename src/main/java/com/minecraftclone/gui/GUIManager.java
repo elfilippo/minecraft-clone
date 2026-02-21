@@ -1,24 +1,32 @@
-package com.minecraftclone.util;
+package com.minecraftclone.gui;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
+import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
 import com.minecraftclone.item.ItemRegistry;
 
-public class UIHelper {
+public class GUIManager {
 
-    AssetManager assetManager;
-    int scale, width, height;
-    BitmapFont font;
+    private AssetManager assetManager;
+    private int scale, windowWidth, windowHeight;
+    private float fontScale;
+    private BitmapFont font;
+    private Node guiNode;
 
-    public UIHelper(AssetManager asset, int scale, BitmapFont font, int width, int height) {
+    public GUIManager(AssetManager asset, BitmapFont font, Node guiNode, int windowWidth, int windowHeight) {
         this.assetManager = asset;
-        this.scale = scale;
-        this.width = width;
-        this.height = height;
         this.font = font;
+        this.guiNode = guiNode;
+        this.windowWidth = windowWidth;
+        this.windowHeight = windowHeight;
+
+        //Does: Autoscaling
+        int scale = Math.min(windowWidth / 480, windowHeight / 270);
+        this.scale = Math.max(1, scale);
+        this.fontScale = this.scale / 4f;
     }
 
     public Picture createPicture(Texture2D texture, String name) {
@@ -61,18 +69,22 @@ public class UIHelper {
     }
 
     public float getFontScale() {
-        return scale / 4f;
+        return fontScale;
     }
 
     public BitmapFont getFont() {
         return font;
     }
 
-    public int getWidth() {
-        return width;
+    public int getWindowWidth() {
+        return windowWidth;
     }
 
-    public int getHeight() {
-        return height;
+    public int getWindowHeight() {
+        return windowHeight;
+    }
+
+    public Node getGuiNode() {
+        return guiNode;
     }
 }

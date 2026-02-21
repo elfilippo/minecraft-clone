@@ -4,34 +4,34 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
-import com.minecraftclone.util.UIHelper;
+import com.minecraftclone.gui.GUIManager;
 
 public class Display {
 
     Picture display;
-    UIHelper helper;
+    GUIManager guiManager;
 
-    public Display(UIHelper helper, Texture2D texture, int x, int y) {
-        this.helper = helper;
+    public Display(GUIManager guiManager, Texture2D texture, int x, int y) {
+        this.guiManager = guiManager;
 
-        display = helper.createPicture(texture, "display");
+        display = guiManager.createPicture(texture, "display");
         display.setPosition(x, y);
     }
 
-    public Display(UIHelper helper, Texture2D texture) {
-        this.helper = helper;
+    public Display(GUIManager guiManager, Texture2D texture) {
+        this.guiManager = guiManager;
 
-        display = helper.createPicture(texture, "display");
+        display = guiManager.createPicture(texture, "display");
     }
 
-    public Display(UIHelper helper, int x, int y) {
-        this.helper = helper;
-        display = helper.createPicture(helper.loadItemTexture2d("golden_apple"), "display");
+    public Display(GUIManager guiManager, int x, int y) {
+        this.guiManager = guiManager;
+        display = guiManager.createPicture(guiManager.loadItemTexture2d("golden_apple"), "display");
         display.setPosition(x, y);
     }
 
     public void setTexture(Texture2D texture) {
-        display.setTexture(helper.getAssetManager(), texture, true);
+        display.setTexture(guiManager.getAssetManager(), texture, true);
     }
 
     public Texture2D getTexture() {

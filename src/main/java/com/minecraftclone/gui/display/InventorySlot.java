@@ -1,11 +1,11 @@
 package com.minecraftclone.gui.display;
 
-import com.minecraftclone.util.UIHelper;
+import com.minecraftclone.gui.GUIManager;
 
 public class InventorySlot extends Slot {
 
-    public InventorySlot(UIHelper helper, int x, int y) {
-        super(helper, x, y);
+    public InventorySlot(GUIManager guiManager, int x, int y) {
+        super(guiManager, x, y);
     }
 
     public String getText() {

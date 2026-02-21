@@ -4,32 +4,31 @@ import com.jme3.font.BitmapText;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.texture.Texture2D;
-import com.minecraftclone.util.UIHelper;
+import com.minecraftclone.gui.GUIManager;
 
 public class Slot extends Display {
 
     Vector3f anchor;
     BitmapText text;
 
-    public Slot(UIHelper helper, int x, int y) {
-        super(helper, x, y);
-        text = new BitmapText(helper.getFont());
-        text.setLocalScale(helper.getFontScale());
+    public Slot(GUIManager guiManager, int x, int y) {
+        super(guiManager, x, y);
+        text = new BitmapText(guiManager.getFont());
+        text.setLocalScale(guiManager.getFontScale());
         text.setLocalTranslation(x, y, 0);
 
         anchor = text.getLocalTranslation().clone();
-        anchor.x = anchor.x + 16 * helper.getScale(); //FIXME: Magic number
-        anchor.y = anchor.y + this.text.getHeight() * helper.getFontScale() - helper.getScale() - 1; //Fixme: -1?
-    }
-
-    public void setTexture(Texture2D texture) {
-        display.setTexture(helper.getAssetManager(), texture, true);
+        anchor.x = anchor.x + 16 * guiManager.getScale(); //FIXME: Magic number
+        anchor.y = anchor.y + this.text.getHeight() * guiManager.getFontScale() - guiManager.getScale() - 1; //Fixme: -1?
     }
 
     public void setText(String text) {
         this.text.setText(text);
-        this.text.setLocalTranslation(anchor.x - this.text.getLineWidth() * helper.getFontScale() + helper.getScale(), anchor.y, anchor.z);
+        this.text.setLocalTranslation(
+            anchor.x - this.text.getLineWidth() * guiManager.getFontScale() + guiManager.getScale(),
+            anchor.y,
+            anchor.z
+        );
     }
 
     @Override

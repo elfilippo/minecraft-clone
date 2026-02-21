@@ -1,22 +1,15 @@
 package com.minecraftclone.gui.hud;
 
-import com.jme3.asset.AssetManager;
-import com.jme3.font.BitmapFont;
 import com.jme3.scene.Node;
-import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
-import com.minecraftclone.Main;
+import com.minecraftclone.gui.GUIManager;
 import com.minecraftclone.gui.display.InventorySlot;
-import com.minecraftclone.gui.display.Slot;
-import com.minecraftclone.util.UIHelper;
-import java.util.ArrayList;
 import java.util.List;
 
 public class HeadsUpDisplay {
 
-    private AssetManager asset;
     private Picture experienceBarEmpty, crosshair;
-    private Node hudNode, statsNode;
+    private Node hudNode;
 
     private int scale, halfWidth, halfHeight;
 
@@ -24,64 +17,44 @@ public class HeadsUpDisplay {
     private HungerDisplay hungerDisplay;
     private Hotbar hotbar;
 
-    private List<Slot> hotbarSlots = new ArrayList<>();
     private int selectedSlot;
 
-    public HeadsUpDisplay(Main main, int scale) {
-        Node guiNode = main.getGuiNode();
-        BitmapFont font = main.getguiFont();
-        this.asset = main.getAssetManager();
-        this.scale = scale;
+    public HeadsUpDisplay(GUIManager guiManager) {
+        Node guiNode = guiManager.getGuiNode();
 
-        halfWidth = main.getCamera().getWidth() / 2;
-        System.out.println(halfWidth);
-        halfHeight = main.getCamera().getHeight() / 2;
-
-        UIHelper uiHelper = new UIHelper(asset, scale, font, main.getCamera().getWidth(), main.getCamera().getHeight());
-
-        //DOES: Create Nodes for layering and attach them
+        //DOES: Create Nodes for layering and attaches them
         hudNode = new Node("hudNode");
-        statsNode = new Node("statsNode");
-
         guiNode.attachChild(hudNode);
-        hudNode.attachChild(statsNode);
 
-        //DOES: Create Texture variables
-        Texture2D crosshairTexture = uiHelper.loadGUITexture2d("sprites/hud/crosshair"); //15x15
-        Texture2D experienceBarEmptyTexture = uiHelper.loadGUITexture2d("sprites/hud/experience_bar_background"); //182x5
+        //DOES: Creates different parts of the gui
+        hotbar = new Hotbar(guiManager, hudNode);
 
-        hotbar = new Hotbar(uiHelper, hudNode);
-        hotbar.getHotbar().setPosition(halfWidth - (hotbar.getHotbar().getWidth() / 2), 0);
+        crosshair = guiManager.createPicture(guiManager.loadGUITexture2d("sprites/hud/crosshair"), "crosshair");
+        experienceBarEmpty = guiManager.createPicture(
+            guiManager.loadGUITexture2d("sprites/hud/experience_bar_background"),
+            "experienceBarEmpty"
+        );
 
-        //DOES: Create Pictures to display in the GUI, positions them and attaches them to nodes
-        experienceBarEmpty = uiHelper.createPicture(experienceBarEmptyTexture, "experienceBarEmpty");
-        crosshair = uiHelper.createPicture(crosshairTexture, "crosshair");
+        heartsDisplay = new HeartsDisplay(
+            guiManager,
+            (int) (halfWidth - (hotbar.getHotbar().getWidth() / 2)),
+            (int) (experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHotbar().getHeight()),
+            hudNode
+        );
+        hungerDisplay = new HungerDisplay(
+            guiManager,
+            (int) (halfWidth + hotbar.getHotbar().getWidth() / 2 - 9 * scale),
+            (int) (experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHotbar().getHeight()),
+            hudNode
+        );
 
+        //DOES: Sets the Position of some gui elements on the screen
         experienceBarEmpty.setPosition(halfWidth - ((experienceBarEmpty.getWidth() / 2)), hotbar.getHotbar().getHeight() + scale * 2);
         crosshair.setPosition(halfWidth - ((crosshair.getWidth() / 2)), halfHeight - ((crosshair.getHeight() / 2)));
 
+        //DOES: Attaches gui elements to Nodes
         hudNode.attachChild(experienceBarEmpty);
         hudNode.attachChild(crosshair);
-
-        heartsDisplay = new HeartsDisplay(
-            uiHelper,
-            (int) (halfWidth - (hotbar.getHotbar().getWidth() / 2)),
-            (int) (experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHotbar().getHeight()),
-            statsNode
-        );
-        hungerDisplay = new HungerDisplay(
-            uiHelper,
-            (int) (halfWidth + hotbar.getHotbar().getWidth() / 2 - 9 * scale),
-            (int) (experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHotbar().getHeight()),
-            statsNode
-        );
-
-        //DOES: Creates empty textures and text on top of the Hotbar to display items placed there
-        for (int i = 0; i < 9; i++) {
-            Slot slot = new Slot(uiHelper, (halfWidth - (hotbar.getHotbar().getWidth()) / 2) + scale * (3 + 20 * i), 3 * scale);
-            slot.attachTo(hudNode);
-            hotbarSlots.add(slot);
-        }
     }
 
     /**
@@ -106,14 +79,7 @@ public class HeadsUpDisplay {
      * @param invText List of all Item Texts in the inventory
      */
     public void updateHotbarDisplayItem(List<InventorySlot> slots) {
-        //Info: The items displayed in the Hotbar are copied from those in the inventoryList, because the inventory also has a Hotbar
-        //Does: Checks for differences between the inventory hotbar and real hotbar and if they are not the same displays the item in the inventory hotbar in the hotbar
-        for (int i = 0; i < 9; i++) {
-            Slot slot = hotbarSlots.get(i);
-
-            slot.setTexture(slots.get(i).getTexture());
-            slot.setText(slots.get(i).getText());
-        }
+        hotbar.updateHotbarDisplayItems(slots);
     }
 
     public int getSelectedSlot() {
@@ -127,10 +93,7 @@ public class HeadsUpDisplay {
     public void setHotbarSelectedSlot(int slot) {
         if (slot <= 9 && slot >= 1) {
             selectedSlot = slot;
-            hotbar.setSelectorPosition(
-                halfWidth - (hotbar.getHotbar().getWidth() / 2 + scale) + ((hotbar.getHotbar().getWidth() - 2 * scale) / 9) * (slot - 1),
-                0
-            );
+            hotbar.setSelectedSlot(slot);
         }
     }
 }

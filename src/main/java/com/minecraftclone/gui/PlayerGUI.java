@@ -16,13 +16,11 @@ public class PlayerGUI {
         int windowWidth = main.getCamera().getWidth();
         int windowHeight = main.getCamera().getHeight();
 
-        //Does: Autoscale for GUI based on screen resolution
-        int scale = Math.min(windowWidth / 480, windowHeight / 270);
-        scale = Math.max(1, scale);
+        GUIManager guiManager = new GUIManager(main.getAssetManager(), main.getguiFont(), main.getGuiNode(), windowWidth, windowHeight);
 
         //Does: Creates GUI elements
-        inventoryGUI = new Inventory(main, scale);
-        hud = new HeadsUpDisplay(main, scale);
+        inventoryGUI = new Inventory(main, guiManager);
+        hud = new HeadsUpDisplay(guiManager);
     }
 
     /**

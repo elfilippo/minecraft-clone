@@ -1,17 +1,16 @@
 package com.minecraftclone.gui.menu;
 
-import com.jme3.asset.AssetManager;
-import com.jme3.font.BitmapFont;
 import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.ui.Picture;
+import com.jme3.texture.Texture2D;
 import com.minecraftclone.Main;
+import com.minecraftclone.gui.GUIManager;
+import com.minecraftclone.gui.display.Display;
 import com.minecraftclone.gui.display.InventorySlot;
 import com.minecraftclone.gui.display.Slot;
 import com.minecraftclone.item.ItemInstance;
-import com.minecraftclone.util.UIHelper;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,38 +20,40 @@ public class Inventory {
     //IDEA: three textures that are transformed in a way to create an illusion of being 3d (need to be darkened to make them more 3d)
     private FlyByCamera flyByCamera;
     private InputManager inputManager;
-    private AssetManager asset;
-    private UIHelper uiHelper;
+    private GUIManager guiManager;
 
     private Node guiNode;
     private Node inventoryNode;
 
     private List<InventorySlot> inventorySlots = new ArrayList<>();
 
-    public Inventory(Main main, int scale) {
-        this.guiNode = main.getGuiNode();
-        this.asset = main.getAssetManager();
+    private static final int OFFSETX = 40;
+    private static final int OFFSETY = 45;
+
+    public Inventory(Main main, GUIManager guiManager) {
+        this.guiManager = guiManager;
+        this.guiNode = guiManager.getGuiNode();
+
         this.flyByCamera = main.getFlyByCamera();
         this.inputManager = main.getInputManager();
 
-        BitmapFont font = main.getguiFont();
-
-        uiHelper = new UIHelper(asset, scale, font, 1920, 1080); //Fixme: magic numbers
-
-        //DOES: Create Variables for easier positioning of the HUD elements
-        int windowWidth = main.getCamera().getWidth();
-        int windowHeight = main.getCamera().getHeight();
-        int halfWidth = main.getViewPort().getCamera().getWidth() / 2;
-        int halfHeight = main.getViewPort().getCamera().getHeight() / 2;
-
-        //DOES: Create Nodes for layering and attach them
+        //DOES: Creates Nodes and attaches them
         inventoryNode = new Node("inventoryNode");
         guiNode.attachChild(inventoryNode);
 
-        //DOES: Create the inventory and position it in the screens center
-        Picture inventory = uiHelper.createPicture(uiHelper.loadGUITexture2d("container/inventory"), "inventory");
-        inventory.setPosition(halfWidth - (inventory.getWidth() / 2) + 40 * scale, halfHeight - (inventory.getHeight() / 2) - 45 * scale);
-        inventoryNode.attachChild(inventory);
+        //DOES: Create the inventory and center it
+        Texture2D inventoryTexture = guiManager.loadGUITexture2d("container/inventory");
+        Display inventory = new Display(
+            guiManager,
+            inventoryTexture,
+            guiManager.getWindowWidth() / 2 -
+                ((inventoryTexture.getImage().getWidth() * guiManager.getScale()) / 2) +
+                OFFSETX * guiManager.getScale(),
+            guiManager.getWindowHeight() / 2 -
+                ((inventoryTexture.getImage().getHeight() * guiManager.getScale()) / 2) -
+                OFFSETY * guiManager.getScale()
+        );
+        inventory.attachTo(inventoryNode);
 
         //TODO: Clean up magic Numbers (maybe define as constants)
         //DOES: Create invisible Textures on top of the item slots in the inventory so they can be replaced by textures of different items
@@ -60,17 +61,17 @@ public class Inventory {
             for (int i0 = 0; i0 < 9; i0++) {
                 if (i == 0) {
                     InventorySlot slot = new InventorySlot(
-                        uiHelper,
-                        (int) ((windowWidth - inventory.getWidth()) / 2 + scale * (48 + 18 * i0)),
-                        (int) ((windowHeight + inventory.getHeight()) / 2 - 203 * scale)
+                        guiManager,
+                        (int) ((guiManager.getWindowWidth() - inventory.getWidth()) / 2 + guiManager.getScale() * (48 + 18 * i0)),
+                        (int) ((guiManager.getWindowHeight() + inventory.getHeight()) / 2 - 203 * guiManager.getScale())
                     );
                     slot.attachTo(inventoryNode);
                     inventorySlots.add(slot);
                 } else {
                     InventorySlot slot = new InventorySlot(
-                        uiHelper,
-                        (int) ((windowWidth - inventory.getWidth()) / 2 + scale * (48 + 18 * i0)),
-                        (int) ((windowHeight + inventory.getHeight()) / 2 - scale * (127 + 18 * i))
+                        guiManager,
+                        (int) ((guiManager.getWindowWidth() - inventory.getWidth()) / 2 + guiManager.getScale() * (48 + 18 * i0)),
+                        (int) ((guiManager.getWindowHeight() + inventory.getHeight()) / 2 - guiManager.getScale() * (127 + 18 * i))
                     );
                     slot.attachTo(inventoryNode);
                     inventorySlots.add(slot);
@@ -109,7 +110,7 @@ public class Inventory {
                 } else {
                     slot.setText("");
                 }
-                slot.setTexture(uiHelper.loadItemTexture2d(item.getId()));
+                slot.setTexture(guiManager.loadItemTexture2d(item.getId()));
             }
         }
     }
