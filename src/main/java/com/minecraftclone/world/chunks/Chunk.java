@@ -25,6 +25,7 @@ public class Chunk {
     private final Block[][][] blocks = new Block[SIZE][SIZE][SIZE];
 
     private final Node chunkNode = new Node("Chunk");
+    private final Node collisionNode = new Node("Collision");
     private final AssetManager assetManager;
 
     private final Map<String, Geometry> geometries = new HashMap<>();
@@ -79,7 +80,6 @@ public class Chunk {
         if (!dirty) return;
 
         Map<String, Mesh> meshes = ChunkMeshBuilder.build(blocks);
-
         //DOES: remove old geometries
         for (Geometry geometry : geometries.values()) {
             geometry.removeFromParent();
@@ -87,11 +87,8 @@ public class Chunk {
         geometries.clear();
 
         //DOES: if exists, remove collision body
-        if (collisionBody != null) {
-            physicsSpace.remove(collisionBody);
-        }
-
-        Node collisionNode = new Node("CollisionNode");
+        removeCollision();
+        collisionNode.detachAllChildren();
 
         //DOES: iterate over meshes hashmap & create and add geometries
         for (Map.Entry<String, Mesh> meshEntry : meshes.entrySet()) {
@@ -109,6 +106,11 @@ public class Chunk {
             collisionNode.attachChild(geometry.clone());
         }
 
+        //DOES: set chunk to clean to indicate completion of rebuild
+        dirty = false;
+    }
+
+    public void addCollision() {
         //CASE: when chunk has geometry at collision node
         if (collisionNode.getQuantity() > 0) {
             //DOES: create collision body
@@ -117,9 +119,15 @@ public class Chunk {
             chunkNode.addControl(collisionBody);
             physicsSpace.add(collisionBody);
         }
+    }
 
-        //DOES: set chunk to clean to indicate completion of rebuild
-        dirty = false;
+    /**
+     * removes collision from the chunk if it has any
+     */
+    public void removeCollision() {
+        if (collisionBody != null) {
+            physicsSpace.remove(collisionBody);
+        }
     }
 
     /**
@@ -131,9 +139,7 @@ public class Chunk {
         }
         geometries.clear();
 
-        if (collisionBody != null) {
-            physicsSpace.remove(collisionBody);
-        }
+        removeCollision();
     }
 
     /**
@@ -156,6 +162,10 @@ public class Chunk {
         return chunkY;
     }
 
+    /**
+     * sets if the chunk is dirty (won't rebuild otherwise)
+     * @param dirty
+     */
     public void setDirty(boolean dirty) {
         this.dirty = dirty;
     }

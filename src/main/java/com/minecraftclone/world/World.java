@@ -16,7 +16,8 @@ import java.util.Map;
 
 public class World {
 
-    private static final int RENDER_DISTANCE = 4;
+    private static final int RENDER_DISTANCE = 10;
+    private static final int SIMULATION_DISTANCE = 5;
     private final SimpleApplication app;
     private final PlayerCharacter playerCharacter;
     private final BulletAppState bulletAppState;
@@ -34,7 +35,7 @@ public class World {
         render = new RenderEngine(app, playerCharacter);
         app.getRootNode().attachChild(playerCharacter.getNode());
 
-        chunkManager = new ChunkManager(app, this, RENDER_DISTANCE);
+        chunkManager = new ChunkManager(app, this, RENDER_DISTANCE, SIMULATION_DISTANCE);
     }
 
     public Block getBlock(int worldX, int worldY, int worldZ) {
@@ -80,6 +81,10 @@ public class World {
 
         chunk.setBlock(localX, localY, localZ, block);
         chunk.rebuild();
+
+        //DOES: add collision to chunk
+        chunk.addCollision();
+        chunkManager.addToHasCollision(new ChunkPos(chunkX, chunkY, chunkZ));
 
         rebuildNeighborsIfNeeded(chunkX, chunkY, chunkZ, localX, localY, localZ);
     }

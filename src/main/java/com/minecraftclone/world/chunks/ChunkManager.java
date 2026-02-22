@@ -19,17 +19,21 @@ public class ChunkManager {
     private final World world;
     private final PhysicsSpace physicsSpace;
     private final int renderDistance;
+    private final int simulationDistance;
 
     //IS: array double-ended queue
     //INFO: allows efficient adding & removing from both ends
     private final Queue<ChunkPos> queue = new ArrayDeque<>();
+    private final Queue<ChunkPos> collisionQueue = new ArrayDeque<>();
 
     //IS: set of chunk positions
     //INFO: set is used for super-fast lookup time (check if chunk is already queued)
     private final Set<ChunkPos> queued = new HashSet<>();
+    private final Set<ChunkPos> collisionQueued = new HashSet<>();
 
-    //IS: set of loaded chunks
+    //IS: set of loaded chunks and chunks with collision
     private final Set<ChunkPos> loaded = new HashSet<>();
+    private final Set<ChunkPos> hasCollision = new HashSet<>();
 
     private Vector3f playerPos;
 
@@ -39,10 +43,15 @@ public class ChunkManager {
 
     private boolean reloadChunks = true;
 
-    public ChunkManager(SimpleApplication app, World world, int renderDistance) {
+    /**
+     * handles chunk generation, loading, unloading, and everything else
+     * <p>
+     */
+    public ChunkManager(SimpleApplication app, World world, int renderDistance, int simulationDistance) {
         this.app = app;
         this.world = world;
         this.renderDistance = renderDistance;
+        this.simulationDistance = simulationDistance;
 
         BulletAppState bullet = app.getStateManager().getState(BulletAppState.class);
 
@@ -68,11 +77,13 @@ public class ChunkManager {
 
             //DOES: unload chunks outside render distance
             unloadChunks();
+            removeCollision();
             reloadChunks = false;
         }
 
-        //DOES: generate & render chunks in queue
+        //DOES: generate, render & add collision to chunks in queue
         processQueue();
+        processCollisionQueue();
     }
 
     /**
@@ -113,6 +124,12 @@ public class ChunkManager {
 
                 //DOES: add chunks below to queue if not same chunk as already added above
                 if (distanceZ1 != distanceZ2) addIfMissing(chunkX + offsetX, chunkZ + distanceZ2);
+
+                //DOES: add collision to queue if within simulation distance
+                if (distance <= simulationDistance) {
+                    addCollisionIfMissing(chunkX + offsetX, chunkZ + distanceZ1);
+                    if (distanceZ1 != distanceZ2) addCollisionIfMissing(chunkX + offsetX, chunkZ + distanceZ2);
+                }
             }
         }
     }
@@ -136,7 +153,21 @@ public class ChunkManager {
     }
 
     /**
-     * generates chunks in queue
+     * adds given chunk to collision queue if not already there
+     * @param chunkX
+     * @param chunkZ
+     */
+    private void addCollisionIfMissing(int chunkX, int chunkZ) {
+        ChunkPos pos = new ChunkPos(chunkX, 0, chunkZ);
+        if (!loaded.contains(pos)) return;
+        if (hasCollision.contains(pos) || collisionQueued.contains(pos)) return;
+
+        collisionQueue.add(pos);
+        collisionQueued.add(pos);
+    }
+
+    /**
+     * loads or generates chunks in queue
      */
     private void processQueue() {
         //NOTE: needs to support fractional chunks per tick (setting?)
@@ -152,10 +183,37 @@ public class ChunkManager {
             //DOES: remove from queue set
             queued.remove(pos);
 
-            //DOES: generate chunk
+            //DOES: load or generate chunk
             loadChunk(pos);
             loaded.add(pos);
         }
+    }
+
+    private void processCollisionQueue() {
+        ChunkPos pos = collisionQueue.poll();
+        if (pos == null) return;
+        collisionQueued.remove(pos);
+
+        Chunk chunk = world.getChunk(pos);
+        if (chunk == null) return;
+        chunk.addCollision();
+        hasCollision.add(pos);
+    }
+
+    /**
+     * processes all chunks with collision and removes it if outside simulation distance
+     */
+    private void removeCollision() {
+        Set<ChunkPos> collisionRemoved = new HashSet<>();
+        for (ChunkPos pos : hasCollision) {
+            if (inDistance(pos, simulationDistance)) continue;
+
+            Chunk chunk = world.getChunk(pos);
+            if (chunk == null) continue;
+            chunk.removeCollision();
+            collisionRemoved.add(pos);
+        }
+        hasCollision.removeAll(collisionRemoved);
     }
 
     /**
@@ -168,7 +226,6 @@ public class ChunkManager {
             Chunk chunk = world.getChunk(pos);
             chunk.setDirty(true);
             world.getChunk(pos).rebuild();
-            loaded.add(pos);
             return;
         }
 
@@ -185,12 +242,19 @@ public class ChunkManager {
 
         //DOES: rebuild chunk with new terrain
         chunk.rebuild();
+
+        //DOES: add collision right away if in simulation distance
+        //INFO: enqueueMissing() skips if already has collision, so it only gets added once
+        if (inDistance(pos, simulationDistance)) {
+            chunk.addCollision();
+            hasCollision.add(pos);
+        }
     }
 
     private void unloadChunks() {
         Set<ChunkPos> unloaded = new HashSet<>();
         for (ChunkPos pos : loaded) {
-            if (inRenderDistance(pos)) continue;
+            if (inDistance(pos, renderDistance)) continue;
 
             Chunk chunk = world.getChunk(pos);
             if (chunk == null) continue;
@@ -200,22 +264,23 @@ public class ChunkManager {
         loaded.removeAll(unloaded);
     }
 
-    private boolean inRenderDistance(ChunkPos pos) {
+    /**
+     * checks if chunk is in distance
+     * @param pos
+     * @param distance
+     * @return
+     */
+    private boolean inDistance(ChunkPos pos, int distance) {
         int chunkX = Math.floorDiv((int) playerPos.x, Chunk.SIZE);
         int chunkZ = Math.floorDiv((int) playerPos.z, Chunk.SIZE);
+        return Math.abs(pos.x - chunkX) + Math.abs(pos.z - chunkZ) <= distance;
+    }
 
-        for (int distance = 0; distance <= renderDistance; distance++) {
-            for (int offsetX = -distance; offsetX <= distance; offsetX++) {
-                int distanceZ1 = distance - Math.abs(offsetX);
-                int distanceZ2 = -distanceZ1;
-
-                if (pos.x == chunkX + offsetX) {
-                    if (pos.z == chunkZ + distanceZ1 || pos.z == chunkZ + distanceZ2) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+    /**
+     * adds to hasCollision set so that collision can be scheduled to be removed
+     * @param pos
+     */
+    public void addToHasCollision(ChunkPos pos) {
+        hasCollision.add(pos);
     }
 }
