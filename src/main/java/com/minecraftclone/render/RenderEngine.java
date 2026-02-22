@@ -67,6 +67,6 @@ public class RenderEngine {
         gui.setLife(player.getLife());
         gui.setHunger(player.getHunger());
         gui.setHotbarSelectedSlot(player.getHotbarSlot());
-        gui.setInventoryVisibility(player.getinventoryVisible());
+        gui.setMenuVisible(player.getMenuVisible());
     }
 }

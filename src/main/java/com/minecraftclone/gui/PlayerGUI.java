@@ -2,7 +2,8 @@ package com.minecraftclone.gui;
 
 import com.minecraftclone.Main;
 import com.minecraftclone.gui.hud.HeadsUpDisplay;
-import com.minecraftclone.gui.menu.inventory.Inventory;
+import com.minecraftclone.gui.menu.Inventory;
+import com.minecraftclone.gui.menu.MenuManager;
 import com.minecraftclone.item.ItemInstance;
 import java.io.IOException;
 
@@ -10,6 +11,7 @@ public class PlayerGUI {
 
     private HeadsUpDisplay hud;
     private Inventory inventoryGUI;
+    private MenuManager menus;
 
     public PlayerGUI(Main main) throws IOException {
         //Does: Gets the window resolution
@@ -19,7 +21,7 @@ public class PlayerGUI {
         GUIManager guiManager = new GUIManager(main.getAssetManager(), main.getguiFont(), main.getGuiNode(), windowWidth, windowHeight);
 
         //Does: Creates GUI elements
-        inventoryGUI = new Inventory(main, guiManager);
+        menus = new MenuManager(guiManager, main.getInputManager(), main.getFlyByCamera());
         hud = new HeadsUpDisplay(guiManager);
     }
 
@@ -30,8 +32,10 @@ public class PlayerGUI {
      * @param item Specifies the item that should be displayed at the given Position
      */
     public void inventoryDisplayItem(int row, int column, ItemInstance item) {
-        inventoryGUI.displayItem(row, column, item);
-        hud.updateHotbarDisplayItem(inventoryGUI.getInventorySlots());
+        menus.inventoryDisplayItem(row, column, item);
+        if (row == 1) {
+            hud.updateHotbarDisplayItem(1, menus.getHotbarSlot(column));
+        }
     }
 
     /**
@@ -59,10 +63,15 @@ public class PlayerGUI {
     }
 
     /**
-     * Changes the visibility of the Inventory. Also makes the Cursor moveable
+     * Changes the visibility of a menu. Also makes the Cursor moveable
      * @param visible Specifies the visibility to be either true or false
      */
-    public void setInventoryVisibility(boolean visible) {
-        inventoryGUI.setInventoryVisibility(visible);
+    public void setMenuVisible(int id) {
+        //Fixme: trash
+        if (id == 1) {
+            menus.setInventoryVisibility(true);
+        } else {
+            menus.setInventoryVisibility(false);
+        }
     }
 }

@@ -47,14 +47,11 @@ public class Hotbar {
         );
     }
 
-    protected void updateHotbarDisplayItems(List<InventorySlot> slots) {
-        //Fixme: Should only update what has actually been changed
-        for (int i = 0; i < 9; i++) {
-            Slot slot = hotbarSlots.get(i);
+    protected void updateHotbarDisplayItems(int slotNumber, InventorySlot slots) {
+        Slot slot = hotbarSlots.get(slotNumber);
 
-            slot.setTexture(slots.get(i).getTexture());
-            slot.setText(slots.get(i).getText());
-        }
+        slot.setTexture(slots.getTexture());
+        slot.setText(slots.getText());
     }
 
     protected Display getHotbar() {

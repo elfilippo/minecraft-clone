@@ -29,7 +29,7 @@ public class PlayerCharacter {
     private int life = 13;
     private int hunger = 13;
     private int hotbarSlot = 1;
-    private boolean inventoryVisible = false;
+    private int menuVisible = 0;
 
     public PlayerCharacter(BulletAppState bulletAppState, ActionInput input, AnalogInput analogInput, SimpleApplication app) {
         this.input = input;
@@ -82,7 +82,7 @@ public class PlayerCharacter {
         if (analog.getMouseWheelUp() != 0.0 && hotbarSlot > 1) hotbarSlot--;
         if (analog.getMouseWheelDown() != 0.0f && hotbarSlot < 9) hotbarSlot++;
 
-        if (input.isTapped(Action.TOGGLE_INVENTORY)) inventoryVisible = !inventoryVisible;
+        if (input.isTapped(Action.TOGGLE_INVENTORY) && menuVisible == 0) menuVisible = 1;
     }
 
     public Node getNode() {
@@ -109,7 +109,7 @@ public class PlayerCharacter {
         return hotbarSlot;
     }
 
-    public boolean getinventoryVisible() {
-        return inventoryVisible;
+    public int getMenuVisible() {
+        return menuVisible;
     }
 }
