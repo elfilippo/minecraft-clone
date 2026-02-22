@@ -33,12 +33,16 @@ public class ChunkManager {
 
     private Vector3f playerPos;
 
+    //IS: chunk player is/was in
+    private int chunkX, lastChunkX;
+    private int chunkZ, lastChunkZ;
+
+    private boolean reloadChunks = true;
+
     public ChunkManager(SimpleApplication app, World world, int renderDistance) {
         this.app = app;
         this.world = world;
         this.renderDistance = renderDistance;
-
-        loaded.add(new ChunkPos(10, 3, 10));
 
         BulletAppState bullet = app.getStateManager().getState(BulletAppState.class);
 
@@ -52,14 +56,23 @@ public class ChunkManager {
     public void update(Vector3f playerPos) {
         this.playerPos = playerPos;
 
-        //INFO: called every frame
-        enqueueMissing();
+        lastChunkX = chunkX;
+        lastChunkZ = chunkZ;
+
+        chunkX = Math.floorDiv((int) playerPos.x, Chunk.SIZE);
+        chunkZ = Math.floorDiv((int) playerPos.z, Chunk.SIZE);
+
+        if (chunkX != lastChunkX || chunkZ != lastChunkZ || reloadChunks) {
+            //INFO: called every frame
+            enqueueMissing();
+
+            //DOES: unload chunks outside render distance
+            unloadChunks();
+            reloadChunks = false;
+        }
 
         //DOES: generate & render chunks in queue
         processQueue();
-
-        //DOES: unload chunks outside render distance
-        unloadChunks();
     }
 
     /**

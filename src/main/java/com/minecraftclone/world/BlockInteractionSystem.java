@@ -1,7 +1,12 @@
 package com.minecraftclone.world;
 
+import com.jme3.app.SimpleApplication;
+import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.debug.WireBox;
 import com.minecraftclone.block.Block;
 import com.minecraftclone.player.PlayerCharacter;
 import com.minecraftclone.player.input.Action;
@@ -18,6 +23,8 @@ public final class BlockInteractionSystem {
     private final World world;
     private final Camera camera;
     private final ActionInput input;
+    private final Geometry selectionBox;
+    private final SimpleApplication app;
 
     private Block selectedBlock;
 
@@ -35,30 +42,41 @@ public final class BlockInteractionSystem {
     private int placeDelay = 8;
     private int breakDelay = 8;
 
-    public BlockInteractionSystem(World world, Camera camera, ActionInput input) {
+    RaycastResult hit;
+
+    public BlockInteractionSystem(World world, ActionInput input, SimpleApplication app) {
         this.world = world;
-        this.camera = camera;
+        this.camera = app.getCamera();
         this.input = input;
+        this.app = app;
+        selectionBox = new Geometry("selection", new WireBox(0.501f, 0.501f, 0.501f));
+        Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", ColorRGBA.Black);
+        mat.getAdditionalRenderState().setLineWidth(4f);
+        selectionBox.setMaterial(mat);
     }
 
     /**
      * checks for block breaking and placing
      */
     public void tick() {
+        blockSelectionBox();
+
         ticksSinceBreak += 1;
         ticksSincePlace += 1;
 
-        if (input.isTapped(Action.BREAK_BLOCK) && allowBreaking) {
+        if (input.isTapped(Action.BREAK_BLOCK) && input.isTapped(Action.PLACE_BLOCK)) tryReplace();
+        else if (input.isTapped(Action.BREAK_BLOCK) && allowBreaking) {
             tryBreak();
             return;
-        }
-        if (input.isTapped(Action.PLACE_BLOCK) && allowPlacing) {
+        } else if (input.isTapped(Action.PLACE_BLOCK) && allowPlacing) {
             tryPlace();
             return;
         }
 
-        if (input.isHeld(Action.BREAK_BLOCK) && allowBreaking && ticksSinceBreak > breakDelay) tryBreak();
-        if (input.isHeld(Action.PLACE_BLOCK) && allowPlacing && ticksSincePlace > placeDelay) tryPlace();
+        if (input.isHeld(Action.PLACE_BLOCK) && input.isHeld(Action.BREAK_BLOCK)) tryReplace();
+        else if (input.isHeld(Action.BREAK_BLOCK) && allowBreaking && ticksSinceBreak > breakDelay) tryBreak();
+        else if (input.isHeld(Action.PLACE_BLOCK) && allowPlacing && ticksSincePlace > placeDelay) tryPlace();
     }
 
     public void setSelectedBlock(Block block) {
@@ -81,11 +99,8 @@ public final class BlockInteractionSystem {
      * tries to break clostest block player is looking at
      */
     private void tryBreak() {
-        RaycastResult hit = raycastBlock();
-
         //CASE: block not hit or unloaded
-        if (hit == null) return;
-        if (!world.isBlockLoaded(hit.x, hit.y, hit.z)) return;
+        if (hit == null || !world.isBlockLoaded(hit.x, hit.y, hit.z)) return;
 
         Block block = world.getBlock(hit.x, hit.y, hit.z);
 
@@ -101,8 +116,6 @@ public final class BlockInteractionSystem {
      */
     private void tryPlace() {
         if (selectedBlock == null) return;
-
-        RaycastResult hit = raycastBlock();
 
         //CASE: no block hit
         if (hit == null) return;
@@ -241,5 +254,32 @@ public final class BlockInteractionSystem {
             this.ny = ny;
             this.nz = nz;
         }
+    }
+
+    private void blockSelectionBox() {
+        hit = raycastBlock();
+
+        //CASE: block not hit or unloaded
+        if (hit == null || !world.isBlockLoaded(hit.x, hit.y, hit.z)) {
+            selectionBox.removeFromParent();
+            return;
+        }
+
+        selectionBox.setLocalTranslation(hit.x + 0.5f, hit.y + 0.5f, hit.z + 0.5f);
+        if (selectionBox.getParent() == null) {
+            app.getRootNode().attachChild(selectionBox);
+        }
+    }
+
+    private void tryReplace() {
+        //CASE: block not hit or unloaded
+        if (hit == null || !world.isBlockLoaded(hit.x, hit.y, hit.z)) return;
+
+        Block block = world.getBlock(hit.x, hit.y, hit.z);
+
+        //CASE: block not there or not breakable
+        if (block == null || !block.isBreakable()) return;
+
+        if (selectedBlock != block) world.setBlock(hit.x, hit.y, hit.z, selectedBlock);
     }
 }
