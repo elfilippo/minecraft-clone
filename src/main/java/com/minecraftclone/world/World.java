@@ -6,7 +6,6 @@ import com.minecraftclone.Main;
 import com.minecraftclone.block.Block;
 import com.minecraftclone.player.PlayerCharacter;
 import com.minecraftclone.player.input.ActionInput;
-import com.minecraftclone.player.input.AnalogInput;
 import com.minecraftclone.render.RenderEngine;
 import com.minecraftclone.world.chunks.Chunk;
 import com.minecraftclone.world.chunks.ChunkManager;
@@ -25,12 +24,13 @@ public class World {
 
     private final Map<String, Chunk> chunks = new HashMap<>();
 
-    public World(Main app, ActionInput actionInput, AnalogInput analogInput, BulletAppState bulletAppState) {
+    public World(Main app, ActionInput actionInput, BulletAppState bulletAppState) {
         this.app = app;
         this.bulletAppState = bulletAppState;
 
         //DOES: create & attatch player
-        playerCharacter = new PlayerCharacter(bulletAppState, actionInput, analogInput, app);
+        playerCharacter = new PlayerCharacter(bulletAppState, app);
+
         render = new RenderEngine(app, playerCharacter);
         app.getRootNode().attachChild(playerCharacter.getNode());
 

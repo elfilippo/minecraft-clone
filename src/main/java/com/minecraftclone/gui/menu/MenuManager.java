@@ -26,12 +26,16 @@ public class MenuManager {
         return tempNode;
     }
 
-    public void setInventoryVisibility(boolean visible) {
-        inventoryGUI.setVisibility(visible);
-        if (visible) {
-            inventorySlots.alignWith(inventoryGUI);
+    public void setMenuVisibility(Menus menu, boolean visible) {
+        switch (menu) {
+            case Menus.INVENTORY -> {
+                inventoryGUI.setVisibility(visible);
+                if (visible) {
+                    inventorySlots.alignWith(inventoryGUI);
+                }
+                inventorySlots.setVisibility(visible);
+            }
         }
-        inventorySlots.setVisibility(visible);
     }
 
     public InventorySlots getInventorySlots() {

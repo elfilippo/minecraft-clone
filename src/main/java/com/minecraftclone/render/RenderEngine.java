@@ -64,9 +64,9 @@ public class RenderEngine {
     }
 
     public void guiUpdate() {
+        //Fixme: crack
         gui.setLife(player.getLife());
         gui.setHunger(player.getHunger());
         gui.setHotbarSelectedSlot(player.getHotbarSlot());
-        gui.setMenuVisible(player.getMenuVisible());
     }
 }

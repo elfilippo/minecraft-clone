@@ -4,7 +4,6 @@ import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
@@ -13,12 +12,10 @@ public class KeyMapping {
 
     private InputManager keys;
     private ActionListener actionListener;
-    private AnalogListener analogListener;
 
-    public KeyMapping(InputManager keys, ActionListener actionListener, AnalogListener analogListener) {
+    public KeyMapping(InputManager keys, ActionListener actionListener) {
         this.keys = keys;
         this.actionListener = actionListener;
-        this.analogListener = analogListener;
 
         bindKeyAction("FORWARD", KeyInput.KEY_W);
         bindKeyAction("BACKWARD", KeyInput.KEY_S);
@@ -60,6 +57,6 @@ public class KeyMapping {
 
     private void bindMouseAxis(String name, int axisCode, boolean negative) {
         keys.addMapping(name, new MouseAxisTrigger(axisCode, negative));
-        keys.addListener(analogListener, name);
+        keys.addListener(actionListener, name);
     }
 }

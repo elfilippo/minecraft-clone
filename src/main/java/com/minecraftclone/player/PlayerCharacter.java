@@ -7,9 +7,7 @@ import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
-import com.minecraftclone.player.input.Action;
-import com.minecraftclone.player.input.ActionInput;
-import com.minecraftclone.player.input.AnalogInput;
+import com.minecraftclone.gui.menu.Menus;
 
 public class PlayerCharacter {
 
@@ -17,23 +15,19 @@ public class PlayerCharacter {
     public static final float WIDTH = 0.7f;
     public static final float HEIGHT = 1.8f;
     public static final float EYE_OFFSET = HEIGHT * 0.35f;
-    private final CharacterControl playerControl;
+    private final CharacterControl playerControl; //Info: Can replace with BetterCharacterControl
     private final Node playerNode;
 
     private final float speed = 0.15f;
     private final boolean debugEnabled = false;
     private final Vector3f walkDir = new Vector3f();
-    private final ActionInput input;
-    private final AnalogInput analog;
     private final Camera cam;
     private int life = 13;
     private int hunger = 13;
     private int hotbarSlot = 1;
-    private int menuVisible = 0;
+    private Menus menu;
 
-    public PlayerCharacter(BulletAppState bulletAppState, ActionInput input, AnalogInput analogInput, SimpleApplication app) {
-        this.input = input;
-        this.analog = analogInput;
+    public PlayerCharacter(BulletAppState bulletAppState, SimpleApplication app) {
         cam = app.getCamera();
 
         bulletAppState.setDebugEnabled(debugEnabled);
@@ -53,36 +47,40 @@ public class PlayerCharacter {
         this.playerNode = playerNode;
     }
 
-    public void tick() {
+    public void tick(PlayerCommand cmd) {
         Vector3f forward = cam.getDirection().clone();
-        forward.setY(0).normalizeLocal().multLocal(speed);
+        forward.setY(0).normalizeLocal();
+
         Vector3f left = cam.getLeft().clone();
-        left.setY(0).normalizeLocal().multLocal(speed);
+        left.setY(0).normalizeLocal();
 
         walkDir.set(0, 0, 0);
 
-        if (input.isHeld(Action.FORWARD)) walkDir.addLocal(forward);
-        if (input.isHeld(Action.LEFT)) walkDir.addLocal(left);
-        if (input.isHeld(Action.BACKWARD)) walkDir.addLocal(forward.negate());
-        if (input.isHeld(Action.RIGHT)) walkDir.addLocal(left.negate());
+        walkDir.addLocal(forward.mult(cmd.forward));
+        walkDir.addLocal(left.mult(cmd.strafe));
+
+        if (walkDir.lengthSquared() > 0) {
+            walkDir.normalizeLocal().multLocal(speed);
+        }
 
         playerControl.setWalkDirection(walkDir);
-        if (input.isHeld(Action.JUMP) && playerControl.onGround()) playerControl.jump();
 
-        if (input.isTapped(Action.HOTBAR_1)) hotbarSlot = 1;
-        if (input.isTapped(Action.HOTBAR_2)) hotbarSlot = 2;
-        if (input.isTapped(Action.HOTBAR_3)) hotbarSlot = 3;
-        if (input.isTapped(Action.HOTBAR_4)) hotbarSlot = 4;
-        if (input.isTapped(Action.HOTBAR_5)) hotbarSlot = 5;
-        if (input.isTapped(Action.HOTBAR_6)) hotbarSlot = 6;
-        if (input.isTapped(Action.HOTBAR_7)) hotbarSlot = 7;
-        if (input.isTapped(Action.HOTBAR_8)) hotbarSlot = 8;
-        if (input.isTapped(Action.HOTBAR_9)) hotbarSlot = 9;
+        if (cmd.jump && playerControl.onGround()) {
+            playerControl.jump();
+        }
 
-        if (analog.getMouseWheelUp() != 0.0 && hotbarSlot > 1) hotbarSlot--;
-        if (analog.getMouseWheelDown() != 0.0f && hotbarSlot < 9) hotbarSlot++;
+        // Hotbar direct selection
+        if (cmd.selectHotbar != 0) {
+            hotbarSlot = cmd.selectHotbar;
+        }
 
-        if (input.isTapped(Action.TOGGLE_INVENTORY) && menuVisible == 0) menuVisible = 1;
+        // Mouse wheel
+        hotbarSlot += cmd.hotbarDelta;
+        hotbarSlot = Math.max(1, Math.min(9, hotbarSlot));
+
+        /*if (cmd.toggleInventory) {
+            menu.toggleInventory();
+        }*/ //FIXME:
     }
 
     public Node getNode() {
@@ -107,9 +105,5 @@ public class PlayerCharacter {
 
     public int getHotbarSlot() {
         return hotbarSlot;
-    }
-
-    public int getMenuVisible() {
-        return menuVisible;
     }
 }
