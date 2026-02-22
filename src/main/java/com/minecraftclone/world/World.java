@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class World {
 
-    private static final int RENDER_DISTANCE = 10;
+    private static final int RENDER_DISTANCE = 4;
     private final SimpleApplication app;
     private final PlayerCharacter playerCharacter;
     private final BulletAppState bulletAppState;
@@ -38,7 +38,7 @@ public class World {
     }
 
     public Block getBlock(int worldX, int worldY, int worldZ) {
-        Chunk chunk = getChunk(worldX, worldY, worldZ);
+        Chunk chunk = getChunkAtPos(worldX, worldY, worldZ);
         if (chunk == null) return null;
 
         //DOES: calculate chunk block is in and request it
@@ -51,7 +51,7 @@ public class World {
 
     public boolean isBlockLoaded(int worldX, int worldY, int worldZ) {
         //DOES: return bool if chunk can be gotten
-        return getChunk(worldX, worldY, worldZ) != null;
+        return getChunkAtPos(worldX, worldY, worldZ) != null;
     }
 
     /**Sets block at world coordinates
@@ -73,13 +73,13 @@ public class World {
 
         //DOES: get chunk from map, create & attatch to root node if doesn't exist
         Chunk chunk = chunks.computeIfAbsent(key(chunkX, chunkY, chunkZ), k -> {
-            Chunk c = new Chunk(chunkX, chunkY, chunkZ, app.getAssetManager());
+            Chunk c = new Chunk(chunkX, chunkY, chunkZ, app.getAssetManager(), bulletAppState.getPhysicsSpace());
             app.getRootNode().attachChild(c.getNode());
             return c;
         });
 
         chunk.setBlock(localX, localY, localZ, block);
-        chunk.rebuild(bulletAppState.getPhysicsSpace());
+        chunk.rebuild();
 
         rebuildNeighborsIfNeeded(chunkX, chunkY, chunkZ, localX, localY, localZ);
     }
@@ -90,11 +90,22 @@ public class World {
      * @param worldZ
      * @return Chunk, null if doesn't exist
      */
-    private Chunk getChunk(int worldX, int worldY, int worldZ) {
+    private Chunk getChunkAtPos(int worldX, int worldY, int worldZ) {
         int chunkX = Math.floorDiv(worldX, Chunk.SIZE);
         int chunkY = Math.floorDiv(worldY, Chunk.SIZE);
         int chunkZ = Math.floorDiv(worldZ, Chunk.SIZE);
         return chunks.get(key(chunkX, chunkY, chunkZ));
+    }
+
+    /**
+     * returns chunk at chunk coordinates
+     * @param chunkX
+     * @param chunkY
+     * @param chunkZ
+     * @return null if doesn't exist
+     */
+    public Chunk getChunk(ChunkPos pos) {
+        return chunks.get(key(pos.x, pos.y, pos.z));
     }
 
     /**
@@ -124,7 +135,7 @@ public class World {
     private void rebuild(int chunkX, int chunkY, int chunkZ) {
         Chunk chunk = chunks.get(key(chunkX, chunkY, chunkZ));
         if (chunk != null) {
-            chunk.rebuild(bulletAppState.getPhysicsSpace());
+            chunk.rebuild();
         }
     }
 

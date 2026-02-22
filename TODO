@@ -12,7 +12,8 @@ not binding besides prio 0, just suggestions
 
 [filp] {0} add block selection indicator
 [filp] {0} only create collision meshes for chunks around Player (simulation distance)
-[filp] {0} unload chunks
+[filp] {0} unload chunks at different y-levels
+[filp] {0} only check for chunks when crossing into different chunk
 [filp] {1} improve checking for visible faces (across chunk borders, etc.)
 [filp] {2} only create mesh for faces facing player when far away
 [filp] {2} separate rendering (visual blocks, chunk meshes, RenderEngine class) from blocks in memory (Chunk class)

@@ -28,10 +28,17 @@ public class ChunkManager {
     //INFO: set is used for super-fast lookup time (check if chunk is already queued)
     private final Set<ChunkPos> queued = new HashSet<>();
 
+    //IS: set of loaded chunks
+    private final Set<ChunkPos> loaded = new HashSet<>();
+
+    private Vector3f playerPos;
+
     public ChunkManager(SimpleApplication app, World world, int renderDistance) {
         this.app = app;
         this.world = world;
         this.renderDistance = renderDistance;
+
+        loaded.add(new ChunkPos(10, 3, 10));
 
         BulletAppState bullet = app.getStateManager().getState(BulletAppState.class);
 
@@ -40,14 +47,19 @@ public class ChunkManager {
 
     /**
      * updates chunk queue
-     * @param playerWorldPos
+     * @param playerPos
      */
-    public void update(Vector3f playerWorldPos) {
+    public void update(Vector3f playerPos) {
+        this.playerPos = playerPos;
+
         //INFO: called every frame
-        enqueueMissing(playerWorldPos);
+        enqueueMissing();
 
         //DOES: generate & render chunks in queue
         processQueue();
+
+        //DOES: unload chunks outside render distance
+        unloadChunks();
     }
 
     /**
@@ -55,7 +67,7 @@ public class ChunkManager {
      * chunks closer to player are enqueued first
      * @param playerPos
      */
-    private void enqueueMissing(Vector3f playerPos) {
+    private void enqueueMissing() {
         //DOES: get chunk coords from player pos
         //INFO: floorDiv is used to get the correct coords even with negative playerPos
         int chunkX = Math.floorDiv((int) playerPos.x, Chunk.SIZE);
@@ -102,8 +114,8 @@ public class ChunkManager {
 
         ChunkPos pos = new ChunkPos(chunkX, 0, chunkZ);
 
-        //CASE: if exists or queued
-        if (world.hasChunk(pos) || queued.contains(pos)) return;
+        //CASE: if loaded or queued
+        if (loaded.contains(pos) || queued.contains(pos)) return;
 
         //DOES: add to queue and queue set
         queue.add(pos);
@@ -128,16 +140,26 @@ public class ChunkManager {
             queued.remove(pos);
 
             //DOES: generate chunk
-            generateChunk(pos);
+            loadChunk(pos);
+            loaded.add(pos);
         }
     }
 
     /**
-     * generates chunk at position
+     * loads or generates chunk at position
      * @param pos
      */
-    private void generateChunk(ChunkPos pos) {
-        Chunk chunk = new Chunk(pos.x, pos.y, pos.z, app.getAssetManager());
+    private void loadChunk(ChunkPos pos) {
+        //CASE: if exists but unloaded
+        if (world.hasChunk(pos)) {
+            Chunk chunk = world.getChunk(pos);
+            chunk.setDirty(true);
+            world.getChunk(pos).rebuild();
+            loaded.add(pos);
+            return;
+        }
+
+        Chunk chunk = new Chunk(pos.x, pos.y, pos.z, app.getAssetManager(), physicsSpace);
 
         //DOES: add chunk to map
         world.addChunk(chunk);
@@ -149,6 +171,38 @@ public class ChunkManager {
         TerrainGenerator.generateChunk(chunk);
 
         //DOES: rebuild chunk with new terrain
-        chunk.rebuild(physicsSpace);
+        chunk.rebuild();
+    }
+
+    private void unloadChunks() {
+        Set<ChunkPos> unloaded = new HashSet<>();
+        for (ChunkPos pos : loaded) {
+            if (inRenderDistance(pos)) continue;
+
+            Chunk chunk = world.getChunk(pos);
+            if (chunk == null) continue;
+            chunk.unload();
+            unloaded.add(pos);
+        }
+        loaded.removeAll(unloaded);
+    }
+
+    private boolean inRenderDistance(ChunkPos pos) {
+        int chunkX = Math.floorDiv((int) playerPos.x, Chunk.SIZE);
+        int chunkZ = Math.floorDiv((int) playerPos.z, Chunk.SIZE);
+
+        for (int distance = 0; distance <= renderDistance; distance++) {
+            for (int offsetX = -distance; offsetX <= distance; offsetX++) {
+                int distanceZ1 = distance - Math.abs(offsetX);
+                int distanceZ2 = -distanceZ1;
+
+                if (pos.x == chunkX + offsetX) {
+                    if (pos.z == chunkZ + distanceZ1 || pos.z == chunkZ + distanceZ2) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

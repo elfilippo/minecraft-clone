@@ -29,7 +29,7 @@ public class Main extends SimpleApplication {
 
     //DOES: settings
     public static AppSettings settings;
-    public static boolean fullscreen = true;
+    public static boolean fullscreen = false;
     public static int screen_width = 1920;
     public static int screen_height = 1080;
     private boolean initialized = false;

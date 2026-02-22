@@ -29,13 +29,16 @@ public class Chunk {
 
     private final Map<String, Geometry> geometries = new HashMap<>();
     private RigidBodyControl collisionBody;
+    private final PhysicsSpace physicsSpace;
+
     private boolean dirty = true;
 
-    public Chunk(int chunkX, int chunkY, int chunkZ, AssetManager assetManager) {
+    public Chunk(int chunkX, int chunkY, int chunkZ, AssetManager assetManager, PhysicsSpace physicsSpace) {
         this.chunkX = chunkX;
         this.chunkY = chunkY;
         this.chunkZ = chunkZ;
         this.assetManager = assetManager;
+        this.physicsSpace = physicsSpace;
 
         //DOES: set location of the chunk node
         chunkNode.setLocalTranslation(chunkX * SIZE, chunkY * SIZE, chunkZ * SIZE);
@@ -72,7 +75,7 @@ public class Chunk {
      * rebuilds the chunk mesh if not dirty
      * <p>
      */
-    public void rebuild(PhysicsSpace physicsSpace) {
+    public void rebuild() {
         if (!dirty) return;
 
         Map<String, Mesh> meshes = ChunkMeshBuilder.build(blocks);
@@ -120,6 +123,20 @@ public class Chunk {
     }
 
     /**
+     * unloads the chunk and removes collision
+     */
+    public void unload() {
+        for (Geometry geometry : geometries.values()) {
+            geometry.removeFromParent();
+        }
+        geometries.clear();
+
+        if (collisionBody != null) {
+            physicsSpace.remove(collisionBody);
+        }
+    }
+
+    /**
      * returns the array of block objects
      * @return
      */
@@ -137,5 +154,9 @@ public class Chunk {
 
     public int getChunkY() {
         return chunkY;
+    }
+
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
     }
 }

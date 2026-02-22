@@ -2,6 +2,7 @@ package com.minecraftclone.world.chunks;
 
 public final class ChunkPos {
 
+    //TODO: figure out what this does
     public final int x, y, z;
 
     public ChunkPos(int x, int y, int z) {
