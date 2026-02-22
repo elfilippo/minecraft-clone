@@ -28,9 +28,9 @@ public class PlayerCharacter {
     private int hunger = 13;
     private int hotbarSlot = 1;
     private boolean inventoryVisible = false;
-    private boolean console = false;
+    private boolean chatOpen = false;
     private char consoleInput;
-    private boolean consoleEnter = false;
+    private boolean chatSubmitted = false;
 
     public PlayerCharacter(BulletAppState bulletAppState, ActionInput input, SimpleApplication app) {
         this.input = input;
@@ -81,10 +81,10 @@ public class PlayerCharacter {
 
         if (input.isTapped(Action.TOGGLE_INVENTORY)) inventoryVisible = !inventoryVisible;
 
-        if (input.isTapped(Action.T)) console = true;
+        if (input.isTapped(Action.T)) chatOpen = true;
 
-        if (console) {
-            if (input.isTapped(Action.ENTER)) consoleEnter = true;
+        if (chatOpen) {
+            if (input.isTapped(Action.ENTER)) chatSubmitted = true;
             if (input.isTapped(Action.ONE)) consoleInput = '1';
             if (input.isTapped(Action.TWO)) consoleInput = '2';
             if (input.isTapped(Action.THREE)) consoleInput = '3';
@@ -163,17 +163,20 @@ public class PlayerCharacter {
         return temp;
     }
 
-    public boolean getConsoleEnter() {
-        if (consoleEnter) {
-            boolean temp = consoleEnter;
-            consoleEnter = false;
-            console = false;
+    /**
+     * @return if chat message has been submitted
+     */
+    public boolean submitChat() {
+        if (chatSubmitted) {
+            boolean temp = chatSubmitted;
+            chatSubmitted = false;
+            chatOpen = false;
             return temp;
         }
         return false;
     }
 
-    public boolean getConsole() {
-        return console;
+    public boolean getChatOpen() {
+        return chatOpen;
     }
 }

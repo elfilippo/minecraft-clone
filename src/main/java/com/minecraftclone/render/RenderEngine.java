@@ -29,12 +29,12 @@ public class RenderEngine {
     }
 
     public void guiUpdate() {
-        if (player.getConsole()) {
+        if (player.getChatOpen()) {
             if (!console) {
-                gui.openConsole(player.getConsole());
+                gui.openConsole(player.getChatOpen());
                 console = true;
             }
-            gui.consoleCommandEnter(player.getConsoleEnter());
+            gui.consoleCommandEnter(player.submitChat());
             gui.consoleTextAdd(player.getConsoleInput());
         }
         gui.setLife(player.getLife());
@@ -43,7 +43,7 @@ public class RenderEngine {
         gui.setInventoryVisibility(player.getinventoryVisible());
 
         switch (gui.getCommand()) {
-            default -> 
+            default -> System.out.println("skibidi");
         }
     }
 }

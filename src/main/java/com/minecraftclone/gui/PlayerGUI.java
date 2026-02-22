@@ -100,8 +100,14 @@ public class PlayerGUI {
         );
         hotbar.setPosition(windowWidth / 2 - (hotbar.getWidth() / 2), 0);
         hotbarSelector.setPosition(windowWidth / 2 - ((hotbarSelector.getWidth() / 2)), 0);
-        experienceBarEmpty.setPosition(windowWidth / 2 - ((experienceBarEmpty.getWidth() / 2)), hotbar.getHeight() + scale * 2);
-        crosshair.setPosition(windowWidth / 2 - ((crosshair.getWidth() / 2)), windowHeight / 2 - ((crosshair.getHeight() / 2)));
+        experienceBarEmpty.setPosition(
+            windowWidth / 2 - ((experienceBarEmpty.getWidth() / 2)),
+            hotbar.getHeight() + scale * 2
+        );
+        crosshair.setPosition(
+            windowWidth / 2 - ((crosshair.getWidth() / 2)),
+            windowHeight / 2 - ((crosshair.getHeight() / 2))
+        );
 
         //Does: Attach HUD Elements to GUI Node, so they are visible
         inventoryNode.attachChild(inventory);
@@ -191,7 +197,11 @@ public class PlayerGUI {
         //Does: Generate invisible Pictures on top of hotbar slots to be replaced with visible items
         for (int i = 0; i < 9; i++) {
             BitmapText text = new BitmapText(font);
-            text.setLocalTranslation((windowWidth - hotbar.getWidth()) / 2 + scale * (20 + 20 * i), 2 * scale + text.getHeight(), 0);
+            text.setLocalTranslation(
+                (windowWidth - hotbar.getWidth()) / 2 + scale * (20 + 20 * i),
+                2 * scale + text.getHeight(),
+                0
+            );
 
             hotbarNode.attachChild(text);
             hotbarItemCountList.add(text);
