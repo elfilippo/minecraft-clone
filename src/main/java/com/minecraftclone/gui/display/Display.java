@@ -26,7 +26,7 @@ public class Display {
 
     public Display(GUIManager guiManager, int x, int y) {
         this.guiManager = guiManager;
-        display = guiManager.createPicture(guiManager.loadItemTexture2d("golden_apple"), "display");
+        display = guiManager.createPicture(guiManager.loadGUITexture2d("blank"), "display", 16);
         display.setPosition(x, y);
     }
 

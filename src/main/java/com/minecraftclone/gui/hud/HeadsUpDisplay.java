@@ -10,13 +10,9 @@ public class HeadsUpDisplay {
     private Picture experienceBarEmpty, crosshair;
     private Node hudNode;
 
-    private int scale, halfWidth, halfHeight;
-
     private HeartsDisplay heartsDisplay;
     private HungerDisplay hungerDisplay;
     private Hotbar hotbar;
-
-    private int selectedSlot;
 
     public HeadsUpDisplay(GUIManager guiManager) {
         Node guiNode = guiManager.getGuiNode();
@@ -36,20 +32,26 @@ public class HeadsUpDisplay {
 
         heartsDisplay = new HeartsDisplay(
             guiManager,
-            (int) (halfWidth - (hotbar.getHotbar().getWidth() / 2)),
-            (int) (experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHotbar().getHeight()),
+            (int) (guiManager.getHalftWindowWidth() - (hotbar.getHotbar().getWidth() / 2)),
+            (int) (experienceBarEmpty.getHeight() + guiManager.getScale() * 4 + hotbar.getHotbar().getHeight()),
             hudNode
         );
         hungerDisplay = new HungerDisplay(
             guiManager,
-            (int) (halfWidth + hotbar.getHotbar().getWidth() / 2 - 9 * scale),
-            (int) (experienceBarEmpty.getHeight() + scale * 4 + hotbar.getHotbar().getHeight()),
+            (int) (guiManager.getHalftWindowWidth() + hotbar.getHotbar().getWidth() / 2 - 9 * guiManager.getScale()),
+            (int) (experienceBarEmpty.getHeight() + guiManager.getScale() * 4 + hotbar.getHotbar().getHeight()),
             hudNode
         );
 
         //DOES: Sets the Position of some gui elements on the screen
-        experienceBarEmpty.setPosition(halfWidth - ((experienceBarEmpty.getWidth() / 2)), hotbar.getHotbar().getHeight() + scale * 2);
-        crosshair.setPosition(halfWidth - ((crosshair.getWidth() / 2)), halfHeight - ((crosshair.getHeight() / 2)));
+        experienceBarEmpty.setPosition(
+            guiManager.getHalftWindowWidth() - ((experienceBarEmpty.getWidth() / 2)),
+            hotbar.getHotbar().getHeight() + guiManager.getScale() * 2
+        );
+        crosshair.setPosition(
+            guiManager.getHalftWindowWidth() - ((crosshair.getWidth() / 2)),
+            guiManager.getHalftWindowHeight() - ((crosshair.getHeight() / 2))
+        );
 
         //DOES: Attaches gui elements to Nodes
         hudNode.attachChild(experienceBarEmpty);
@@ -78,11 +80,7 @@ public class HeadsUpDisplay {
      * @param invText List of all Item Texts in the inventory
      */
     public void updateHotbarDisplayItem(int slotNumber, InventorySlot slots) {
-        hotbar.updateHotbarDisplayItems(slotNumber, slots);
-    }
-
-    public int getSelectedSlot() {
-        return selectedSlot;
+        hotbar.updateHotbarDisplayItem(slotNumber, slots);
     }
 
     /**
@@ -91,7 +89,6 @@ public class HeadsUpDisplay {
      */
     public void setHotbarSelectedSlot(int slot) {
         if (slot <= 9 && slot >= 1) {
-            selectedSlot = slot;
             hotbar.setSelectedSlot(slot);
         }
     }

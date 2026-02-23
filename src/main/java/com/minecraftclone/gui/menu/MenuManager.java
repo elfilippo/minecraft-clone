@@ -67,7 +67,7 @@ public class MenuManager {
     }
 
     public InventorySlot getHotbarSlot(int slot) {
-        return inventorySlots.getInventorySlots(slot);
+        return inventorySlots.getInventorySlot(slot);
     }
 
     public Menus getVisibleMenu() {

@@ -33,7 +33,7 @@ public class PlayerGUI {
     public void inventoryDisplayItem(int row, int column, ItemInstance item) {
         menus.inventoryDisplayItem(row, column, item);
         if (row == 1) {
-            hud.updateHotbarDisplayItem(1, menus.getHotbarSlot(column));
+            hud.updateHotbarDisplayItem(column, menus.getHotbarSlot(column));
         }
     }
 

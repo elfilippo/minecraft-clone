@@ -11,7 +11,7 @@ import com.minecraftclone.item.ItemRegistry;
 public class GUIManager {
 
     private AssetManager assetManager;
-    private int scale, windowWidth, windowHeight;
+    private int scale, windowWidth, windowHeight, halftWindowWidth, halftWindowHeight;
     private float fontScale;
     private BitmapFont font;
     private Node guiNode;
@@ -22,6 +22,8 @@ public class GUIManager {
         this.guiNode = guiNode;
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
+        this.halftWindowWidth = windowWidth / 2;
+        this.halftWindowHeight = windowHeight / 2;
 
         //Does: Autoscaling
         int scale = Math.min(windowWidth / 480, windowHeight / 270);
@@ -34,6 +36,14 @@ public class GUIManager {
         picture.setTexture(assetManager, texture, true);
         picture.setWidth(texture.getImage().getWidth() * scale);
         picture.setHeight(texture.getImage().getHeight() * scale);
+        return picture;
+    }
+
+    public Picture createPicture(Texture2D texture, String name, int customScale) {
+        Picture picture = new Picture(name);
+        picture.setTexture(assetManager, texture, true);
+        picture.setWidth(texture.getImage().getWidth() * scale * customScale);
+        picture.setHeight(texture.getImage().getHeight() * scale * customScale);
         return picture;
     }
 
@@ -77,5 +87,13 @@ public class GUIManager {
 
     public Node getGuiNode() {
         return guiNode;
+    }
+
+    public int getHalftWindowWidth() {
+        return halftWindowWidth;
+    }
+
+    public int getHalftWindowHeight() {
+        return halftWindowHeight;
     }
 }

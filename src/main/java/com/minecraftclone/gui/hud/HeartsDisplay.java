@@ -9,6 +9,8 @@ import java.util.List;
 
 public class HeartsDisplay {
 
+    private static final int ICON_WIDTH = 8;
+
     private List<Display> hearts = new ArrayList<>();
 
     private Texture2D full, half;
@@ -21,7 +23,7 @@ public class HeartsDisplay {
             Display heartContainer = new Display(
                 guiManager,
                 guiManager.loadGUITexture2d("sprites/hud/heart/container"),
-                x + 8 * guiManager.getScale() * i,
+                x + ICON_WIDTH * guiManager.getScale() * i,
                 y
             );
             heartContainer.attachTo(node);
@@ -29,7 +31,7 @@ public class HeartsDisplay {
             Display heart = new Display(
                 guiManager,
                 guiManager.loadGUITexture2d("sprites/hud/heart/full"),
-                x + 8 * guiManager.getScale() * i,
+                x + ICON_WIDTH * guiManager.getScale() * i,
                 y
             );
             hearts.add(heart);

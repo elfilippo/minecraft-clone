@@ -8,6 +8,8 @@ import com.minecraftclone.gui.GUIManager;
 
 public class Slot extends Display {
 
+    private static final int SLOT_WIDTH = 16;
+
     Vector3f anchor;
     BitmapText text;
 
@@ -18,8 +20,8 @@ public class Slot extends Display {
         text.setLocalTranslation(x, y, 0);
 
         anchor = text.getLocalTranslation().clone();
-        anchor.x = anchor.x + 16 * guiManager.getScale(); //FIXME: Magic number
-        anchor.y = anchor.y + this.text.getHeight() * guiManager.getFontScale() - guiManager.getScale() - 1; //Fixme: -1?
+        anchor.x = anchor.x + SLOT_WIDTH * guiManager.getScale();
+        anchor.y = anchor.y + this.text.getHeight() * guiManager.getFontScale() - guiManager.getScale() - 1;
     }
 
     public void setText(String text) {

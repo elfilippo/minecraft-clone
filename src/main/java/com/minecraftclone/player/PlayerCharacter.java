@@ -9,6 +9,8 @@ import com.jme3.scene.Node;
 import com.minecraftclone.Main;
 import com.minecraftclone.gui.PlayerGUI;
 import com.minecraftclone.gui.menu.Menus;
+import com.minecraftclone.item.ItemInstance;
+import com.minecraftclone.item.ItemRegistry;
 import java.io.IOException;
 
 public class PlayerCharacter {
@@ -24,8 +26,8 @@ public class PlayerCharacter {
     private final boolean debugEnabled = false;
     private final Vector3f walkDir = new Vector3f();
     private final Camera cam;
-    private int life = 13;
-    private int hunger = 13;
+    private int life;
+    private int hunger;
     private int hotbarSlot = 1;
     private PlayerGUI gui;
 
@@ -53,6 +55,8 @@ public class PlayerCharacter {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        gui.inventoryDisplayItem(1, 4, new ItemInstance(ItemRegistry.get("diamond_sword")));
     }
 
     public void tick(PlayerCommand cmd) {
@@ -85,6 +89,7 @@ public class PlayerCharacter {
         // Mouse wheel
         hotbarSlot += cmd.hotbarDelta;
         hotbarSlot = Math.max(1, Math.min(9, hotbarSlot));
+        gui.setHotbarSelectedSlot(hotbarSlot);
 
         if (cmd.toggleInventory) {
             if (gui.isMenuVisible()) {

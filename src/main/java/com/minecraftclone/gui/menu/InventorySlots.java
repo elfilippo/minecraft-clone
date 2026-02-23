@@ -85,7 +85,7 @@ public class InventorySlots {
         }
     }
 
-    public InventorySlot getInventorySlots(int slot) {
+    public InventorySlot getInventorySlot(int slot) {
         return inventorySlots.get(slot);
     }
 }

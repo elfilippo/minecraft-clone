@@ -9,6 +9,8 @@ import java.util.List;
 
 public class HungerDisplay {
 
+    private static final int ICON_WIDTH = 8;
+
     private List<Display> hungerBars = new ArrayList<>();
 
     private Texture2D full, half;
@@ -21,12 +23,12 @@ public class HungerDisplay {
             Display hungerContainer = new Display(
                 guiManager,
                 guiManager.loadGUITexture2d("sprites/hud/food_empty"),
-                x - 8 * guiManager.getScale() * i,
+                x - ICON_WIDTH * guiManager.getScale() * i,
                 y
             );
             hungerContainer.attachTo(node);
 
-            Display hunger = new Display(guiManager, full, x - 8 * guiManager.getScale() * i, y);
+            Display hunger = new Display(guiManager, full, x - ICON_WIDTH * guiManager.getScale() * i, y);
             hungerBars.add(hunger);
             hunger.attachTo(node);
         }

@@ -12,7 +12,7 @@ public class Hotbar {
 
     private GUIManager guiManager;
 
-    private final Display hotbar, selector;
+    private Display hotbar, selector;
 
     private List<Slot> hotbarSlots = new ArrayList<>();
 
@@ -22,7 +22,7 @@ public class Hotbar {
         hotbar = new Display(guiManager, guiManager.loadGUITexture2d("sprites/hud/hotbar"));
         selector = new Display(guiManager, guiManager.loadGUITexture2d("sprites/hud/hotbar_selection"));
 
-        hotbar.setPosition(guiManager.getWindowWidth() / 2 - (hotbar.getWidth() / 2), 0);
+        hotbar.setPosition(guiManager.getHalftWindowWidth() - (hotbar.getWidth() / 2), 0);
 
         hotbar.attachTo(node);
         selector.attachTo(node);
@@ -30,7 +30,7 @@ public class Hotbar {
         for (int i = 0; i < 9; i++) {
             Slot slot = new Slot(
                 guiManager,
-                (guiManager.getWindowWidth() / 2 - (hotbar.getWidth()) / 2) + guiManager.getScale() * (3 + 20 * i),
+                (guiManager.getHalftWindowWidth() - (hotbar.getWidth()) / 2) + guiManager.getScale() * (3 + 20 * i),
                 3 * guiManager.getScale()
             );
             slot.attachTo(node);
@@ -39,16 +39,16 @@ public class Hotbar {
     }
 
     protected void setSelectedSlot(int slot) {
-        hotbar.setPosition(
-            guiManager.getWindowWidth() / 2 -
+        selector.setPosition(
+            guiManager.getHalftWindowWidth() -
                 (hotbar.getWidth() / 2 + guiManager.getScale()) +
                 ((hotbar.getWidth() - 2 * guiManager.getScale()) / 9) * (slot - 1),
             0
         );
     }
 
-    protected void updateHotbarDisplayItems(int slotNumber, InventorySlot slots) {
-        Slot slot = hotbarSlots.get(slotNumber);
+    protected void updateHotbarDisplayItem(int column, InventorySlot slots) {
+        Slot slot = hotbarSlots.get(column);
 
         slot.setTexture(slots.getTexture());
         slot.setText(slots.getText());
