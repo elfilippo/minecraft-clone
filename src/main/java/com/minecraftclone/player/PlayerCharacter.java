@@ -9,8 +9,6 @@ import com.jme3.scene.Node;
 import com.minecraftclone.Main;
 import com.minecraftclone.gui.PlayerGUI;
 import com.minecraftclone.gui.menu.Menus;
-import com.minecraftclone.item.ItemInstance;
-import com.minecraftclone.item.ItemRegistry;
 import java.io.IOException;
 
 public class PlayerCharacter {
@@ -19,17 +17,20 @@ public class PlayerCharacter {
     public static final float WIDTH = 0.7f;
     public static final float HEIGHT = 1.8f;
     public static final float EYE_OFFSET = HEIGHT * 0.35f;
+
     private final CharacterControl playerControl; //Info: Can replace with BetterCharacterControl
     private final Node playerNode;
-
     private final float speed = 0.15f;
     private final boolean debugEnabled = false;
     private final Vector3f walkDir = new Vector3f();
     private final Camera cam;
-    private int life;
-    private int hunger;
+
+    private int life, hunger;
     private int hotbarSlot = 1;
+
     private PlayerGUI gui;
+    private Inventory inventory;
+    private InventoryController inventoryControler;
 
     public PlayerCharacter(BulletAppState bulletmainState, Main main) {
         cam = main.getCamera();
@@ -50,13 +51,13 @@ public class PlayerCharacter {
         this.playerControl = player;
         this.playerNode = playerNode;
 
+        this.inventory = new Inventory(35);
+        this.inventoryControler = new InventoryController(inventory);
         try {
             this.gui = new PlayerGUI(main);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        gui.inventoryDisplayItem(1, 4, new ItemInstance(ItemRegistry.get("diamond_sword")));
     }
 
     public void tick(PlayerCommand cmd) {

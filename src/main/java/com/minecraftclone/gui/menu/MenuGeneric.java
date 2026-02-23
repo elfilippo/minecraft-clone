@@ -14,7 +14,7 @@ public class MenuGeneric {
     public MenuGeneric(GUIManager guiManager, Node node, int offsetX, int offsetY, String texturePath) {
         this.node = node;
 
-        Texture2D texture = guiManager.loadGUITexture2d(texturePath); //"container/menu"
+        Texture2D texture = guiManager.loadGUITexture2d(texturePath);
         menu = new Display(
             guiManager,
             texture,
