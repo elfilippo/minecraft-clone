@@ -12,12 +12,15 @@ public class MenuManager {
     private Inventory inventoryGUI;
     private InventorySlots inventorySlots;
     private GUIManager guiManager;
+    private Menus visibleMenu = Menus.INVENTORY;
 
     public MenuManager(GUIManager guiManager, InputManager inputManager, FlyByCamera flyByCamera) {
         this.guiManager = guiManager;
 
         inventoryGUI = new Inventory(guiManager, newNode("inventory"), inputManager, flyByCamera);
         inventorySlots = new InventorySlots(guiManager, newNode("slots"));
+
+        setMenuVisibility(Menus.NONE);
     }
 
     private Node newNode(String name) {
@@ -26,14 +29,31 @@ public class MenuManager {
         return tempNode;
     }
 
-    public void setMenuVisibility(Menus menu, boolean visible) {
+    public void setMenuVisibility(Menus menu) {
         switch (menu) {
             case Menus.INVENTORY -> {
-                inventoryGUI.setVisibility(visible);
-                if (visible) {
-                    inventorySlots.alignWith(inventoryGUI);
+                inventoryGUI.setVisibility(true);
+                inventorySlots.alignWith(inventoryGUI);
+                inventorySlots.setVisibility(true);
+                visibleMenu = Menus.INVENTORY;
+            }
+            case Menus.NONE -> {
+                if (visibleMenu != Menus.NONE) {
+                    setMenuInvisible(visibleMenu);
+                    visibleMenu = Menus.NONE;
                 }
-                inventorySlots.setVisibility(visible);
+            }
+        }
+    }
+
+    private void setMenuInvisible(Menus menu) {
+        switch (menu) {
+            case Menus.INVENTORY -> {
+                inventoryGUI.setVisibility(false);
+                inventorySlots.setVisibility(false);
+            }
+            case Menus.NONE -> {
+                break;
             }
         }
     }
@@ -48,5 +68,9 @@ public class MenuManager {
 
     public InventorySlot getHotbarSlot(int slot) {
         return inventorySlots.getInventorySlots(slot);
+    }
+
+    public Menus getVisibleMenu() {
+        return visibleMenu;
     }
 }

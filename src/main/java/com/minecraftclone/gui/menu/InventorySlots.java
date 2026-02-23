@@ -43,15 +43,15 @@ public class InventorySlots {
     }
 
     public void alignWith(MenuGeneric menu) {
-        for (int i = 0; i > 37; i++) {
+        for (int i = 0; i < 36; i++) {
             int tempX = anchors.get(i).x();
             int tempY = anchors.get(i).y();
 
             inventorySlots
                 .get(i)
                 .setPosition(
-                    (guiManager.getWindowWidth() - menu.getWidth() * guiManager.getScale()) / 2 + tempX,
-                    (guiManager.getWindowHeight() + menu.getHeight() * guiManager.getScale()) / 2 - tempY
+                    (guiManager.getWindowWidth() - menu.getWidth()) / 2 + tempX,
+                    (guiManager.getWindowHeight() + menu.getHeight()) / 2 - tempY
                 );
         }
     }

@@ -2,7 +2,6 @@ package com.minecraftclone.gui;
 
 import com.minecraftclone.Main;
 import com.minecraftclone.gui.hud.HeadsUpDisplay;
-import com.minecraftclone.gui.menu.Inventory;
 import com.minecraftclone.gui.menu.MenuManager;
 import com.minecraftclone.gui.menu.Menus;
 import com.minecraftclone.item.ItemInstance;
@@ -11,7 +10,6 @@ import java.io.IOException;
 public class PlayerGUI {
 
     private HeadsUpDisplay hud;
-    private Inventory inventoryGUI;
     private MenuManager menus;
 
     public PlayerGUI(Main main) throws IOException {
@@ -67,7 +65,12 @@ public class PlayerGUI {
      * Changes the visibility of a menu. Also makes the Cursor moveable
      * @param visible Specifies the visibility to be either true or false
      */
-    public void setMenuVisible(Menus menu, boolean visible) {
-        menus.setMenuVisibility(menu, visible);
+    public void setMenuVisibility(Menus menu) {
+        menus.setMenuVisibility(menu);
+    }
+
+    public boolean isMenuVisible() {
+        if (menus.getVisibleMenu() != Menus.NONE) return true;
+        else return false;
     }
 }

@@ -1,13 +1,15 @@
 package com.minecraftclone.player;
 
-import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
+import com.minecraftclone.Main;
+import com.minecraftclone.gui.PlayerGUI;
 import com.minecraftclone.gui.menu.Menus;
+import java.io.IOException;
 
 public class PlayerCharacter {
 
@@ -25,12 +27,12 @@ public class PlayerCharacter {
     private int life = 13;
     private int hunger = 13;
     private int hotbarSlot = 1;
-    private Menus menu;
+    private PlayerGUI gui;
 
-    public PlayerCharacter(BulletAppState bulletAppState, SimpleApplication app) {
-        cam = app.getCamera();
+    public PlayerCharacter(BulletAppState bulletmainState, Main main) {
+        cam = main.getCamera();
 
-        bulletAppState.setDebugEnabled(debugEnabled);
+        bulletmainState.setDebugEnabled(debugEnabled);
 
         var shape = new BoxCollisionShape(new Vector3f(WIDTH / 2f, HEIGHT / 2f, WIDTH / 2f));
         var player = new CharacterControl(shape, STEP_HEIGHT);
@@ -40,11 +42,17 @@ public class PlayerCharacter {
 
         Node playerNode = new Node("Player");
         playerNode.addControl(player);
-        bulletAppState.getPhysicsSpace().add(player);
+        bulletmainState.getPhysicsSpace().add(player);
 
         player.setPhysicsLocation(new Vector3f(5, 20, 2));
         this.playerControl = player;
         this.playerNode = playerNode;
+
+        try {
+            this.gui = new PlayerGUI(main);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void tick(PlayerCommand cmd) {
@@ -78,9 +86,13 @@ public class PlayerCharacter {
         hotbarSlot += cmd.hotbarDelta;
         hotbarSlot = Math.max(1, Math.min(9, hotbarSlot));
 
-        /*if (cmd.toggleInventory) {
-            menu.toggleInventory();
-        }*/ //FIXME:
+        if (cmd.toggleInventory) {
+            if (gui.isMenuVisible()) {
+                gui.setMenuVisibility(Menus.NONE);
+            } else {
+                gui.setMenuVisibility(Menus.INVENTORY);
+            }
+        }
     }
 
     public Node getNode() {
@@ -95,15 +107,13 @@ public class PlayerCharacter {
         return playerControl.getPhysicsLocation();
     }
 
-    public int getLife() {
-        return life;
+    public void setLife(int life) {
+        this.life = life;
+        gui.setLife(life);
     }
 
-    public int getHunger() {
-        return hunger;
-    }
-
-    public int getHotbarSlot() {
-        return hotbarSlot;
+    public void setHunger(int hunger) {
+        this.hunger = hunger;
+        gui.setHunger(hunger);
     }
 }

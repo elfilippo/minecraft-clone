@@ -51,15 +51,6 @@ public class GUIManager {
         return texture;
     }
 
-    @Deprecated
-    public Picture createPicture(Texture2D texture, String name, int customScale) {
-        Picture picture = new Picture(name);
-        picture.setTexture(assetManager, texture, true);
-        picture.setWidth(texture.getImage().getWidth() * customScale);
-        picture.setHeight(texture.getImage().getHeight() * customScale);
-        return picture;
-    }
-
     public AssetManager getAssetManager() {
         return assetManager;
     }
