@@ -229,7 +229,7 @@ public class ChunkManager {
             return;
         }
 
-        Chunk chunk = new Chunk(pos.x, pos.y, pos.z, app.getAssetManager(), physicsSpace);
+        Chunk chunk = new Chunk(world, pos.x, pos.y, pos.z, app.getAssetManager(), physicsSpace);
 
         //DOES: add chunk to map
         world.addChunk(chunk);
@@ -248,6 +248,35 @@ public class ChunkManager {
         if (inDistance(pos, simulationDistance)) {
             chunk.addCollision();
             hasCollision.add(pos);
+        }
+
+        //DOES: rebuild neighbors to cull faces across chunk borders properly
+        //INFO: not recursive, since rebuildNeighbor does not rebuild neighbors for itself (does not loop infinitely)
+        rebuildNeighbor(pos.x + 1, pos.y, pos.z);
+        rebuildNeighbor(pos.x - 1, pos.y, pos.z);
+        rebuildNeighbor(pos.x, pos.y + 1, pos.z);
+        rebuildNeighbor(pos.x, pos.y - 1, pos.z);
+        rebuildNeighbor(pos.x, pos.y, pos.z + 1);
+        rebuildNeighbor(pos.x, pos.y, pos.z - 1);
+    }
+
+    /**
+     * rebuilds chunk at given pos while preserving collision state
+     * use specifically for rebuilding *neighbors* (to cull faces or whatever)
+     * @param chunkX
+     * @param chunkY
+     * @param chunkZ
+     */
+    private void rebuildNeighbor(int chunkX, int chunkY, int chunkZ) {
+        ChunkPos pos = new ChunkPos(chunkX, chunkY, chunkZ);
+        Chunk neighbor = world.getChunk(pos);
+        if (neighbor == null) return;
+
+        boolean hadCollision = hasCollision.contains(pos);
+        neighbor.setDirty(true);
+        neighbor.rebuild();
+        if (hadCollision) {
+            neighbor.addCollision();
         }
     }
 

@@ -74,7 +74,7 @@ public class World {
 
         //DOES: get chunk from map, create & attatch to root node if doesn't exist
         Chunk chunk = chunks.computeIfAbsent(key(chunkX, chunkY, chunkZ), k -> {
-            Chunk c = new Chunk(chunkX, chunkY, chunkZ, app.getAssetManager(), bulletAppState.getPhysicsSpace());
+            Chunk c = new Chunk(this, chunkX, chunkY, chunkZ, app.getAssetManager(), bulletAppState.getPhysicsSpace());
             app.getRootNode().attachChild(c.getNode());
             return c;
         });

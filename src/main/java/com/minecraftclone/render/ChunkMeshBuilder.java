@@ -9,7 +9,9 @@ import com.minecraftclone.block.Block;
 import com.minecraftclone.block.MeshLibrary.BlockGeometry;
 import com.minecraftclone.block.MeshLibrary.Face;
 import com.minecraftclone.block.MeshLibrary.OcclusionFace;
+import com.minecraftclone.world.World;
 import com.minecraftclone.world.chunks.Chunk;
+import com.minecraftclone.world.chunks.ChunkPos;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,7 +25,15 @@ public final class ChunkMeshBuilder {
      * @param blocks 3d array of blocks in chunk
      * @return map of meshes with textures as keys
      */
-    public static Map<String, Mesh> build(Block[][][] blocks) {
+    public static Map<String, Mesh> build(Block[][][] blocks, World world, int chunkX, int chunkY, int chunkZ) {
+        //IS: 3d block arrays for neighboring chunks for cross-chunk culling
+        Block[][][] neighborUp = getChunkBlocks(world, chunkX, chunkY + 1, chunkZ);
+        Block[][][] neighborDown = getChunkBlocks(world, chunkX, chunkY - 1, chunkZ);
+        Block[][][] neighborNorth = getChunkBlocks(world, chunkX, chunkY, chunkZ + 1);
+        Block[][][] neighborSouth = getChunkBlocks(world, chunkX, chunkY, chunkZ - 1);
+        Block[][][] neighborEast = getChunkBlocks(world, chunkX + 1, chunkY, chunkZ);
+        Block[][][] neighborWest = getChunkBlocks(world, chunkX - 1, chunkY, chunkZ);
+
         //IS: map storing vertex positions
         Map<String, List<Vector3f>> pos = new HashMap<>();
 
@@ -54,7 +64,21 @@ public final class ChunkMeshBuilder {
                     //DOES: add each face from the geometry
                     for (Face face : geometry.getFaces()) {
                         //DOES: check if face should be rendered (occlusion culling)
-                        if (shouldRenderFace(face, blocks, x, y, z)) {
+                        if (
+                            shouldRenderFace(
+                                face,
+                                blocks,
+                                neighborUp,
+                                neighborDown,
+                                neighborNorth,
+                                neighborSouth,
+                                neighborEast,
+                                neighborWest,
+                                x,
+                                y,
+                                z
+                            )
+                        ) {
                             //DOES: get the texture for current face based on its texture key
                             String texture = getTextureForFace(block, face.textureKey);
 
@@ -125,8 +149,33 @@ public final class ChunkMeshBuilder {
 
     /**
      * determines if a face should be rendered based on occlusion
+     * checks across chunks as well
+     * @param face the face to be rendered
+     * @param blocks the 3d array of the current chunk
+     * @param neighborUp ↓ 3d arrays of neighboring chunks ↓
+     * @param neighborDown
+     * @param neighborNorth
+     * @param neighborSouth
+     * @param neighborEast
+     * @param neighborWest
+     * @param x ↓ coordinates of the face ↓
+     * @param y
+     * @param z
+     * @return
      */
-    private static boolean shouldRenderFace(Face face, Block[][][] blocks, int x, int y, int z) {
+    private static boolean shouldRenderFace(
+        Face face,
+        Block[][][] blocks,
+        Block[][][] neighborUp,
+        Block[][][] neighborDown,
+        Block[][][] neighborNorth,
+        Block[][][] neighborSouth,
+        Block[][][] neighborEast,
+        Block[][][] neighborWest,
+        int x,
+        int y,
+        int z
+    ) {
         //DOES: return since faces with NONE direction are always rendered
         //NOTE: e.g. faces that never border entire block like stair sides or fence posts
         if (face.direction == OcclusionFace.NONE) {
@@ -165,7 +214,18 @@ public final class ChunkMeshBuilder {
         }
 
         //DOES: render face if adjacent block is air, transparent, or outside chunk
-        return isAirOrTransparent(blocks, adjFaceX, adjFaceY, adjFaceZ);
+        return isAirOrTransparent(
+            blocks,
+            neighborUp,
+            neighborDown,
+            neighborNorth,
+            neighborSouth,
+            neighborEast,
+            neighborWest,
+            adjFaceX,
+            adjFaceY,
+            adjFaceZ
+        );
     }
 
     /**
@@ -241,28 +301,81 @@ public final class ChunkMeshBuilder {
     /**
      * checks if a position is air or transparent
      * @param blocks 3d array of blocks in chunk
-     * @param x
+     * @param neighborUp ↓ 3d arrays of neighboring chunks ↓
+     * @param neighborDown
+     * @param neighborNorth
+     * @param neighborSouth
+     * @param neighborEast
+     * @param neighborWest
+     * @param x ↓ coordinates of the block ↓
      * @param y
      * @param z
      * @return true if position is air or transparent
      */
-    private static boolean isAirOrTransparent(Block[][][] blocks, int x, int y, int z) {
-        //CASE: out of bounds -> air
-        //NOTE: needs to be improved to check for invisible faces outside chunk
-        if (x < 0 || y < 0 || z < 0 || x >= Chunk.SIZE || y >= Chunk.SIZE || z >= Chunk.SIZE) {
-            return true;
+    private static boolean isAirOrTransparent(
+        Block[][][] blocks,
+        Block[][][] neighborUp,
+        Block[][][] neighborDown,
+        Block[][][] neighborNorth,
+        Block[][][] neighborSouth,
+        Block[][][] neighborEast,
+        Block[][][] neighborWest,
+        int x,
+        int y,
+        int z
+    ) {
+        //CASE: in chunk bounds -> local blocks array used
+        if (x >= 0 && y >= 0 && z >= 0 && x < Chunk.SIZE && y < Chunk.SIZE && z < Chunk.SIZE) {
+            Block block = blocks[x][y][z];
+            return block == null || !block.isFull();
         }
 
-        //IS: block at position
-        Block block = blocks[x][y][z];
+        //CASE: out of bounds
+        //DOES: pick the right neighbor array and mirror the coordinates
+        Block[][][] neighbor;
+        int neighborX = x,
+            neighborY = y,
+            neighborZ = z;
 
-        //CASE: air -> transparent
-        if (block == null) {
-            return true;
+        if (y >= Chunk.SIZE) {
+            neighbor = neighborUp;
+            neighborY = 0;
+        } else if (y < 0) {
+            neighbor = neighborDown;
+            neighborY = Chunk.SIZE - 1;
+        } else if (z >= Chunk.SIZE) {
+            neighbor = neighborNorth;
+            neighborZ = 0;
+        } else if (z < 0) {
+            neighbor = neighborSouth;
+            neighborZ = Chunk.SIZE - 1;
+        } else if (x >= Chunk.SIZE) {
+            neighbor = neighborEast;
+            neighborX = 0;
+        } else {
+            neighbor = neighborWest;
+            neighborX = Chunk.SIZE - 1;
         }
 
-        //INFO: none-full blocks treated as transparent for occlusion purposes
+        //CASE: null neighbor -> unloaded -> render face
+        if (neighbor == null) return true;
+
         //NOTE: should treat blocks like stairs that do have some full faces otherwise to improve performance
-        return !block.isFull();
+        //INFO: non-full blocks treated as transparent for occlusion purposes
+        Block block = neighbor[neighborX][neighborY][neighborZ];
+        return block == null || !block.isFull();
+    }
+
+    /**
+     * gets blocks array of chunk at given chunk pos
+     * @param world
+     * @param chunkX
+     * @param chunkY
+     * @param chunkZ
+     * @return
+     */
+    private static Block[][][] getChunkBlocks(World world, int chunkX, int chunkY, int chunkZ) {
+        Chunk chunk = world.getChunk(new ChunkPos(chunkX, chunkY, chunkZ));
+        return chunk != null ? chunk.getBlocks() : null;
     }
 }

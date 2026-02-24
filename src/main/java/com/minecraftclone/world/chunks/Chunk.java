@@ -11,6 +11,7 @@ import com.jme3.scene.Node;
 import com.minecraftclone.block.Block;
 import com.minecraftclone.render.BlockMaterialCache;
 import com.minecraftclone.render.ChunkMeshBuilder;
+import com.minecraftclone.world.World;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,10 +32,19 @@ public class Chunk {
     private final Map<String, Geometry> geometries = new HashMap<>();
     private RigidBodyControl collisionBody;
     private final PhysicsSpace physicsSpace;
+    private final World world;
 
     private boolean dirty = true;
 
-    public Chunk(int chunkX, int chunkY, int chunkZ, AssetManager assetManager, PhysicsSpace physicsSpace) {
+    public Chunk(
+        World world,
+        int chunkX,
+        int chunkY,
+        int chunkZ,
+        AssetManager assetManager,
+        PhysicsSpace physicsSpace
+    ) {
+        this.world = world;
         this.chunkX = chunkX;
         this.chunkY = chunkY;
         this.chunkZ = chunkZ;
@@ -79,7 +89,7 @@ public class Chunk {
     public void rebuild() {
         if (!dirty) return;
 
-        Map<String, Mesh> meshes = ChunkMeshBuilder.build(blocks);
+        Map<String, Mesh> meshes = ChunkMeshBuilder.build(blocks, world, chunkX, chunkY, chunkZ);
         //DOES: remove old geometries
         for (Geometry geometry : geometries.values()) {
             geometry.removeFromParent();
