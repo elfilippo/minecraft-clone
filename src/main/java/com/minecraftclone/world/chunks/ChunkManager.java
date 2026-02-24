@@ -312,4 +312,13 @@ public class ChunkManager {
     public void addToHasCollision(ChunkPos pos) {
         hasCollision.add(pos);
     }
+
+    /**
+     * returns if chunk at given pos has collision
+     * @param pos
+     * @return
+     */
+    public boolean hasCollision(ChunkPos pos) {
+        return hasCollision.contains(pos);
+    }
 }

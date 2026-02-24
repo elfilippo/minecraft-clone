@@ -11,7 +11,7 @@ not binding besides prio 0, just suggestions
 [[todo list]]
 
 [filp] {0} forbid block interaction when in inventory
-[filp] {1} improve checking for visible faces (across chunk borders, etc.)
+[filp] {1} create chunk meshes on different thread, only attach on main
 [filp] {2} only create mesh for faces facing player when far away
 [filp] {2} separate rendering (visual blocks, chunk meshes, RenderEngine class) from blocks in memory (Chunk class)
 [filp] {2} unload & generate chunks at different y-levels (flood fill)

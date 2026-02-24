@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class World {
 
-    private static final int RENDER_DISTANCE = 10;
+    private static final int RENDER_DISTANCE = 30;
     private static final int SIMULATION_DISTANCE = 5;
     private final SimpleApplication app;
     private final PlayerCharacter playerCharacter;
@@ -43,11 +43,7 @@ public class World {
         if (chunk == null) return null;
 
         //DOES: calculate chunk block is in and request it
-        return chunk.getBlock(
-            Math.floorMod(worldX, Chunk.SIZE),
-            Math.floorMod(worldY, Chunk.SIZE),
-            Math.floorMod(worldZ, Chunk.SIZE)
-        );
+        return chunk.getBlock(Math.floorMod(worldX, Chunk.SIZE), Math.floorMod(worldY, Chunk.SIZE), Math.floorMod(worldZ, Chunk.SIZE));
     }
 
     public boolean isBlockLoaded(int worldX, int worldY, int worldZ) {
@@ -138,9 +134,14 @@ public class World {
      * @param chunkZ
      */
     private void rebuild(int chunkX, int chunkY, int chunkZ) {
+        ChunkPos pos = new ChunkPos(chunkX, chunkY, chunkZ);
         Chunk chunk = chunks.get(key(chunkX, chunkY, chunkZ));
-        if (chunk != null) {
-            chunk.rebuild();
+        if (chunk == null) return;
+
+        chunk.setDirty(true);
+        chunk.rebuild();
+        if (chunkManager.hasCollision(pos)) {
+            chunk.addCollision();
         }
     }
 
