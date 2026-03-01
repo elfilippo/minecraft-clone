@@ -11,48 +11,15 @@ public class InventoryController {
         this.inventory = inventory;
     }
 
-    public void onSlotClicked(int index) {
-        Slot slot = inventory.getSlot(index);
-
-        if (carriedStack == null) {
-            pickUp(slot);
-        } else {
-            placeOrSwap(slot);
-        }
-    }
-
-    private void pickUp(Slot slot) {
-        if (!slot.isEmpty()) {
-            carriedStack = slot.getStack();
-            slot.clear();
-        }
-    }
-
-    private void placeOrSwap(Slot slot) {
-        if (slot.isEmpty()) {
-            slot.setStack(carriedStack);
-            carriedStack = null;
-            return;
-        }
-
-        ItemInstance slotStack = slot.getStack();
-
-        if (slotStack.getItem() == carriedStack.getItem()) {
-            int max = slotStack.getItem().getMaxStack();
-            int canAdd = max - slotStack.getAmount();
-
-            int toTransfer = Math.min(canAdd, carriedStack.getAmount());
-            slotStack.add(toTransfer);
-            carriedStack.remove(toTransfer);
-
-            if (carriedStack.getAmount() <= 0) {
-                carriedStack = null;
+    public void addToInventory(ItemInstance item) {
+        for (int i = 0; i < inventory.getSize(); i++) {
+            if (inventory.getSlot(i).isEmpty()) {
+                inventory.getSlot(i).setStack(item);
             }
-        } else {
-            // swap
-            ItemInstance temp = slotStack;
-            slot.setStack(carriedStack);
-            carriedStack = temp;
         }
+    }
+
+    public Slot getInventorySlot(int slot) {
+        return inventory.getSlot(slot);
     }
 }
