@@ -16,6 +16,8 @@ public class GUIManager {
     private BitmapFont font;
     private Node guiNode;
 
+    //Fixme: müll
+
     public GUIManager(AssetManager asset, BitmapFont font, Node guiNode, int windowWidth, int windowHeight) {
         this.assetManager = asset;
         this.font = font;

@@ -30,7 +30,7 @@ public class PlayerCharacter {
 
     private PlayerGUI gui;
     private Inventory inventory;
-    private InventoryController inventoryControler;
+    private InventoryController inventoryController;
 
     public PlayerCharacter(BulletAppState bulletmainState, Main main) {
         cam = main.getCamera();
@@ -52,12 +52,13 @@ public class PlayerCharacter {
         this.playerNode = playerNode;
 
         this.inventory = new Inventory(35);
-        this.inventoryControler = new InventoryController(inventory);
         try {
             this.gui = new PlayerGUI(main);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        this.inventoryController = new InventoryController(inventory, gui);
     }
 
     public void tick(PlayerCommand cmd) {

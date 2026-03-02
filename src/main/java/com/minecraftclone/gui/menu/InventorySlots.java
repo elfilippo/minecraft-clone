@@ -5,7 +5,6 @@ import com.jme3.scene.Spatial;
 import com.minecraftclone.gui.GUIManager;
 import com.minecraftclone.gui.display.InventorySlot;
 import com.minecraftclone.gui.display.Slot;
-import com.minecraftclone.item.ItemInstance;
 import java.util.ArrayList;
 import java.util.List;
 import jme3utilities.math.Vector3i;
@@ -58,22 +57,19 @@ public class InventorySlots {
 
     /**
      * Displays an item at the specified slot in the inventory
-     * @param row Specifies the row where the item should be displayed
-     * @param column Specifies the column where the item should be displayed
+     * @param index Specifies Slot where an Item shoul dbe displayed
      * @param item SPecifies the item that should be displayed
      */
-    public void displayItem(int row, int column, ItemInstance item) {
-        if (row >= 1 && row <= 4) {
-            if (column >= 1 && column <= 9) {
-                Slot slot = inventorySlots.get(column - 1 + 9 * (row - 1));
+    public void displayItem(int index, String id, int amount) {
+        if (index >= 0 && index <= 35) {
+            Slot slot = inventorySlots.get(index);
 
-                if (item.getStackSize() > 1) {
-                    slot.setText(String.valueOf(item.getStackSize()));
-                } else {
-                    slot.setText("");
-                }
-                slot.setTexture(guiManager.loadItemTexture2d(item.getId()));
+            if (amount > 1) {
+                slot.setText(String.valueOf(amount));
+            } else {
+                slot.setText("");
             }
+            slot.setTexture(guiManager.loadItemTexture2d(id));
         }
     }
 

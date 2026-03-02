@@ -10,6 +10,10 @@ public class ItemInstance {
         this.amount = amount;
     }
 
+    public String getId() {
+        return item.getId();
+    }
+
     public Item getItem() {
         return item;
     }

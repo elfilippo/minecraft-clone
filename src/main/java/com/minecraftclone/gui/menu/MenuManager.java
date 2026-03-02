@@ -5,7 +5,6 @@ import com.jme3.input.InputManager;
 import com.jme3.scene.Node;
 import com.minecraftclone.gui.GUIManager;
 import com.minecraftclone.gui.display.InventorySlot;
-import com.minecraftclone.item.ItemInstance;
 
 public class MenuManager {
 
@@ -62,8 +61,8 @@ public class MenuManager {
         return inventorySlots;
     }
 
-    public void inventoryDisplayItem(int row, int column, ItemInstance item) {
-        inventorySlots.displayItem(row, column, item);
+    public void inventoryDisplayItem(int index, String id, int amount) {
+        inventorySlots.displayItem(index, id, amount);
     }
 
     public InventorySlot getHotbarSlot(int slot) {

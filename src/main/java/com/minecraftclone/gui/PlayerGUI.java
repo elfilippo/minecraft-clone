@@ -4,7 +4,6 @@ import com.minecraftclone.Main;
 import com.minecraftclone.gui.hud.HeadsUpDisplay;
 import com.minecraftclone.gui.menu.MenuManager;
 import com.minecraftclone.gui.menu.Menus;
-import com.minecraftclone.item.ItemInstance;
 import java.io.IOException;
 
 public class PlayerGUI {
@@ -24,16 +23,10 @@ public class PlayerGUI {
         hud = new HeadsUpDisplay(guiManager);
     }
 
-    /**
-     * Displays an item in the Inventory
-     * @param row Specifies a Row in the inventory where the Item should be displayed. 1 is the Hotbar
-     * @param column Specifies a Column in the inventory where the Item should be displayed
-     * @param item Specifies the item that should be displayed at the given Position
-     */
-    public void inventoryDisplayItem(int row, int column, ItemInstance item) {
-        menus.inventoryDisplayItem(row, column, item);
-        if (row == 1) {
-            hud.updateHotbarDisplayItem(column, menus.getHotbarSlot(column));
+    public void inventoryDisplayItem(int index, String id, int amount) {
+        menus.inventoryDisplayItem(index, id, amount);
+        if (index <= 8) {
+            hud.updateHotbarDisplayItem(index, menus.getHotbarSlot(index));
         }
     }
 
