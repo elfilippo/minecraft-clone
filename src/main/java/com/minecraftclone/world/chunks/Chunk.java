@@ -71,6 +71,23 @@ public class Chunk {
         dirty = true;
     }
 
+    public void applyMesh(Map<String, Mesh> meshes) {
+        // remove old geometries
+        for (Geometry geometry : geometries.values()) {
+            geometry.removeFromParent();
+        }
+        geometries.clear();
+
+        for (Map.Entry<String, Mesh> entry : meshes.entrySet()) {
+            Geometry geometry = new Geometry("chunk_" + entry.getKey(), entry.getValue());
+            geometry.setMaterial(BlockMaterialCache.get(entry.getKey(), assetManager));
+            geometries.put(entry.getKey(), geometry);
+            chunkNode.attachChild(geometry);
+        }
+
+        dirty = false;
+    }
+
     /**
      * returns the block object at local pos
      * @param x

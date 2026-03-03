@@ -43,7 +43,11 @@ public class World {
         if (chunk == null) return null;
 
         //DOES: calculate chunk block is in and request it
-        return chunk.getBlock(Math.floorMod(worldX, Chunk.SIZE), Math.floorMod(worldY, Chunk.SIZE), Math.floorMod(worldZ, Chunk.SIZE));
+        return chunk.getBlock(
+            Math.floorMod(worldX, Chunk.SIZE),
+            Math.floorMod(worldY, Chunk.SIZE),
+            Math.floorMod(worldZ, Chunk.SIZE)
+        );
     }
 
     public boolean isBlockLoaded(int worldX, int worldY, int worldZ) {
@@ -173,5 +177,9 @@ public class World {
      */
     public void addChunk(Chunk chunk) {
         chunks.put(key(chunk.getChunkX(), chunk.getChunkY(), chunk.getChunkZ()), chunk);
+    }
+
+    public void shutdown() {
+        chunkManager.shutdown();
     }
 }

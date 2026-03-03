@@ -203,4 +203,10 @@ public class Main extends SimpleApplication {
     public BitmapFont getguiFont() {
         return guiFont;
     }
+
+    @Override
+    public void destroy() {
+        world.shutdown();
+        super.destroy();
+    }
 }

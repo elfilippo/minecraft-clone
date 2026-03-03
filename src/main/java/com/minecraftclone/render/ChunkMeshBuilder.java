@@ -22,7 +22,13 @@ public final class ChunkMeshBuilder {
 
     /**
      * generates map of meshes that each use a certain texture in a chunk
+     * fetches neighbor arrays from world before delegating to the main build method
+     * used for synchronous rebuilds (block placing/breaking, neighbor rebuilds)
      * @param blocks 3d array of blocks in chunk
+     * @param world
+     * @param chunkX
+     * @param chunkY
+     * @param chunkZ
      * @return map of meshes with textures as keys
      */
     public static Map<String, Mesh> build(Block[][][] blocks, World world, int chunkX, int chunkY, int chunkZ) {
@@ -34,6 +40,31 @@ public final class ChunkMeshBuilder {
         Block[][][] neighborEast = getChunkBlocks(world, chunkX + 1, chunkY, chunkZ);
         Block[][][] neighborWest = getChunkBlocks(world, chunkX - 1, chunkY, chunkZ);
 
+        return build(blocks, neighborUp, neighborDown, neighborNorth, neighborSouth, neighborEast, neighborWest);
+    }
+
+    /**
+     * generates map of meshes that each use a certain texture in a chunk
+     * takes pre-fetched neighbor arrays directly — used by ChunkBuildTask on background thread
+     * to avoid fetching from world (which would cause data races)
+     * @param blocks 3d array of blocks in chunk
+     * @param neighborUp ↓ pre-snapshotted 3d arrays of neighboring chunks, null if unloaded ↓
+     * @param neighborDown
+     * @param neighborNorth
+     * @param neighborSouth
+     * @param neighborEast
+     * @param neighborWest
+     * @return map of meshes with textures as keys
+     */
+    public static Map<String, Mesh> build(
+        Block[][][] blocks,
+        Block[][][] neighborUp,
+        Block[][][] neighborDown,
+        Block[][][] neighborNorth,
+        Block[][][] neighborSouth,
+        Block[][][] neighborEast,
+        Block[][][] neighborWest
+    ) {
         //IS: map storing vertex positions
         Map<String, List<Vector3f>> pos = new HashMap<>();
 
@@ -368,6 +399,7 @@ public final class ChunkMeshBuilder {
 
     /**
      * gets blocks array of chunk at given chunk pos
+     * used only by the world-aware overload of build() for synchronous rebuilds
      * @param world
      * @param chunkX
      * @param chunkY
