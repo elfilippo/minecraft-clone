@@ -14,25 +14,23 @@ import com.minecraftclone.world.chunks.Chunk;
 import com.minecraftclone.world.chunks.ChunkPos;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public final class ChunkMeshBuilder {
 
     /**
-     * generates map of meshes that each use a certain texture in a chunk
-     * fetches neighbor arrays from world before delegating to the main build method
-     * used for synchronous rebuilds (block placing/breaking, neighbor rebuilds)
+     * builds a single mesh for the chunk using greedy meshing for full cube blocks
+     * and per-face fallback for non-cube blocks (stairs, slabs, fences).
+     * fetches neighbor arrays from world for cross-chunk face culling.
+     * used for synchronous rebuilds (block placing/breaking).
      * @param blocks 3d array of blocks in chunk
      * @param world
      * @param chunkX
      * @param chunkY
      * @param chunkZ
-     * @return map of meshes with textures as keys
+     * @return single merged mesh using atlas UVs
      */
-    public static Map<String, Mesh> build(Block[][][] blocks, World world, int chunkX, int chunkY, int chunkZ) {
-        //IS: 3d block arrays for neighboring chunks for cross-chunk culling
+    public static Mesh build(Block[][][] blocks, World world, int chunkX, int chunkY, int chunkZ) {
         Block[][][] neighborUp = getChunkBlocks(world, chunkX, chunkY + 1, chunkZ);
         Block[][][] neighborDown = getChunkBlocks(world, chunkX, chunkY - 1, chunkZ);
         Block[][][] neighborNorth = getChunkBlocks(world, chunkX, chunkY, chunkZ + 1);
@@ -44,18 +42,20 @@ public final class ChunkMeshBuilder {
     }
 
     /**
-     * generates map of meshes that each use a certain texture in a chunk
-     * takes pre-fetched neighbor arrays directly for performance -> used by ChunkBuildTask on background thread
-     * @param blocks 3d array of blocks in chunk
-     * @param neighborUp ↓ 3d arrays of neighboring chunks, null if unloaded ↓
+     * builds a single mesh for the chunk using pre-fetched neighbor arrays.
+     * used by ChunkBuildTask on background thread.
+     * full cube blocks use greedy meshing to reduce vertex count dramatically.
+     * non-cube blocks fall back to per-face building.
+     * @param blocks        3d array of blocks in chunk
+     * @param neighborUp    ↓ 3d arrays of neighboring chunks, null if unloaded ↓
      * @param neighborDown
      * @param neighborNorth
      * @param neighborSouth
      * @param neighborEast
      * @param neighborWest
-     * @return map of meshes with textures as keys
+     * @return single merged mesh using atlas UVs
      */
-    public static Map<String, Mesh> build(
+    public static Mesh build(
         Block[][][] blocks,
         Block[][][] neighborUp,
         Block[][][] neighborDown,
@@ -64,38 +64,583 @@ public final class ChunkMeshBuilder {
         Block[][][] neighborEast,
         Block[][][] neighborWest
     ) {
-        //IS: map storing vertex positions
-        Map<String, List<Vector3f>> pos = new HashMap<>();
+        List<Vector3f> positions = new ArrayList<>();
+        List<Vector3f> normals = new ArrayList<>();
+        List<Vector2f> uvs = new ArrayList<>();
+        List<Integer> indices = new ArrayList<>();
 
-        //IS: map storing vertex normals (facing directions)
-        Map<String, List<Vector3f>> norm = new HashMap<>();
+        //DOES: greedy meshing pass for full cube blocks — one pass per face direction
+        greedyUp(blocks, neighborUp, positions, normals, uvs, indices);
+        greedyDown(blocks, neighborDown, positions, normals, uvs, indices);
+        greedyNorth(blocks, neighborNorth, positions, normals, uvs, indices);
+        greedySouth(blocks, neighborSouth, positions, normals, uvs, indices);
+        greedyEast(blocks, neighborEast, positions, normals, uvs, indices);
+        greedyWest(blocks, neighborWest, positions, normals, uvs, indices);
 
-        //IS: map storing texture coordinates (which part to display on which vertex)
-        Map<String, List<Vector2f>> uv = new HashMap<>();
+        //DOES: per-face fallback for non-cube blocks (stairs, slabs, fences)
+        buildNonCube(
+            blocks,
+            neighborUp,
+            neighborDown,
+            neighborNorth,
+            neighborSouth,
+            neighborEast,
+            neighborWest,
+            positions,
+            normals,
+            uvs,
+            indices
+        );
 
-        //IS: indices, which vertices form each triangle
-        Map<String, List<Integer>> index = new HashMap<>();
+        return assembleMesh(positions, normals, uvs, indices);
+    }
 
-        //IS: used when building vertices
-        //INFO: local (block) coords are translated to chunk coords by adding offset
-        Map<String, Integer> offset = new HashMap<>();
+    // -------------------------------------------------------------------------
+    // GREEDY MESHING — one explicit method per face direction
+    // -------------------------------------------------------------------------
+    // Each method sweeps a 2d slice perpendicular to its face direction,
+    // builds a mask of which cells need a face (and what texture), then
+    // greedily merges adjacent same-texture cells into the largest quads possible.
+    // Using explicit methods per direction avoids axis-index arithmetic bugs.
 
-        //DOES: iterate through all blocks in chunk
+    private static final Vector3f NORMAL_UP = new Vector3f(0, 1, 0);
+    private static final Vector3f NORMAL_DOWN = new Vector3f(0, -1, 0);
+    private static final Vector3f NORMAL_NORTH = new Vector3f(0, 0, 1);
+    private static final Vector3f NORMAL_SOUTH = new Vector3f(0, 0, -1);
+    private static final Vector3f NORMAL_EAST = new Vector3f(1, 0, 0);
+    private static final Vector3f NORMAL_WEST = new Vector3f(-1, 0, 0);
+
+    /**
+     * greedy meshing for UP faces (+Y).
+     * slices along Y, mask axes are X (i) and Z (j).
+     */
+    private static void greedyUp(
+        Block[][][] blocks,
+        Block[][][] neighborUp,
+        List<Vector3f> pos,
+        List<Vector3f> norm,
+        List<Vector2f> uvs,
+        List<Integer> idx
+    ) {
+        int S = Chunk.SIZE;
+        for (int y = 0; y < S; y++) {
+            String[] mask = new String[S * S];
+            for (int x = 0; x < S; x++) {
+                for (int z = 0; z < S; z++) {
+                    Block b = blocks[x][y][z];
+                    if (b == null || !b.isFull()) continue;
+                    //IS: neighbor is the block directly above
+                    int ny = y + 1;
+                    boolean exposed =
+                        ny >= S
+                            ? (neighborUp == null || neighborUp[x][0][z] == null || !neighborUp[x][0][z].isFull())
+                            : (blocks[x][ny][z] == null || !blocks[x][ny][z].isFull());
+                    if (exposed) mask[x * S + z] = b.getTopTex();
+                }
+            }
+            //IS: face sits on top of y, so face Y = y+1
+            greedyMerge(mask, S, y + 1, NORMAL_UP, true, pos, norm, uvs, idx);
+        }
+    }
+
+    /**
+     * greedy meshing for DOWN faces (-Y).
+     * slices along Y, mask axes are X (i) and Z (j).
+     */
+    private static void greedyDown(
+        Block[][][] blocks,
+        Block[][][] neighborDown,
+        List<Vector3f> pos,
+        List<Vector3f> norm,
+        List<Vector2f> uvs,
+        List<Integer> idx
+    ) {
+        int S = Chunk.SIZE;
+        for (int y = 0; y < S; y++) {
+            String[] mask = new String[S * S];
+            for (int x = 0; x < S; x++) {
+                for (int z = 0; z < S; z++) {
+                    Block b = blocks[x][y][z];
+                    if (b == null || !b.isFull()) continue;
+                    int ny = y - 1;
+                    boolean exposed =
+                        ny < 0
+                            ? (neighborDown == null ||
+                                  neighborDown[x][S - 1][z] == null ||
+                                  !neighborDown[x][S - 1][z].isFull())
+                            : (blocks[x][ny][z] == null || !blocks[x][ny][z].isFull());
+                    if (exposed) mask[x * S + z] = b.getBottomTex();
+                }
+            }
+            //IS: face sits on bottom of y, so face Y = y
+            greedyMerge(mask, S, y, NORMAL_DOWN, false, pos, norm, uvs, idx);
+        }
+    }
+
+    /**
+     * greedy meshing for NORTH faces (+Z).
+     * slices along Z, mask axes are X (i) and Y (j).
+     */
+    private static void greedyNorth(
+        Block[][][] blocks,
+        Block[][][] neighborNorth,
+        List<Vector3f> pos,
+        List<Vector3f> norm,
+        List<Vector2f> uvs,
+        List<Integer> idx
+    ) {
+        int S = Chunk.SIZE;
+        for (int z = 0; z < S; z++) {
+            String[] mask = new String[S * S];
+            for (int x = 0; x < S; x++) {
+                for (int y = 0; y < S; y++) {
+                    Block b = blocks[x][y][z];
+                    if (b == null || !b.isFull()) continue;
+                    int nz = z + 1;
+                    boolean exposed =
+                        nz >= S
+                            ? (neighborNorth == null ||
+                                  neighborNorth[x][y][0] == null ||
+                                  !neighborNorth[x][y][0].isFull())
+                            : (blocks[x][y][nz] == null || !blocks[x][y][nz].isFull());
+                    if (exposed) mask[x * S + y] = b.getSideTex();
+                }
+            }
+            //IS: face sits on north side of z, so face Z = z+1
+            greedyMergeNorth(mask, S, z + 1, pos, norm, uvs, idx);
+        }
+    }
+
+    /**
+     * greedy meshing for SOUTH faces (-Z).
+     * slices along Z, mask axes are X (i) and Y (j).
+     */
+    private static void greedySouth(
+        Block[][][] blocks,
+        Block[][][] neighborSouth,
+        List<Vector3f> pos,
+        List<Vector3f> norm,
+        List<Vector2f> uvs,
+        List<Integer> idx
+    ) {
+        int S = Chunk.SIZE;
+        for (int z = 0; z < S; z++) {
+            String[] mask = new String[S * S];
+            for (int x = 0; x < S; x++) {
+                for (int y = 0; y < S; y++) {
+                    Block b = blocks[x][y][z];
+                    if (b == null || !b.isFull()) continue;
+                    int nz = z - 1;
+                    boolean exposed =
+                        nz < 0
+                            ? (neighborSouth == null ||
+                                  neighborSouth[x][y][S - 1] == null ||
+                                  !neighborSouth[x][y][S - 1].isFull())
+                            : (blocks[x][y][nz] == null || !blocks[x][y][nz].isFull());
+                    if (exposed) mask[x * S + y] = b.getSideTex();
+                }
+            }
+            //IS: face sits on south side of z, so face Z = z
+            greedyMergeSouth(mask, S, z, pos, norm, uvs, idx);
+        }
+    }
+
+    /**
+     * greedy meshing for EAST faces (+X).
+     * slices along X, mask axes are Z (i) and Y (j).
+     */
+    private static void greedyEast(
+        Block[][][] blocks,
+        Block[][][] neighborEast,
+        List<Vector3f> pos,
+        List<Vector3f> norm,
+        List<Vector2f> uvs,
+        List<Integer> idx
+    ) {
+        int S = Chunk.SIZE;
+        for (int x = 0; x < S; x++) {
+            String[] mask = new String[S * S];
+            for (int z = 0; z < S; z++) {
+                for (int y = 0; y < S; y++) {
+                    Block b = blocks[x][y][z];
+                    if (b == null || !b.isFull()) continue;
+                    int nx = x + 1;
+                    boolean exposed =
+                        nx >= S
+                            ? (neighborEast == null || neighborEast[0][y][z] == null || !neighborEast[0][y][z].isFull())
+                            : (blocks[nx][y][z] == null || !blocks[nx][y][z].isFull());
+                    if (exposed) mask[z * S + y] = b.getSideTex();
+                }
+            }
+            //IS: face sits on east side of x, so face X = x+1
+            greedyMergeEast(mask, S, x + 1, pos, norm, uvs, idx);
+        }
+    }
+
+    /**
+     * greedy meshing for WEST faces (-X).
+     * slices along X, mask axes are Z (i) and Y (j).
+     */
+    private static void greedyWest(
+        Block[][][] blocks,
+        Block[][][] neighborWest,
+        List<Vector3f> pos,
+        List<Vector3f> norm,
+        List<Vector2f> uvs,
+        List<Integer> idx
+    ) {
+        int S = Chunk.SIZE;
+        for (int x = 0; x < S; x++) {
+            String[] mask = new String[S * S];
+            for (int z = 0; z < S; z++) {
+                for (int y = 0; y < S; y++) {
+                    Block b = blocks[x][y][z];
+                    if (b == null || !b.isFull()) continue;
+                    int nx = x - 1;
+                    boolean exposed =
+                        nx < 0
+                            ? (neighborWest == null ||
+                                  neighborWest[S - 1][y][z] == null ||
+                                  !neighborWest[S - 1][y][z].isFull())
+                            : (blocks[nx][y][z] == null || !blocks[nx][y][z].isFull());
+                    if (exposed) mask[z * S + y] = b.getSideTex();
+                }
+            }
+            //IS: face sits on west side of x, so face X = x
+            greedyMergeWest(mask, S, x, pos, norm, uvs, idx);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // GREEDY MERGE — shared merge logic, direction-specific quad emit
+    // -------------------------------------------------------------------------
+
+    /**
+     * shared greedy merge pass for UP and DOWN faces.
+     * mask is indexed [x * S + z]. i = x axis, j = z axis.
+     * @param faceY  the Y coordinate of the face plane
+     * @param up     true for UP face, false for DOWN face
+     */
+    private static void greedyMerge(
+        String[] mask,
+        int S,
+        int faceY,
+        Vector3f normal,
+        boolean up,
+        List<Vector3f> pos,
+        List<Vector3f> norm,
+        List<Vector2f> uvs,
+        List<Integer> idx
+    ) {
+        boolean[] used = new boolean[S * S];
+        for (int i = 0; i < S; i++) {
+            for (int j = 0; j < S; j++) {
+                int index = i * S + j;
+                if (used[index] || mask[index] == null) continue;
+                String tex = mask[index];
+
+                //DOES: expand width along i (X axis)
+                int width = 1;
+                while (i + width < S && !used[(i + width) * S + j] && tex.equals(mask[(i + width) * S + j])) width++;
+
+                //DOES: expand height along j (Z axis)
+                int height = 1;
+                outer: while (j + height < S) {
+                    for (int k = i; k < i + width; k++) {
+                        if (used[k * S + j + height] || !tex.equals(mask[k * S + j + height])) break outer;
+                    }
+                    height++;
+                }
+
+                //DOES: mark used
+                for (int di = 0; di < width; di++) for (int dj = 0; dj < height; dj++) used[(i + di) * S + j + dj] =
+                    true;
+
+                //IS: quad corners — i=X, j=Z, faceY=Y
+                float x0 = i,
+                    x1 = i + width;
+                float z0 = j,
+                    z1 = j + height;
+                float y = faceY;
+
+                Vector3f[] verts;
+                if (up) {
+                    //INFO: counter-clockwise when viewed from above
+                    verts = new Vector3f[] {
+                        new Vector3f(x0, y, z0),
+                        new Vector3f(x0, y, z1),
+                        new Vector3f(x1, y, z1),
+                        new Vector3f(x1, y, z0),
+                    };
+                } else {
+                    verts = new Vector3f[] {
+                        new Vector3f(x0, y, z0),
+                        new Vector3f(x1, y, z0),
+                        new Vector3f(x1, y, z1),
+                        new Vector3f(x0, y, z1),
+                    };
+                }
+
+                //INFO: width=X extent, height=Z extent for horizontal faces
+                addQuad(pos, norm, uvs, idx, verts, normal, atlasUVsHorizontal(tex, width, height));
+            }
+        }
+    }
+
+    /**
+     * greedy merge for NORTH faces (+Z). mask indexed [x * S + y]. i=X, j=Y.
+     * @param faceZ the Z coordinate of the face plane (z+1 of the block)
+     */
+    private static void greedyMergeNorth(
+        String[] mask,
+        int S,
+        int faceZ,
+        List<Vector3f> pos,
+        List<Vector3f> norm,
+        List<Vector2f> uvs,
+        List<Integer> idx
+    ) {
+        boolean[] used = new boolean[S * S];
+        for (int i = 0; i < S; i++) {
+            for (int j = 0; j < S; j++) {
+                int index = i * S + j;
+                if (used[index] || mask[index] == null) continue;
+                String tex = mask[index];
+
+                int width = 1;
+                while (i + width < S && !used[(i + width) * S + j] && tex.equals(mask[(i + width) * S + j])) width++;
+
+                int height = 1;
+                outer: while (j + height < S) {
+                    for (int k = i; k < i + width; k++) {
+                        if (used[k * S + j + height] || !tex.equals(mask[k * S + j + height])) break outer;
+                    }
+                    height++;
+                }
+
+                for (int di = 0; di < width; di++) for (int dj = 0; dj < height; dj++) used[(i + di) * S + j + dj] =
+                    true;
+
+                //IS: i=X, j=Y, face at Z=faceZ
+                float x0 = i,
+                    x1 = i + width;
+                float y0 = j,
+                    y1 = j + height;
+                float z = faceZ;
+
+                //INFO: counter-clockwise when viewed from +Z side
+                Vector3f[] verts = new Vector3f[] {
+                    new Vector3f(x0, y0, z),
+                    new Vector3f(x1, y0, z),
+                    new Vector3f(x1, y1, z),
+                    new Vector3f(x0, y1, z),
+                };
+
+                //INFO: width=X extent, height=Y extent for north/south faces
+                addQuad(pos, norm, uvs, idx, verts, NORMAL_NORTH, atlasUVsVertical(tex, width, height));
+            }
+        }
+    }
+
+    /**
+     * greedy merge for SOUTH faces (-Z). mask indexed [x * S + y]. i=X, j=Y.
+     * @param faceZ the Z coordinate of the face plane (z of the block)
+     */
+    private static void greedyMergeSouth(
+        String[] mask,
+        int S,
+        int faceZ,
+        List<Vector3f> pos,
+        List<Vector3f> norm,
+        List<Vector2f> uvs,
+        List<Integer> idx
+    ) {
+        boolean[] used = new boolean[S * S];
+        for (int i = 0; i < S; i++) {
+            for (int j = 0; j < S; j++) {
+                int index = i * S + j;
+                if (used[index] || mask[index] == null) continue;
+                String tex = mask[index];
+
+                int width = 1;
+                while (i + width < S && !used[(i + width) * S + j] && tex.equals(mask[(i + width) * S + j])) width++;
+
+                int height = 1;
+                outer: while (j + height < S) {
+                    for (int k = i; k < i + width; k++) {
+                        if (used[k * S + j + height] || !tex.equals(mask[k * S + j + height])) break outer;
+                    }
+                    height++;
+                }
+
+                for (int di = 0; di < width; di++) for (int dj = 0; dj < height; dj++) used[(i + di) * S + j + dj] =
+                    true;
+
+                //IS: i=X, j=Y, face at Z=faceZ
+                float x0 = i,
+                    x1 = i + width;
+                float y0 = j,
+                    y1 = j + height;
+                float z = faceZ;
+
+                //INFO: counter-clockwise when viewed from -Z side (reversed X)
+                Vector3f[] verts = new Vector3f[] {
+                    new Vector3f(x1, y0, z),
+                    new Vector3f(x0, y0, z),
+                    new Vector3f(x0, y1, z),
+                    new Vector3f(x1, y1, z),
+                };
+
+                //INFO: width=X extent, height=Y extent for north/south faces
+                addQuad(pos, norm, uvs, idx, verts, NORMAL_SOUTH, atlasUVsVertical(tex, width, height));
+            }
+        }
+    }
+
+    /**
+     * greedy merge for EAST faces (+X). mask indexed [z * S + y]. i=Z, j=Y.
+     * @param faceX the X coordinate of the face plane (x+1 of the block)
+     */
+    private static void greedyMergeEast(
+        String[] mask,
+        int S,
+        int faceX,
+        List<Vector3f> pos,
+        List<Vector3f> norm,
+        List<Vector2f> uvs,
+        List<Integer> idx
+    ) {
+        boolean[] used = new boolean[S * S];
+        for (int i = 0; i < S; i++) {
+            for (int j = 0; j < S; j++) {
+                int index = i * S + j;
+                if (used[index] || mask[index] == null) continue;
+                String tex = mask[index];
+
+                int width = 1;
+                while (i + width < S && !used[(i + width) * S + j] && tex.equals(mask[(i + width) * S + j])) width++;
+
+                int height = 1;
+                outer: while (j + height < S) {
+                    for (int k = i; k < i + width; k++) {
+                        if (used[k * S + j + height] || !tex.equals(mask[k * S + j + height])) break outer;
+                    }
+                    height++;
+                }
+
+                for (int di = 0; di < width; di++) for (int dj = 0; dj < height; dj++) used[(i + di) * S + j + dj] =
+                    true;
+
+                //IS: i=Z, j=Y, face at X=faceX
+                float z0 = i,
+                    z1 = i + width;
+                float y0 = j,
+                    y1 = j + height;
+                float x = faceX;
+
+                //INFO: counter-clockwise when viewed from +X side (reversed Z)
+                Vector3f[] verts = new Vector3f[] {
+                    new Vector3f(x, y0, z1),
+                    new Vector3f(x, y0, z0),
+                    new Vector3f(x, y1, z0),
+                    new Vector3f(x, y1, z1),
+                };
+
+                //INFO: width=Z extent, height=Y extent for east/west faces
+                addQuad(pos, norm, uvs, idx, verts, NORMAL_EAST, atlasUVsVertical(tex, width, height));
+            }
+        }
+    }
+
+    /**
+     * greedy merge for WEST faces (-X). mask indexed [z * S + y]. i=Z, j=Y.
+     * @param faceX the X coordinate of the face plane (x of the block)
+     */
+    private static void greedyMergeWest(
+        String[] mask,
+        int S,
+        int faceX,
+        List<Vector3f> pos,
+        List<Vector3f> norm,
+        List<Vector2f> uvs,
+        List<Integer> idx
+    ) {
+        boolean[] used = new boolean[S * S];
+        for (int i = 0; i < S; i++) {
+            for (int j = 0; j < S; j++) {
+                int index = i * S + j;
+                if (used[index] || mask[index] == null) continue;
+                String tex = mask[index];
+
+                int width = 1;
+                while (i + width < S && !used[(i + width) * S + j] && tex.equals(mask[(i + width) * S + j])) width++;
+
+                int height = 1;
+                outer: while (j + height < S) {
+                    for (int k = i; k < i + width; k++) {
+                        if (used[k * S + j + height] || !tex.equals(mask[k * S + j + height])) break outer;
+                    }
+                    height++;
+                }
+
+                for (int di = 0; di < width; di++) for (int dj = 0; dj < height; dj++) used[(i + di) * S + j + dj] =
+                    true;
+
+                //IS: i=Z, j=Y, face at X=faceX
+                float z0 = i,
+                    z1 = i + width;
+                float y0 = j,
+                    y1 = j + height;
+                float x = faceX;
+
+                //INFO: counter-clockwise when viewed from -X side
+                Vector3f[] verts = new Vector3f[] {
+                    new Vector3f(x, y0, z0),
+                    new Vector3f(x, y0, z1),
+                    new Vector3f(x, y1, z1),
+                    new Vector3f(x, y1, z0),
+                };
+
+                //INFO: width=Z extent, height=Y extent for east/west faces
+                addQuad(pos, norm, uvs, idx, verts, NORMAL_WEST, atlasUVsVertical(tex, width, height));
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // NON-CUBE FALLBACK
+    // -------------------------------------------------------------------------
+
+    /**
+     * per-face pass for non-cube blocks (stairs, slabs, fences).
+     * uses face data from MeshLibrary but remaps UVs to atlas space.
+     */
+    private static void buildNonCube(
+        Block[][][] blocks,
+        Block[][][] neighborUp,
+        Block[][][] neighborDown,
+        Block[][][] neighborNorth,
+        Block[][][] neighborSouth,
+        Block[][][] neighborEast,
+        Block[][][] neighborWest,
+        List<Vector3f> positions,
+        List<Vector3f> normals,
+        List<Vector2f> uvs,
+        List<Integer> indices
+    ) {
         for (int x = 0; x < Chunk.SIZE; x++) {
             for (int y = 0; y < Chunk.SIZE; y++) {
                 for (int z = 0; z < Chunk.SIZE; z++) {
-                    //DOES: save current block as block
                     Block block = blocks[x][y][z];
-                    if (block == null) continue;
 
-                    //DOES: get geometry for block
+                    //CASE: skip null and full cube blocks (handled by greedy pass)
+                    if (block == null || block.isFull()) continue;
+
                     BlockGeometry geometry = block.getGeometry();
 
-                    //DOES: add each face from the geometry
                     for (Face face : geometry.getFaces()) {
-                        //DOES: check if face should be rendered (occlusion culling)
                         if (
-                            shouldRenderFace(
+                            !shouldRenderFace(
                                 face,
                                 blocks,
                                 neighborUp,
@@ -109,89 +654,131 @@ public final class ChunkMeshBuilder {
                                 z
                             )
                         ) {
-                            //DOES: get the texture for current face based on its texture key
-                            String texture = getTextureForFace(block, face.textureKey);
-
-                            //DOES: offset the face vertices to block's position
-                            Vector3f[] worldVertices = new Vector3f[4];
-                            for (int i = 0; i < 4; i++) {
-                                worldVertices[i] = face.vertices[i].add(x, y, z);
-                            }
-
-                            addFace(texture, pos, norm, uv, index, offset, worldVertices, face.normal, face.uvs);
+                            continue;
                         }
+
+                        String texName = resolveTexture(block, face.textureKey);
+
+                        //IS: face vertices offset to block's local position in chunk
+                        Vector3f[] worldVerts = new Vector3f[4];
+                        for (int i = 0; i < 4; i++) {
+                            worldVerts[i] = face.vertices[i].add(x, y, z);
+                        }
+
+                        //DOES: remap each face UV from local (0-1) space to atlas UV space
+                        Vector2f[] faceUVs = new Vector2f[4];
+                        for (int i = 0; i < 4; i++) {
+                            faceUVs[i] = BlockAtlas.remap(texName, face.uvs[i].x, face.uvs[i].y);
+                        }
+
+                        addQuad(positions, normals, uvs, indices, worldVerts, face.normal, faceUVs);
                     }
                 }
             }
         }
+    }
 
-        Map<String, Mesh> meshes = new HashMap<>();
+    // -------------------------------------------------------------------------
+    // SHARED UTILITIES
+    // -------------------------------------------------------------------------
 
-        //DOES: create and set up meshes for all textures in chunk
-        //DOES: iterate through each texture in the map of positions of textures
-        for (String texture : pos.keySet()) {
-            //DOES: create mesh for current texture
-            var mesh = new Mesh();
-
-            //DOES: set position buffer
-            mesh.setBuffer(
-                VertexBuffer.Type.Position,
-                3,
-                BufferUtils.createFloatBuffer(pos.get(texture).toArray(new Vector3f[0]))
-            );
-
-            //DOES: set normal buffer (face directions)
-            mesh.setBuffer(
-                VertexBuffer.Type.Normal,
-                3,
-                BufferUtils.createFloatBuffer(norm.get(texture).toArray(new Vector3f[0]))
-            );
-
-            //DOES: set local texture coordinate (uv) buffer
-            mesh.setBuffer(
-                VertexBuffer.Type.TexCoord,
-                2,
-                BufferUtils.createFloatBuffer(uv.get(texture).toArray(new Vector2f[0]))
-            );
-
-            //DOES: set index buffer (which indices form each triangle)
-            mesh.setBuffer(
-                VertexBuffer.Type.Index,
-                3,
-                BufferUtils.createIntBuffer(
-                    //DOES: get List<Integer> from index map and convert to int[] with stream()
-                    index
-                        .get(texture)
-                        .stream()
-                        .mapToInt(i -> i)
-                        .toArray()
-                )
-            );
-
-            //DOES: update bounding box of mesh
-            mesh.updateBound();
-
-            //DOES: put mesh into meshes map with texture as key
-            meshes.put(texture, mesh);
-        }
-        return meshes;
+    /**
+     * tiled atlas UVs for horizontal faces (UP/DOWN).
+     * tiles the texture across the quad by passing width/height as UV extents.
+     * BlockAtlas.remap() takes the fractional part so UVs tile within the tile's atlas region.
+     * @param texName texture name
+     * @param uSize   quad width in blocks — texture tiles this many times in U
+     * @param vSize   quad depth in blocks — texture tiles this many times in V
+     */
+    private static Vector2f[] atlasUVsHorizontal(String texName, float uSize, float vSize) {
+        return new Vector2f[] {
+            BlockAtlas.remap(texName, 0, 0),
+            BlockAtlas.remap(texName, uSize, 0),
+            BlockAtlas.remap(texName, uSize, vSize),
+            BlockAtlas.remap(texName, 0, vSize),
+        };
     }
 
     /**
-     * determines if a face should be rendered based on occlusion
-     * checks across chunks as well
-     * @param face the face to be rendered
-     * @param blocks the 3d array of the current chunk
-     * @param neighborUp ↓ 3d arrays of neighboring chunks ↓
-     * @param neighborDown
-     * @param neighborNorth
-     * @param neighborSouth
-     * @param neighborEast
-     * @param neighborWest
-     * @param x ↓ coordinates of the face ↓
-     * @param y
-     * @param z
-     * @return
+     * tiled atlas UVs for vertical faces (NORTH/SOUTH/EAST/WEST).
+     * V is flipped so textures appear right-side up on walls —
+     * world Y increases upward but atlas V=0 is the top of the texture.
+     * @param texName texture name
+     * @param uSize   quad width in blocks — texture tiles this many times in U
+     * @param vSize   quad height in blocks — texture tiles this many times in V
+     */
+    private static Vector2f[] atlasUVsVertical(String texName, float uSize, float vSize) {
+        return new Vector2f[] {
+            BlockAtlas.remap(texName, 0, vSize),
+            BlockAtlas.remap(texName, uSize, vSize),
+            BlockAtlas.remap(texName, uSize, 0),
+            BlockAtlas.remap(texName, 0, 0),
+        };
+    }
+
+    /**
+     * adds a quad (4 vertices, 2 triangles) into the mesh accumulator lists.
+     */
+    private static void addQuad(
+        List<Vector3f> positions,
+        List<Vector3f> normals,
+        List<Vector2f> uvs,
+        List<Integer> indices,
+        Vector3f[] verts,
+        Vector3f normal,
+        Vector2f[] quadUVs
+    ) {
+        int base = positions.size();
+
+        Collections.addAll(positions, verts);
+        for (int i = 0; i < 4; i++) normals.add(normal);
+        Collections.addAll(uvs, quadUVs);
+
+        //IS: two triangles forming the quad (indices 0,1,2 and 0,2,3)
+        indices.add(base);
+        indices.add(base + 1);
+        indices.add(base + 2);
+        indices.add(base);
+        indices.add(base + 2);
+        indices.add(base + 3);
+    }
+
+    /**
+     * assembles final JME Mesh from accumulated vertex data lists.
+     */
+    private static Mesh assembleMesh(
+        List<Vector3f> positions,
+        List<Vector3f> normals,
+        List<Vector2f> uvs,
+        List<Integer> indices
+    ) {
+        Mesh mesh = new Mesh();
+        if (positions.isEmpty()) return mesh;
+
+        mesh.setBuffer(
+            VertexBuffer.Type.Position,
+            3,
+            BufferUtils.createFloatBuffer(positions.toArray(new Vector3f[0]))
+        );
+        mesh.setBuffer(VertexBuffer.Type.Normal, 3, BufferUtils.createFloatBuffer(normals.toArray(new Vector3f[0])));
+        mesh.setBuffer(VertexBuffer.Type.TexCoord, 2, BufferUtils.createFloatBuffer(uvs.toArray(new Vector2f[0])));
+        mesh.setBuffer(
+            VertexBuffer.Type.Index,
+            3,
+            BufferUtils.createIntBuffer(
+                indices
+                    .stream()
+                    .mapToInt(i -> i)
+                    .toArray()
+            )
+        );
+
+        mesh.updateBound();
+        return mesh;
+    }
+
+    /**
+     * determines if a face on a non-cube block should be rendered.
      */
     private static boolean shouldRenderFace(
         Face face,
@@ -206,44 +793,34 @@ public final class ChunkMeshBuilder {
         int y,
         int z
     ) {
-        //DOES: return since faces with NONE direction are always rendered
-        //NOTE: e.g. faces that never border entire block like stair sides or fence posts
-        if (face.direction == OcclusionFace.NONE) {
-            return true;
-        }
+        if (face.direction == OcclusionFace.NONE) return true;
 
-        //DOES: check adjacent block in the face's direction
-        int adjFaceX = x;
-        int adjFaceY = y;
-        int adjFaceZ = z;
-
-        //DOES: determine coordinates for adjacent block in direction
-        //NOTE: ex. if block is at 0,0,0 adds 1 to adjFaceY for block above
+        int adjX = x,
+            adjY = y,
+            adjZ = z;
         switch (face.direction) {
             case UP:
-                adjFaceY++;
+                adjY++;
                 break;
             case DOWN:
-                adjFaceY--;
+                adjY--;
                 break;
             case NORTH:
-                adjFaceZ++;
+                adjZ++;
                 break;
             case SOUTH:
-                adjFaceZ--;
+                adjZ--;
                 break;
             case EAST:
-                adjFaceX++;
+                adjX++;
                 break;
             case WEST:
-                adjFaceX--;
+                adjX--;
                 break;
-            //INFO: will never trigger, but needed for switch statement
-            case NONE:
+            default:
                 return true;
         }
 
-        //DOES: render face if adjacent block is air, transparent, or outside chunk
         return isAirOrTransparent(
             blocks,
             neighborUp,
@@ -252,95 +829,15 @@ public final class ChunkMeshBuilder {
             neighborSouth,
             neighborEast,
             neighborWest,
-            adjFaceX,
-            adjFaceY,
-            adjFaceZ
+            adjX,
+            adjY,
+            adjZ
         );
     }
 
     /**
-     * gets the appropriate texture for a face based on its texture key
-     */
-    private static String getTextureForFace(Block block, String textureKey) {
-        switch (textureKey) {
-            case "top":
-                return block.getTopTex();
-            case "bottom":
-                return block.getBottomTex();
-            case "side":
-                return block.getSideTex();
-            default:
-                return block.getSideTex();
-        }
-    }
-
-    /**
-     * adds a face to the mesh data structures
-     */
-    private static void addFace(
-        String texture,
-        Map<String, List<Vector3f>> pos,
-        Map<String, List<Vector3f>> normalMap,
-        Map<String, List<Vector2f>> uvMap,
-        Map<String, List<Integer>> index,
-        Map<String, Integer> offset,
-        Vector3f[] vertices,
-        Vector3f normal,
-        Vector2f[] uvs
-    ) {
-        //DOES: ensure lists exist for each texture
-        pos.computeIfAbsent(texture, k -> new ArrayList<>());
-        normalMap.computeIfAbsent(texture, k -> new ArrayList<>());
-        uvMap.computeIfAbsent(texture, k -> new ArrayList<>());
-        index.computeIfAbsent(texture, k -> new ArrayList<>());
-
-        //DOES: initialize offset if doesn't exist
-        offset.putIfAbsent(texture, 0);
-
-        //DOES: get vertex count for texture (how many vertices have been added already)
-        //INFO: this is so the correct vertex positons are referenced
-        //NOTE: ex. if grass has 8 vertices, next vertices should be 8-12, etc.
-        int vertexOffset = offset.get(texture);
-
-        //DOES: add all vertices to list of pos<string, list<vector3f>> at current texture
-        //INFO: Collections.addAll takes all elements of an array and adds them to a collection (e.g. a list)
-        Collections.addAll(pos.get(texture), vertices);
-
-        //DOES: add normal to list of normalMap<string, list<vector3f>> in each loop
-        //DOES: add uv of each vertex to uvMap<string, list<vector2f>> from uvs array
-        //INFO: each vertex has same normal, but different uv coordinates
-        for (int k = 0; k < 4; k++) {
-            normalMap.get(texture).add(normal);
-            uvMap.get(texture).add(uvs[k]);
-        }
-
-        //DOES: add indices for two triangles (quad)
-        //NOTE: triangle 1 at 0,1,2, triangle 2 at 0,2,3
-        index.get(texture).add(vertexOffset);
-        index.get(texture).add(vertexOffset + 1);
-        index.get(texture).add(vertexOffset + 2);
-
-        index.get(texture).add(vertexOffset);
-        index.get(texture).add(vertexOffset + 2);
-        index.get(texture).add(vertexOffset + 3);
-
-        //DOES: add offset for next vertex
-        offset.put(texture, vertexOffset + 4);
-    }
-
-    /**
-     * checks if a position is air or transparent
-     * @param blocks 3d array of blocks in chunk
-     * @param neighborUp ↓ 3d arrays of neighboring chunks ↓
-     * @param neighborDown
-     * @param neighborNorth
-     * @param neighborSouth
-     * @param neighborEast
-     * @param neighborWest
-     * @param x ↓ coordinates of the block ↓
-     * @param y
-     * @param z
-     * @return true if position is air or transparent
+     * checks if a position is air or a non-full block.
+     * handles cross-chunk lookups via neighbor arrays.
      */
     private static boolean isAirOrTransparent(
         Block[][][] blocks,
@@ -354,58 +851,63 @@ public final class ChunkMeshBuilder {
         int y,
         int z
     ) {
-        //CASE: in chunk bounds -> local blocks array used
-        if (x >= 0 && y >= 0 && z >= 0 && x < Chunk.SIZE && y < Chunk.SIZE && z < Chunk.SIZE) {
-            Block block = blocks[x][y][z];
-            return block == null || !block.isFull();
+        int S = Chunk.SIZE;
+        if (x >= 0 && y >= 0 && z >= 0 && x < S && y < S && z < S) {
+            Block b = blocks[x][y][z];
+            return b == null || !b.isFull();
         }
 
-        //CASE: out of bounds
-        //DOES: pick the right neighbor array and mirror the coordinates
         Block[][][] neighbor;
-        int neighborX = x,
-            neighborY = y,
-            neighborZ = z;
+        int nx = x,
+            ny = y,
+            nz = z;
 
-        if (y >= Chunk.SIZE) {
+        if (y >= S) {
             neighbor = neighborUp;
-            neighborY = 0;
+            ny = 0;
         } else if (y < 0) {
             neighbor = neighborDown;
-            neighborY = Chunk.SIZE - 1;
-        } else if (z >= Chunk.SIZE) {
+            ny = S - 1;
+        } else if (z >= S) {
             neighbor = neighborNorth;
-            neighborZ = 0;
+            nz = 0;
         } else if (z < 0) {
             neighbor = neighborSouth;
-            neighborZ = Chunk.SIZE - 1;
-        } else if (x >= Chunk.SIZE) {
+            nz = S - 1;
+        } else if (x >= S) {
             neighbor = neighborEast;
-            neighborX = 0;
+            nx = 0;
         } else {
             neighbor = neighborWest;
-            neighborX = Chunk.SIZE - 1;
+            nx = S - 1;
         }
 
-        //CASE: null neighbor -> unloaded -> render face
         if (neighbor == null) return true;
 
-        //NOTE: should treat blocks like stairs that do have some full faces otherwise to improve performance
-        //INFO: non-full blocks treated as transparent for occlusion purposes
-        Block block = neighbor[neighborX][neighborY][neighborZ];
-        return block == null || !block.isFull();
+        Block b = neighbor[nx][ny][nz];
+        return b == null || !b.isFull();
     }
 
     /**
-     * gets blocks array of chunk at given chunk pos
-     * @param world
-     * @param chunkX
-     * @param chunkY
-     * @param chunkZ
-     * @return
+     * resolves a MeshLibrary textureKey ("top", "bottom", "side") to the actual texture name.
+     */
+    private static String resolveTexture(Block block, String textureKey) {
+        switch (textureKey) {
+            case "top":
+                return block.getTopTex();
+            case "bottom":
+                return block.getBottomTex();
+            default:
+                return block.getSideTex();
+        }
+    }
+
+    /**
+     * gets the blocks array of a chunk at given chunk coordinates.
+     * returns null if the chunk is not loaded.
      */
     private static Block[][][] getChunkBlocks(World world, int chunkX, int chunkY, int chunkZ) {
-        Chunk chunk = world.getChunk(new ChunkPos(chunkX, chunkY, chunkZ));
+        com.minecraftclone.world.chunks.Chunk chunk = world.getChunk(new ChunkPos(chunkX, chunkY, chunkZ));
         return chunk != null ? chunk.getBlocks() : null;
     }
 }

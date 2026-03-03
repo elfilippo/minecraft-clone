@@ -9,11 +9,9 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.minecraftclone.block.Block;
-import com.minecraftclone.render.BlockMaterialCache;
+import com.minecraftclone.render.BlockAtlas;
 import com.minecraftclone.render.ChunkMeshBuilder;
 import com.minecraftclone.world.World;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Chunk {
 
@@ -22,14 +20,19 @@ public class Chunk {
 
     private final int chunkX, chunkY, chunkZ;
 
-    //IS: block object stored in triple array of ints (local pos)
+    //IS: block objects stored in triple array indexed by local position
     private final Block[][][] blocks = new Block[SIZE][SIZE][SIZE];
 
     private final Node chunkNode = new Node("Chunk");
+
+    //IS: collision node holds cloned geometry for physics shape building
     private final Node collisionNode = new Node("Collision");
+
     private final AssetManager assetManager;
 
-    private final Map<String, Geometry> geometries = new HashMap<>();
+    //IS: single geometry for the whole chunk — one draw call per chunk
+    private Geometry chunkGeometry;
+
     private RigidBodyControl collisionBody;
     private final PhysicsSpace physicsSpace;
     private final World world;
@@ -51,7 +54,7 @@ public class Chunk {
         this.assetManager = assetManager;
         this.physicsSpace = physicsSpace;
 
-        //DOES: set location of the chunk node
+        //DOES: set location of the chunk node to its world position
         chunkNode.setLocalTranslation(chunkX * SIZE, chunkY * SIZE, chunkZ * SIZE);
     }
 
@@ -60,11 +63,11 @@ public class Chunk {
     }
 
     /**
-     * saves block into blocks array & dirties chunk to reload mesh
-     * @param x
-     * @param y
-     * @param z
-     * @param block
+     * saves block into blocks array and marks chunk as dirty so mesh rebuilds
+     * @param x local x
+     * @param y local y
+     * @param z local z
+     * @param block block to set, null to clear
      */
     public void setBlock(int x, int y, int z, Block block) {
         blocks[x][y][z] = block;
@@ -72,142 +75,135 @@ public class Chunk {
     }
 
     /**
-     * creates & applies geometries from provided map of meshes to chunk node and removes old geometries
-     * @param meshes
+     * applies a pre-built mesh from a background ChunkBuildTask to the chunk node.
+     * replaces the existing geometry with a single new geometry using the atlas material.
+     * @param mesh the pre-built mesh
      */
-    public void applyMesh(Map<String, Mesh> meshes) {
-        //DOES: remove old geometries
-        for (Geometry geometry : geometries.values()) {
-            geometry.removeFromParent();
+    public void applyMesh(Mesh mesh) {
+        //DOES: remove old geometry from scene graph if present
+        if (chunkGeometry != null) {
+            chunkGeometry.removeFromParent();
+            chunkGeometry = null;
         }
-        geometries.clear();
 
-        //DOES: iterate over map of meshes and create and attach geometries from them
-        for (Map.Entry<String, Mesh> entry : meshes.entrySet()) {
-            Geometry geometry = new Geometry("chunk_" + entry.getKey(), entry.getValue());
-            geometry.setMaterial(BlockMaterialCache.get(entry.getKey(), assetManager));
-            geometries.put(entry.getKey(), geometry);
-            chunkNode.attachChild(geometry);
+        //CASE: empty chunk has no geometry to display
+        if (mesh == null || mesh.getVertexCount() == 0) {
+            dirty = false;
+            return;
         }
+
+        //DOES: create single geometry using the shared atlas material
+        chunkGeometry = new Geometry("chunk", mesh);
+        chunkGeometry.setMaterial(BlockAtlas.getMaterial());
+        chunkNode.attachChild(chunkGeometry);
 
         dirty = false;
     }
 
     /**
-     * returns the block object at local pos
-     * @param x
-     * @param y
-     * @param z
-     * @return
+     * returns the block at the given local position
+     * @param x local x
+     * @param y local y
+     * @param z local z
+     * @return block, or null if air
      */
     public Block getBlock(int x, int y, int z) {
         return blocks[x][y][z];
     }
 
     /**
-     * rebuilds the chunk mesh if not dirty
-     * <p>
+     * synchronously rebuilds the chunk mesh on the calling thread if dirty.
+     * used for block placement / breaking on the main thread.
      */
     public void rebuild() {
         if (!dirty) return;
 
-        Map<String, Mesh> meshes = ChunkMeshBuilder.build(blocks, world, chunkX, chunkY, chunkZ);
-        //DOES: remove old geometries
-        for (Geometry geometry : geometries.values()) {
-            geometry.removeFromParent();
-        }
-        geometries.clear();
+        Mesh mesh = ChunkMeshBuilder.build(blocks, world, chunkX, chunkY, chunkZ);
 
-        //DOES: if exists, remove collision body
+        //DOES: remove old geometry
+        if (chunkGeometry != null) {
+            chunkGeometry.removeFromParent();
+            chunkGeometry = null;
+        }
+
+        //DOES: remove old collision
         removeCollision();
         collisionNode.detachAllChildren();
 
-        //DOES: iterate over meshes hashmap & create and add geometries
-        for (Map.Entry<String, Mesh> meshEntry : meshes.entrySet()) {
-            //DOES: create geometry with chunk_<coords> as name and mesh hashmap value as mesh
-            var geometry = new Geometry("chunk_" + meshEntry.getKey(), meshEntry.getValue());
-
-            //DOES: set material of geometry by taking it out of BlockMaterialCashe
-            geometry.setMaterial(BlockMaterialCache.get(meshEntry.getKey(), assetManager));
-
-            //DOES: add geometry to geometries hashmap
-            geometries.put(meshEntry.getKey(), geometry);
-
-            //DOES: attatch geometry to chunkNode and collisionNode
-            chunkNode.attachChild(geometry);
-            collisionNode.attachChild(geometry.clone());
+        //CASE: empty chunk — no geometry or collision needed
+        if (mesh.getVertexCount() == 0) {
+            dirty = false;
+            return;
         }
 
-        //DOES: set chunk to clean to indicate completion of rebuild
+        //DOES: create single geometry with atlas material
+        chunkGeometry = new Geometry("chunk", mesh);
+        chunkGeometry.setMaterial(BlockAtlas.getMaterial());
+        chunkNode.attachChild(chunkGeometry);
+
+        //DOES: clone geometry into collision node for physics shape building
+        collisionNode.attachChild(chunkGeometry.clone());
+
         dirty = false;
     }
 
     /**
-     * applies collision to the chunk if it has any
+     * builds and applies collision from the collision node geometry.
+     * used after synchronous rebuild() on the main thread.
      */
     public void addCollision() {
-        CollisionShape shape = CollisionShapeFactory.createMeshShape(collisionNode);
-        addCollision(shape);
+        if (collisionNode.getQuantity() > 0) {
+            CollisionShape shape = CollisionShapeFactory.createMeshShape(collisionNode);
+            addCollision(shape);
+        }
     }
 
     /**
-     * applies collision to the chunk from provided shape
-     * @param shape
+     * applies a pre-built collision shape to the chunk.
+     * used by ChunkManager after background build completes.
+     * @param shape pre-built collision shape
      */
     public void addCollision(CollisionShape shape) {
-        //CASE: when chunk has geometry at collision node
-
         removeCollision();
-
-        //DOES: create collision body
         collisionBody = new RigidBodyControl(shape, 0f);
         chunkNode.addControl(collisionBody);
         physicsSpace.add(collisionBody);
     }
 
     /**
-     * removes collision from the chunk if it has any
+     * removes the collision body from the physics space if present
      */
     public void removeCollision() {
         if (collisionBody != null) {
             physicsSpace.remove(collisionBody);
+            collisionBody = null;
         }
     }
 
     /**
-     * unloads the chunk and removes collision
+     * unloads the chunk by removing its geometry and collision from the scene
      */
     public void unload() {
-        for (Geometry geometry : geometries.values()) {
-            geometry.removeFromParent();
+        if (chunkGeometry != null) {
+            chunkGeometry.removeFromParent();
+            chunkGeometry = null;
         }
-        geometries.clear();
-
         removeCollision();
     }
 
     /**
-     * returns the array of block objects
-     * @return
+     * returns the raw block array (used for mesh building and neighbor snapshots)
      */
     public Block[][][] getBlocks() {
         return blocks;
     }
 
-    public int getChunkX() {
-        return chunkX;
-    }
-
-    public int getChunkZ() {
-        return chunkZ;
-    }
-
-    public int getChunkY() {
-        return chunkY;
-    }
+    public int getChunkX() { return chunkX; }
+    public int getChunkY() { return chunkY; }
+    public int getChunkZ() { return chunkZ; }
 
     /**
-     * sets if the chunk is dirty (won't rebuild otherwise)
+     * marks chunk as dirty so it will rebuild on next rebuild() call
      * @param dirty
      */
     public void setDirty(boolean dirty) {

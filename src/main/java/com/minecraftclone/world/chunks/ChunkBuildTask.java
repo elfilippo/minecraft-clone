@@ -7,7 +7,6 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.minecraftclone.block.Block;
 import com.minecraftclone.render.ChunkMeshBuilder;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class ChunkBuildTask implements Callable<ChunkBuildResult> {
@@ -54,20 +53,19 @@ public class ChunkBuildTask implements Callable<ChunkBuildResult> {
             TerrainGenerator.generateChunk(chunk);
         }
 
+        //DOES: snapshot the chunk's own blocks array to avoid data races with the main thread
+        //INFO: neighbor arrays are already snapshotted by ChunkManager before task submission
         Block[][][] src = chunk.getBlocks();
         Block[][][] blocks = new Block[Chunk.SIZE][Chunk.SIZE][Chunk.SIZE];
-        for (int x = 0; x < Chunk.SIZE; x++) for (int y = 0; y < Chunk.SIZE; y++) System.arraycopy(
-            src[x][y],
-            0,
-            blocks[x][y],
-            0,
-            Chunk.SIZE
-        );
+        for (int x = 0; x < Chunk.SIZE; x++) {
+            for (int y = 0; y < Chunk.SIZE; y++) {
+                System.arraycopy(src[x][y], 0, blocks[x][y], 0, Chunk.SIZE);
+            }
+        }
 
-        //DOES: stage 2 - build mesh from block data using pre-snapshotted neighbor arrays
-        //INFO: neighbor arrays are snapshotted on main thread before task submission to avoid data races
-        Map<String, Mesh> meshes = ChunkMeshBuilder.build(
-            chunk.getBlocks(),
+        //DOES: stage 2 - build single merged mesh using greedy meshing and atlas UVs
+        Mesh mesh = ChunkMeshBuilder.build(
+            blocks,
             neighborUp,
             neighborDown,
             neighborNorth,
@@ -78,14 +76,12 @@ public class ChunkBuildTask implements Callable<ChunkBuildResult> {
 
         //DOES: stage 3 - build collision shape from mesh geometry (pure math, no physics space touch)
         CollisionShape shape = null;
-        if (buildCollision && !meshes.isEmpty()) {
+        if (buildCollision && mesh.getVertexCount() > 0) {
             Node tempNode = new Node();
-            for (Map.Entry<String, Mesh> entry : meshes.entrySet()) {
-                tempNode.attachChild(new Geometry("col", entry.getValue()));
-            }
+            tempNode.attachChild(new Geometry("col", mesh));
             shape = CollisionShapeFactory.createMeshShape(tempNode);
         }
 
-        return new ChunkBuildResult(pos, chunk, meshes, shape);
+        return new ChunkBuildResult(pos, chunk, mesh, shape);
     }
 }

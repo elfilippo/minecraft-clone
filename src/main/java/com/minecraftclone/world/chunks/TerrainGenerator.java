@@ -1,16 +1,25 @@
 package com.minecraftclone.world.chunks;
 
 import com.minecraftclone.block.Block;
-import com.minecraftclone.block.Blocks;
+import com.minecraftclone.block.BlockRegistry;
 
 public final class TerrainGenerator {
 
     //INFO: terrain generator is temporary, will be completely replaced later
 
-    // tweak these freely
+    //IS: base terrain height in blocks
     private static final int BASE_HEIGHT = 8;
+
+    //IS: controls how spread out the hills are
     private static final float HEIGHT_SCALE = 0.15f;
+
+    //IS: maximum height terrain can reach within a chunk
     private static final int MAX_HEIGHT = Chunk.SIZE - 1;
+
+    //IS: cached block references from registry (avoids repeated map lookups per block)
+    private static final Block GRASS = BlockRegistry.get("grass_block");
+    private static final Block DIRT  = BlockRegistry.get("dirt");
+    private static final Block STONE = BlockRegistry.get("stone");
 
     private TerrainGenerator() {}
 
@@ -27,21 +36,20 @@ public final class TerrainGenerator {
 
                 for (int y = 0; y <= height; y++) {
                     if (y == height) {
-                        blocks[x][y][z] = Blocks.GRASS_BLOCK;
+                        blocks[x][y][z] = GRASS;
                     } else if (y >= height - 3) {
-                        blocks[x][y][z] = Blocks.DIRT;
+                        blocks[x][y][z] = DIRT;
                     } else {
-                        blocks[x][y][z] = Blocks.STONE;
+                        blocks[x][y][z] = STONE;
                     }
                 }
             }
         }
     }
 
-    // simple & fast height function
+    //IS: simple deterministic height function based on sine/cosine waves
     private static int getHeight(int x, int z) {
         double h = Math.sin(x * HEIGHT_SCALE) * 2 + Math.cos(z * HEIGHT_SCALE) * 2;
-
         return BASE_HEIGHT + (int) h;
     }
 }

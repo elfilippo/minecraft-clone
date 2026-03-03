@@ -3,6 +3,7 @@ package com.minecraftclone.world.chunks;
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.Vector3f;
 import com.minecraftclone.block.Block;
 import com.minecraftclone.world.World;
@@ -29,46 +30,47 @@ public class ChunkManager {
     private final int renderDistance;
     private final int simulationDistance;
 
-    //IS: array double-ended queue
-    //INFO: allows efficient adding & removing from both ends
+    //IS: queue of chunk positions waiting to be submitted for building
+    //INFO: ArrayDeque allows efficient adding and removing from both ends
     private final Queue<ChunkPos> queue = new ArrayDeque<>();
 
-    //IS: set of chunk positions
-    //INFO: set is used for super-fast lookup time (check if chunk is already queued)
+    //IS: set for fast lookup of what's already in the queue
     private final Set<ChunkPos> queued = new HashSet<>();
 
-    //IS: set of loaded chunks and chunks with collision
+    //IS: set of chunk positions that are fully loaded and visible
     private final Set<ChunkPos> loaded = new HashSet<>();
+
+    //IS: set of chunk positions that have collision bodies in the physics space
     private final Set<ChunkPos> hasCollision = new HashSet<>();
 
     //IS: thread pool for background chunk building
-    //INFO: uses one less thread than available to leave main thread free
+    //INFO: uses one less thread than available to leave main thread responsive
     private final ExecutorService executor = Executors.newFixedThreadPool(
         Math.max(1, Runtime.getRuntime().availableProcessors() - 1)
     );
 
-    //IS: completed chunk build results waiting to be applied to the scene graph
+    //IS: completed chunk build results waiting to be applied to the scene graph on the main thread
     //INFO: background threads write, main thread reads — must be concurrent
     private final Queue<ChunkBuildResult> readyToApply = new ConcurrentLinkedQueue<>();
 
     //IS: chunks currently being built on a background thread
-    //INFO: checked by enqueueMissing() to avoid submitting the same chunk twice
-    //INFO: thread safe version of hash set
+    //INFO: ConcurrentHashMap.newKeySet() gives a thread-safe HashSet
     private final Set<ChunkPos> inProgress = ConcurrentHashMap.newKeySet();
 
+    //IS: chunks that were rebuilt synchronously on the main thread due to block placement/breaking
+    //INFO: stale background results for these chunks are discarded in applyReadyChunks
     private final Set<ChunkPos> manuallyRebuilt = new HashSet<>();
 
     private Vector3f playerPos;
 
-    //IS: chunk player is/was in
+    //IS: current and previous chunk the player is in (used to detect chunk crossings)
     private int chunkX, lastChunkX;
     private int chunkZ, lastChunkZ;
 
     private boolean reloadChunks = true;
 
     /**
-     * handles chunk generation, loading, unloading, and everything else
-     * <p>
+     * handles chunk generation, loading, unloading, and background mesh building
      */
     public ChunkManager(SimpleApplication app, World world, int renderDistance, int simulationDistance) {
         this.app = app;
@@ -77,13 +79,12 @@ public class ChunkManager {
         this.simulationDistance = simulationDistance;
 
         BulletAppState bullet = app.getStateManager().getState(BulletAppState.class);
-
         this.physicsSpace = bullet.getPhysicsSpace();
     }
 
     /**
-     * updates chunk queue
-     * @param playerPos
+     * called every frame — updates the chunk queue, submits tasks, and applies results
+     * @param playerPos current player physics location
      */
     public void update(Vector3f playerPos) {
         this.playerPos = playerPos;
@@ -95,7 +96,7 @@ public class ChunkManager {
         chunkZ = Math.floorDiv((int) playerPos.z, Chunk.SIZE);
 
         if (chunkX != lastChunkX || chunkZ != lastChunkZ || reloadChunks) {
-            //INFO: called every frame
+            //DOES: queue any chunks in render distance that aren't loaded yet
             enqueueMissing();
 
             //DOES: unload chunks outside render distance
@@ -104,105 +105,84 @@ public class ChunkManager {
             reloadChunks = false;
         }
 
-        //DOES: submit chunk build tasks to background thread
+        //DOES: submit chunk build tasks to background thread pool
         processQueue();
 
-        //DOES: apply completed chunk results to scene graph on main thread
+        //DOES: apply completed background results to scene graph on main thread
         applyReadyChunks();
     }
 
     /**
-     * adds missing chunks in player's render distance to queue,
-     * chunks closer to player are enqueued first
+     * adds all missing chunks within render distance to the queue,
+     * in diamond (closest-first) order matching Minecraft's load order
      */
     private void enqueueMissing() {
-        //DOES: get chunk coords from player pos
-        //INFO: floorDiv is used to get the correct coords even with negative playerPos
         int chunkX = Math.floorDiv((int) playerPos.x, Chunk.SIZE);
         int chunkZ = Math.floorDiv((int) playerPos.z, Chunk.SIZE);
 
-        //DOES: loop through each ring of distance from player
-        //INFO: spiral / diamond order (like mc)
+        //DOES: loop through each diamond ring of distance from player
         for (int distance = 0; distance <= renderDistance; distance++) {
-            //DOES: iterate from -distance to +distance in each upper loop (go left to right across layer)
-            //NOTE: ex. for ring (distance) 2 -> -2, -1, 0, 1, 2
+            /* INFO: diamond pattern visual for distance=2:
+               distanceZ1: 0  1  2  1  0
+                                 x
+                              x  x  x
+                           x  x  x  x  x
+                              x  x  x
+                                 x
+               offsetX:   -2 -1  0  1  2  */
             for (int offsetX = -distance; offsetX <= distance; offsetX++) {
-                //DOES: check how far vertically can be moved for each offsetX in diamond shape
-                /* //INFO: visual:
-                distanceZ1: 0  1  2  1  0
-                                  x
-                               x  x  x
-                            x  x  x  x  x
-                               x  x  x
-                                  x
-                offsetX:   -2 -1  0  1  2  */
-                //IS: distance - absolute value of offsetX (how far up chunks need to be rendered from player)
                 int distanceZ1 = distance - Math.abs(offsetX);
-
-                //IS: inverted distanceZ1 (how far down chunks need to be rendered from player)
                 int distanceZ2 = -distanceZ1;
 
-                //DOES: add chunks above player to queue if not already queued
-                //INFO: offset needs to be added to chunk coords since it's relative to player
                 addIfMissing(chunkX + offsetX, chunkZ + distanceZ1);
-
-                //DOES: add chunks below to queue if not same chunk as already added above
                 if (distanceZ1 != distanceZ2) addIfMissing(chunkX + offsetX, chunkZ + distanceZ2);
             }
         }
     }
 
     /**
-     * checks if chunk at coordinates exists & adds to queue if not
-     * @param chunkX
-     * @param chunkZ
+     * adds a chunk to the queue if it isn't already loaded, queued, or in progress
+     * @param chunkX chunk x coordinate
+     * @param chunkZ chunk z coordinate
      */
     private void addIfMissing(int chunkX, int chunkZ) {
         //NOTE: needs to add chunks at different y coordinates as well later
-
         ChunkPos pos = new ChunkPos(chunkX, 0, chunkZ);
 
-        //CASE: if loaded, in progress, or queued
         if (loaded.contains(pos) || queued.contains(pos) || inProgress.contains(pos)) return;
 
-        //DOES: add to queue and queue set
         queue.add(pos);
         queued.add(pos);
     }
 
     /**
-     * submits chunk build tasks to the background thread executor
+     * dequeues up to CHUNKS_PER_TICK chunks and submits them as background build tasks
      */
     private void processQueue() {
-        //NOTE: needs to support fractional chunks per tick (setting?)
-
-        //DOES: loop for however many chunks can be submitted per tick
         for (int i = 0; i < CHUNKS_PER_TICK; i++) {
-            //DOES: take first element in queue out
             ChunkPos pos = queue.poll();
-
-            //CASE: no elements in queue
             if (pos == null) return;
 
-            //DOES: remove from queue set and mark as in progress
             queued.remove(pos);
             inProgress.add(pos);
 
-            //DOES: snapshot neighbor arrays on main thread before submitting to avoid data races
-            //INFO: background thread must not read from world directly
-            Block[][][] neighborUp = getNeighborBlocks(pos.x, pos.y + 1, pos.z);
-            Block[][][] neighborDown = getNeighborBlocks(pos.x, pos.y - 1, pos.z);
+            //DOES: snapshot neighbor blocks arrays on main thread before going off-thread
+            //INFO: background thread must not read world state directly to avoid data races
+            Block[][][] neighborUp    = getNeighborBlocks(pos.x, pos.y + 1, pos.z);
+            Block[][][] neighborDown  = getNeighborBlocks(pos.x, pos.y - 1, pos.z);
             Block[][][] neighborNorth = getNeighborBlocks(pos.x, pos.y, pos.z + 1);
             Block[][][] neighborSouth = getNeighborBlocks(pos.x, pos.y, pos.z - 1);
-            Block[][][] neighborEast = getNeighborBlocks(pos.x + 1, pos.y, pos.z);
-            Block[][][] neighborWest = getNeighborBlocks(pos.x - 1, pos.y, pos.z);
+            Block[][][] neighborEast  = getNeighborBlocks(pos.x + 1, pos.y, pos.z);
+            Block[][][] neighborWest  = getNeighborBlocks(pos.x - 1, pos.y, pos.z);
 
-            //DOES: create chunk object on main thread (not yet attached to scene)
-            Chunk chunk = world.hasChunk(pos)
+            //DOES: reuse existing chunk if already in world (e.g. returning after unload)
+            //INFO: skip terrain generation for chunks that already have block data
+            boolean alreadyGenerated = world.hasChunk(pos);
+            Chunk chunk = alreadyGenerated
                 ? world.getChunk(pos)
                 : new Chunk(world, pos.x, pos.y, pos.z, app.getAssetManager(), physicsSpace);
+
             boolean buildCollision = inDistance(pos, simulationDistance);
-            boolean alreadyGenerated = world.hasChunk(pos);
 
             ChunkBuildTask task = new ChunkBuildTask(
                 pos,
@@ -217,7 +197,7 @@ public class ChunkManager {
                 !alreadyGenerated
             );
 
-            //DOES: submit task to background thread, add result to readyToApply when done
+            //DOES: submit task to thread pool — result added to readyToApply when done
             executor.submit(() -> {
                 try {
                     ChunkBuildResult result = task.call();
@@ -230,41 +210,44 @@ public class ChunkManager {
     }
 
     /**
-     * gets snapshot of blocks array of neighboring chunk at given chunk coords
-     * @param cx
-     * @param cy
-     * @param cz
-     * @return blocks array, null if chunk not loaded
+     * returns a deep copy of a neighbor chunk's blocks array.
+     * copy is necessary to avoid data races when the main thread modifies blocks
+     * while the background thread reads them for mesh building.
+     * @param cx chunk x
+     * @param cy chunk y
+     * @param cz chunk z
+     * @return copied blocks array, or null if chunk not loaded
      */
     private Block[][][] getNeighborBlocks(int cx, int cy, int cz) {
         Chunk chunk = world.getChunk(new ChunkPos(cx, cy, cz));
         if (chunk == null) return null;
+
         Block[][][] src = chunk.getBlocks();
         Block[][][] copy = new Block[Chunk.SIZE][Chunk.SIZE][Chunk.SIZE];
-        for (int x = 0; x < Chunk.SIZE; x++) for (int y = 0; y < Chunk.SIZE; y++) System.arraycopy(
-            src[x][y],
-            0,
-            copy[x][y],
-            0,
-            Chunk.SIZE
-        );
+        for (int x = 0; x < Chunk.SIZE; x++) {
+            for (int y = 0; y < Chunk.SIZE; y++) {
+                System.arraycopy(src[x][y], 0, copy[x][y], 0, Chunk.SIZE);
+            }
+        }
         return copy;
     }
 
     /**
-     * applies completed chunk build results to the scene graph on the main thread
-     * limited to APPLY_PER_FRAME results per frame to avoid main thread spikes
+     * applies up to APPLY_PER_FRAME completed chunk results to the scene graph.
+     * always runs on the main thread — safe to touch scene graph and physics space here.
      */
     private void applyReadyChunks() {
         for (int i = 0; i < APPLY_PER_FRAME; i++) {
             ChunkBuildResult result = readyToApply.poll();
             if (result == null) return;
 
-            //CASE: chunk was unloaded while task was running, discard result
+            //CASE: chunk was unloaded while task was running — discard result
             if (!inProgress.contains(result.pos)) continue;
 
             inProgress.remove(result.pos);
 
+            //CASE: chunk was manually rebuilt (block placed/broken) while task was in-flight
+            //INFO: discard stale background result to avoid overwriting the correct mesh
             if (manuallyRebuilt.contains(result.pos)) {
                 loaded.add(result.pos);
                 continue;
@@ -272,21 +255,23 @@ public class ChunkManager {
 
             loaded.add(result.pos);
 
-            //DOES: scene graph touches — safe since we are on the main thread
+            //DOES: add chunk to world if it's brand new
             if (!world.hasChunk(result.pos)) {
                 world.addChunk(result.chunk);
                 app.getRootNode().attachChild(result.chunk.getNode());
             }
-            result.chunk.applyMesh(result.meshes);
 
-            //DOES: add collision body to physics space if it was built
+            //DOES: apply the single merged mesh to the chunk
+            result.chunk.applyMesh(result.mesh);
+
+            //DOES: apply pre-built collision shape if this chunk is within simulation distance
             if (result.collisionShape != null) {
                 result.chunk.addCollision(result.collisionShape);
                 hasCollision.add(result.pos);
             }
 
-            //DOES: rebuild neighbors to cull faces across chunk borders properly
-            //INFO: not recursive, since rebuildNeighbor does not rebuild neighbors for itself (does not loop infinitely)
+            //DOES: trigger mesh-only rebuilds on neighbors to fix border face culling
+            //INFO: not recursive — requeueNeighborRebuild never triggers further neighbor rebuilds
             requeueNeighborRebuild(result.pos.x + 1, result.pos.y, result.pos.z);
             requeueNeighborRebuild(result.pos.x - 1, result.pos.y, result.pos.z);
             requeueNeighborRebuild(result.pos.x, result.pos.y + 1, result.pos.z);
@@ -297,7 +282,7 @@ public class ChunkManager {
     }
 
     /**
-     * processes all chunks with collision and removes it if outside simulation distance
+     * removes collision from all chunks that have moved outside simulation distance
      */
     private void removeCollision() {
         Set<ChunkPos> collisionRemoved = new HashSet<>();
@@ -312,6 +297,9 @@ public class ChunkManager {
         hasCollision.removeAll(collisionRemoved);
     }
 
+    /**
+     * unloads all chunks that have moved outside render distance
+     */
     private void unloadChunks() {
         Set<ChunkPos> unloaded = new HashSet<>();
         for (ChunkPos pos : loaded) {
@@ -326,18 +314,18 @@ public class ChunkManager {
     }
 
     /**
-     * requeues a loaded neighbor chunk for a mesh-only background rebuild
-     * used when a new chunk loads next to an existing one to update border face culling
-     * does not regenerate terrain, only rebuilds the mesh
-     * @param cx
-     * @param cy
-     * @param cz
+     * submits a mesh-only background rebuild for a loaded neighbor chunk.
+     * used after a new chunk loads next to it to fix cross-chunk border face culling.
+     * does not regenerate terrain.
+     * @param cx chunk x
+     * @param cy chunk y
+     * @param cz chunk z
      */
     private void requeueNeighborRebuild(int cx, int cy, int cz) {
         ChunkPos pos = new ChunkPos(cx, cy, cz);
         Chunk neighbor = world.getChunk(pos);
 
-        //CASE: neighbor doesn't exist or is already being rebuilt
+        //CASE: neighbor doesn't exist, already rebuilding, or manually rebuilt
         if (
             neighbor == null ||
             !loaded.contains(pos) ||
@@ -345,15 +333,16 @@ public class ChunkManager {
             queued.contains(pos) ||
             manuallyRebuilt.contains(pos)
         ) return;
-        //DOES: snapshot neighbor's own neighbors for the mesh rebuild
-        Block[][][] neighborUp = getNeighborBlocks(cx, cy + 1, cz);
-        Block[][][] neighborDown = getNeighborBlocks(cx, cy - 1, cz);
+
+        //DOES: snapshot this neighbor's own neighbors for the mesh rebuild
+        Block[][][] neighborUp    = getNeighborBlocks(cx, cy + 1, cz);
+        Block[][][] neighborDown  = getNeighborBlocks(cx, cy - 1, cz);
         Block[][][] neighborNorth = getNeighborBlocks(cx, cy, cz + 1);
         Block[][][] neighborSouth = getNeighborBlocks(cx, cy, cz - 1);
-        Block[][][] neighborEast = getNeighborBlocks(cx + 1, cy, cz);
-        Block[][][] neighborWest = getNeighborBlocks(cx - 1, cy, cz);
+        Block[][][] neighborEast  = getNeighborBlocks(cx + 1, cy, cz);
+        Block[][][] neighborWest  = getNeighborBlocks(cx - 1, cy, cz);
 
-        //DOES: mark in progress so it won't be queued again
+        //DOES: move from loaded to inProgress so it won't be requeued again while building
         loaded.remove(pos);
         inProgress.add(pos);
 
@@ -366,11 +355,10 @@ public class ChunkManager {
             neighborSouth,
             neighborEast,
             neighborWest,
-            hasCollision.contains(pos), // preserve collision state
-            false // no terrain generation
+            hasCollision.contains(pos), // preserve existing collision state
+            false                       // no terrain generation
         );
 
-        //DOES: submit mesh-only rebuild to background thread
         executor.submit(() -> {
             try {
                 ChunkBuildResult result = task.call();
@@ -382,10 +370,10 @@ public class ChunkManager {
     }
 
     /**
-     * checks if chunk is in distance
-     * @param pos
-     * @param distance
-     * @return
+     * checks if a chunk is within a given distance of the player using manhattan distance
+     * @param pos chunk position
+     * @param distance max manhattan distance in chunks
+     * @return true if within distance
      */
     private boolean inDistance(ChunkPos pos, int distance) {
         int chunkX = Math.floorDiv((int) playerPos.x, Chunk.SIZE);
@@ -394,35 +382,35 @@ public class ChunkManager {
     }
 
     /**
-     * adds to hasCollision set so that collision can be scheduled to be removed
-     * @param pos
+     * registers a chunk position as having been manually rebuilt on the main thread.
+     * prevents stale in-flight background results from overwriting it.
+     * @param pos chunk position
+     */
+    public void markManuallyRebuilt(ChunkPos pos) {
+        manuallyRebuilt.add(pos);
+    }
+
+    /**
+     * adds a chunk to the hasCollision set so its collision can be tracked for removal
+     * @param pos chunk position
      */
     public void addToHasCollision(ChunkPos pos) {
         hasCollision.add(pos);
     }
 
     /**
-     * returns if chunk at given pos has collision
-     * @param pos
-     * @return
+     * returns whether a chunk has an active collision body
+     * @param pos chunk position
+     * @return true if chunk has collision
      */
     public boolean hasCollision(ChunkPos pos) {
         return hasCollision.contains(pos);
     }
 
     /**
-     * shuts down the background thread executor
-     * called when the game exits to prevent threads from keeping the JVM alive
+     * shuts down the background thread pool cleanly on game exit
      */
     public void shutdown() {
         executor.shutdownNow();
-    }
-
-    public boolean isInProgress(ChunkPos pos) {
-        return inProgress.contains(pos);
-    }
-
-    public void markManuallyRebuilt(ChunkPos pos) {
-        manuallyRebuilt.add(pos);
     }
 }

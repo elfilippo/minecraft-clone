@@ -6,11 +6,12 @@ import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.math.Vector3f;
 import com.jme3.system.AppSettings;
-import com.minecraftclone.block.Blocks;
+import com.minecraftclone.block.BlockRegistry;
 import com.minecraftclone.player.PlayerCharacter;
 import com.minecraftclone.player.input.ActionInput;
 import com.minecraftclone.player.input.AnalogInput;
 import com.minecraftclone.player.input.KeyMapping;
+import com.minecraftclone.render.BlockAtlas;
 import com.minecraftclone.render.CustomCam;
 import com.minecraftclone.world.BlockInteractionSystem;
 import com.minecraftclone.world.World;
@@ -68,6 +69,12 @@ public class Main extends SimpleApplication {
         initialTime = System.nanoTime();
         tickTime = 1f / TICKS_PER_SECOND;
 
+        //DOES: load block definitions from blocks.yml before anything else
+        BlockRegistry.load();
+
+        //DOES: build texture atlas from all textures registered by blocks.yml
+        BlockAtlas.build(assetManager);
+
         //DOES: render tps on screen
         tpsText = new BitmapText(guiFont);
         guiNode.attachChild(tpsText);
@@ -103,14 +110,11 @@ public class Main extends SimpleApplication {
         world = new World(this, actionInput, analogInput, bulletAppState);
         playerCharacter = world.getPlayerCharacter();
 
-        //DOES: nothing rn, will render world eventually
-        //new RenderEngine(rootNode, assetManager, bulletAppState);
-
         //DOES: raycast and break & place blocks
         blockInteraction = new BlockInteractionSystem(world, actionInput, this);
 
         //NOTE: will be set by hotbar later
-        blockInteraction.setSelectedBlock(Blocks.STAIRS);
+        blockInteraction.setSelectedBlock(BlockRegistry.get("oak_stairs"));
     }
 
     @Override

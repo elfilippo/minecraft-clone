@@ -12,37 +12,48 @@ public class Block {
     private final BlockGeometry geometry;
     private final BlockType type;
 
+    //IS: whether the player can break this block (defined per block in blocks.yml)
+    private final boolean breakable;
+
     /**
-     * full constructor with sided textures and custom block type
+     * full constructor — used by BlockRegistry when loading from blocks.yml
      */
-    public Block(boolean full, String topTex, String sideTex, String bottomTex, BlockType type) {
+    public Block(boolean full, String topTex, String sideTex, String bottomTex, BlockType type, boolean breakable) {
         this.full = full;
         this.topTex = topTex;
         this.sideTex = sideTex;
         this.bottomTex = bottomTex;
         this.type = type;
+        this.breakable = breakable;
         this.geometry = getBlockGeometry(type);
+    }
+
+    /**
+     * constructor with sided textures and custom block type, breakable defaults to true
+     */
+    public Block(boolean full, String topTex, String sideTex, String bottomTex, BlockType type) {
+        this(full, topTex, sideTex, bottomTex, type, true);
     }
 
     /**
      * constructor for cube blocks with sided textures
      */
     public Block(boolean full, String topTex, String sideTex, String bottomTex) {
-        this(full, topTex, sideTex, bottomTex, BlockType.CUBE);
+        this(full, topTex, sideTex, bottomTex, BlockType.CUBE, true);
     }
 
     /**
      * constructor for cube blocks with same texture on all sides
      */
     public Block(boolean full, String texture) {
-        this(full, texture, texture, texture, BlockType.CUBE);
+        this(full, texture, texture, texture, BlockType.CUBE, true);
     }
 
     /**
-     * constructor for blocks with custom block type
+     * constructor for blocks with custom block type and same texture on all sides
      */
     public Block(boolean full, String texture, BlockType type) {
-        this(full, texture, texture, texture, type);
+        this(full, texture, texture, texture, type, true);
     }
 
     public boolean isFull() {
@@ -50,12 +61,11 @@ public class Block {
     }
 
     public boolean isBreakable() {
-        //NOTE: always returns true for now, hardness to be added later
-        return true;
+        return breakable;
     }
 
     /**
-     * default true, overridden by child classes for block-specific rules
+     * default true, overridden by child classes for block-specific placement rules
      * @param world
      * @param x
      * @param y
@@ -86,30 +96,24 @@ public class Block {
     }
 
     /**
-     * gets block geometry from mesh library
+     * gets block geometry from mesh library based on block type
      * @param type
      * @return
      */
     private BlockGeometry getBlockGeometry(BlockType type) {
-        //NOTE: needs to have extra logic for rotateable blocks
+        //NOTE: needs extra logic for rotatable blocks later
         switch (type) {
-            case CUBE:
-                return MeshLibrary.CUBE;
-            case STAIRS:
-                return MeshLibrary.STAIRS_NORTH;
-            case SLAB:
-                return MeshLibrary.SLAB;
-            case FENCE:
-                return MeshLibrary.FENCE_POST;
-            case CUSTOM:
-                return MeshLibrary.CUBE;
-            default:
-                return MeshLibrary.CUBE;
+            case CUBE:   return MeshLibrary.CUBE;
+            case STAIRS: return MeshLibrary.STAIRS_NORTH;
+            case SLAB:   return MeshLibrary.SLAB;
+            case FENCE:  return MeshLibrary.FENCE_POST;
+            case CUSTOM: return MeshLibrary.CUBE;
+            default:     return MeshLibrary.CUBE;
         }
     }
 
     /**
-     * enum for different block types
+     * enum for different block shape types
      */
     public enum BlockType {
         CUBE,

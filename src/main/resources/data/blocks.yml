@@ -1,0 +1,311 @@
+# Block definitions for minecraft-clone
+# Each entry defines one block by its registry ID.
+#
+# FIELDS:
+#   id:         unique string identifier used in code via BlockRegistry.get("id")
+#   type:       CUBE | STAIRS | SLAB | FENCE  (default: CUBE)
+#   full:       true if block fills its entire 1x1x1 volume, used for face culling (default: true)
+#   breakable:  whether the player can break this block (default: true)
+#   texture:    single texture name for all faces
+#   top:        texture for top face (overrides texture)
+#   bottom:     texture for bottom face (overrides texture)
+#   side:       texture for side faces (overrides texture)
+#
+# NOTE: texture names are filenames in textures/block/ without the .png extension
+# NOTE: full should be false for any block that doesn't fill the entire cube (stairs, slabs, fences)
+
+blocks:
+
+  # ---- NATURAL ----
+
+  - id: grass_block
+    texture: grass_block_side
+    top: grass_block_top
+    bottom: dirt
+
+  - id: dirt
+    texture: dirt
+
+  - id: stone
+    texture: stone
+
+  - id: cobblestone
+    texture: cobblestone
+
+  - id: mossy_cobblestone
+    texture: mossy_cobblestone
+
+  - id: sand
+    texture: sand
+
+  - id: gravel
+    texture: gravel
+
+  - id: bedrock
+    texture: bedrock
+    breakable: false
+
+  - id: snow
+    texture: snow
+
+  - id: ice
+    texture: ice
+
+  - id: packed_ice
+    texture: ice_packed
+
+  - id: clay
+    texture: clay
+
+  - id: soul_sand
+    texture: soul_sand
+
+  - id: netherrack
+    texture: netherrack
+
+  - id: end_stone
+    texture: end_stone
+
+  - id: glowstone
+    texture: glowstone
+
+  # ---- STONE VARIANTS ----
+
+  - id: sandstone
+    texture: sandstone_normal
+    top: sandstone_top
+    bottom: sandstone_bottom
+
+  - id: red_sandstone
+    texture: red_sandstone_normal
+    top: red_sandstone_top
+    bottom: red_sandstone_bottom
+
+  - id: nether_brick
+    texture: nether_brick
+
+  - id: obsidian
+    texture: obsidian
+
+  - id: brick
+    texture: brick
+
+  # ---- GLASS & SPECIAL ----
+
+  - id: glass
+    texture: glass
+
+  - id: sponge
+    texture: sponge
+
+  - id: wet_sponge
+    texture: sponge_wet
+
+  - id: sea_lantern
+    texture: sea_lantern
+
+  # ---- WOOD PLANKS ----
+
+  - id: planks_oak
+    texture: planks_oak
+
+  - id: planks_spruce
+    texture: planks_spruce
+
+  - id: planks_birch
+    texture: planks_birch
+
+  - id: planks_jungle
+    texture: planks_jungle
+
+  - id: planks_acacia
+    texture: planks_acacia
+
+  - id: planks_dark_oak
+    texture: planks_dark_oak
+
+  # ---- WOOD SHAPES ----
+
+  - id: oak_stairs
+    type: STAIRS
+    full: false
+    texture: oak_planks
+
+  - id: oak_slab
+    type: SLAB
+    full: false
+    texture: oak_planks
+
+  - id: oak_fence
+    type: FENCE
+    full: false
+    texture: oak_planks
+
+  # ---- ORES ----
+
+  - id: coal_ore
+    texture: coal_ore
+
+  - id: iron_ore
+    texture: iron_ore
+
+  - id: gold_ore
+    texture: gold_ore
+
+  - id: lapis_ore
+    texture: lapis_ore
+
+  - id: diamond_ore
+    texture: diamond_ore
+
+  - id: redstone_ore
+    texture: redstone_ore
+
+  - id: emerald_ore
+    texture: emerald_ore
+
+  # ---- STORAGE BLOCKS ----
+
+  - id: coal_block
+    texture: coal_block
+
+  - id: iron_block
+    texture: iron_block
+
+  - id: gold_block
+    texture: gold_block
+
+  - id: diamond_block
+    texture: diamond_block
+
+  - id: lapis_block
+    texture: lapis_block
+
+  - id: emerald_block
+    texture: emerald_block
+
+  # ---- QUARTZ ----
+
+  - id: quartz_block
+    texture: quartz_block_side
+    top: quartz_block_top
+    bottom: quartz_block_bottom
+
+  # ---- PRISMARINE ----
+
+  - id: prismarine
+    texture: prismarine_rough
+
+  - id: prismarine_bricks
+    texture: prismarine_bricks
+
+  - id: dark_prismarine
+    texture: dark_prismarine
+
+  # ---- HARDENED CLAY ----
+
+  - id: hardened_clay
+    texture: hardened_clay
+
+  - id: stained_clay_white
+    texture: hardened_clay_stained_white
+
+  - id: stained_clay_orange
+    texture: hardened_clay_stained_orange
+
+  - id: stained_clay_magenta
+    texture: hardened_clay_stained_magenta
+
+  - id: stained_clay_light_blue
+    texture: hardened_clay_stained_light_blue
+
+  - id: stained_clay_yellow
+    texture: hardened_clay_stained_yellow
+
+  - id: stained_clay_lime
+    texture: hardened_clay_stained_lime
+
+  - id: stained_clay_pink
+    texture: hardened_clay_stained_pink
+
+  - id: stained_clay_gray
+    texture: hardened_clay_stained_gray
+
+  - id: stained_clay_silver
+    texture: hardened_clay_stained_silver
+
+  - id: stained_clay_cyan
+    texture: hardened_clay_stained_cyan
+
+  - id: stained_clay_purple
+    texture: hardened_clay_stained_purple
+
+  - id: stained_clay_blue
+    texture: hardened_clay_stained_blue
+
+  - id: stained_clay_brown
+    texture: hardened_clay_stained_brown
+
+  - id: stained_clay_green
+    texture: hardened_clay_stained_green
+
+  - id: stained_clay_red
+    texture: hardened_clay_stained_red
+
+  - id: stained_clay_black
+    texture: hardened_clay_stained_black
+
+  # ---- WOOL ----
+
+  - id: wool_white
+    texture: wool_colored_white
+
+  - id: wool_orange
+    texture: wool_colored_orange
+
+  - id: wool_magenta
+    texture: wool_colored_magenta
+
+  - id: wool_light_blue
+    texture: wool_colored_light_blue
+
+  - id: wool_yellow
+    texture: wool_colored_yellow
+
+  - id: wool_lime
+    texture: wool_colored_lime
+
+  - id: wool_pink
+    texture: wool_colored_pink
+
+  - id: wool_gray
+    texture: wool_colored_gray
+
+  - id: wool_silver
+    texture: wool_colored_silver
+
+  - id: wool_cyan
+    texture: wool_colored_cyan
+
+  - id: wool_purple
+    texture: wool_colored_purple
+
+  - id: wool_blue
+    texture: wool_colored_blue
+
+  - id: wool_brown
+    texture: wool_colored_brown
+
+  - id: wool_green
+    texture: wool_colored_green
+
+  - id: wool_red
+    texture: wool_colored_red
+
+  - id: wool_black
+    texture: wool_colored_black
+
+  # ---- RED SAND ----
+
+  - id: red_sand
+    texture: red_sand
