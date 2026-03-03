@@ -54,6 +54,16 @@ public class ChunkBuildTask implements Callable<ChunkBuildResult> {
             TerrainGenerator.generateChunk(chunk);
         }
 
+        Block[][][] src = chunk.getBlocks();
+        Block[][][] blocks = new Block[Chunk.SIZE][Chunk.SIZE][Chunk.SIZE];
+        for (int x = 0; x < Chunk.SIZE; x++) for (int y = 0; y < Chunk.SIZE; y++) System.arraycopy(
+            src[x][y],
+            0,
+            blocks[x][y],
+            0,
+            Chunk.SIZE
+        );
+
         //DOES: stage 2 - build mesh from block data using pre-snapshotted neighbor arrays
         //INFO: neighbor arrays are snapshotted on main thread before task submission to avoid data races
         Map<String, Mesh> meshes = ChunkMeshBuilder.build(

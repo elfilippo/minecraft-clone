@@ -3,7 +3,6 @@ package com.minecraftclone.world.chunks;
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
-import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.Vector3f;
 import com.minecraftclone.block.Block;
 import com.minecraftclone.world.World;
@@ -11,6 +10,7 @@ import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,7 +53,10 @@ public class ChunkManager {
 
     //IS: chunks currently being built on a background thread
     //INFO: checked by enqueueMissing() to avoid submitting the same chunk twice
-    private final Set<ChunkPos> inProgress = new HashSet<>();
+    //INFO: thread safe version of hash set
+    private final Set<ChunkPos> inProgress = ConcurrentHashMap.newKeySet();
+
+    private final Set<ChunkPos> manuallyRebuilt = new HashSet<>();
 
     private Vector3f playerPos;
 
@@ -195,8 +198,11 @@ public class ChunkManager {
             Block[][][] neighborWest = getNeighborBlocks(pos.x - 1, pos.y, pos.z);
 
             //DOES: create chunk object on main thread (not yet attached to scene)
-            Chunk chunk = new Chunk(world, pos.x, pos.y, pos.z, app.getAssetManager(), physicsSpace);
+            Chunk chunk = world.hasChunk(pos)
+                ? world.getChunk(pos)
+                : new Chunk(world, pos.x, pos.y, pos.z, app.getAssetManager(), physicsSpace);
             boolean buildCollision = inDistance(pos, simulationDistance);
+            boolean alreadyGenerated = world.hasChunk(pos);
 
             ChunkBuildTask task = new ChunkBuildTask(
                 pos,
@@ -208,7 +214,7 @@ public class ChunkManager {
                 neighborEast,
                 neighborWest,
                 buildCollision,
-                true
+                !alreadyGenerated
             );
 
             //DOES: submit task to background thread, add result to readyToApply when done
@@ -224,7 +230,7 @@ public class ChunkManager {
     }
 
     /**
-     * gets blocks array of neighboring chunk at given chunk coords
+     * gets snapshot of blocks array of neighboring chunk at given chunk coords
      * @param cx
      * @param cy
      * @param cz
@@ -232,7 +238,17 @@ public class ChunkManager {
      */
     private Block[][][] getNeighborBlocks(int cx, int cy, int cz) {
         Chunk chunk = world.getChunk(new ChunkPos(cx, cy, cz));
-        return chunk != null ? chunk.getBlocks() : null;
+        if (chunk == null) return null;
+        Block[][][] src = chunk.getBlocks();
+        Block[][][] copy = new Block[Chunk.SIZE][Chunk.SIZE][Chunk.SIZE];
+        for (int x = 0; x < Chunk.SIZE; x++) for (int y = 0; y < Chunk.SIZE; y++) System.arraycopy(
+            src[x][y],
+            0,
+            copy[x][y],
+            0,
+            Chunk.SIZE
+        );
+        return copy;
     }
 
     /**
@@ -248,6 +264,12 @@ public class ChunkManager {
             if (!inProgress.contains(result.pos)) continue;
 
             inProgress.remove(result.pos);
+
+            if (manuallyRebuilt.contains(result.pos)) {
+                loaded.add(result.pos);
+                continue;
+            }
+
             loaded.add(result.pos);
 
             //DOES: scene graph touches — safe since we are on the main thread
@@ -259,9 +281,7 @@ public class ChunkManager {
 
             //DOES: add collision body to physics space if it was built
             if (result.collisionShape != null) {
-                RigidBodyControl body = new RigidBodyControl(result.collisionShape, 0f);
-                result.chunk.getNode().addControl(body);
-                physicsSpace.add(body);
+                result.chunk.addCollision(result.collisionShape);
                 hasCollision.add(result.pos);
             }
 
@@ -318,8 +338,13 @@ public class ChunkManager {
         Chunk neighbor = world.getChunk(pos);
 
         //CASE: neighbor doesn't exist or is already being rebuilt
-        if (neighbor == null || !loaded.contains(pos) || inProgress.contains(pos) || queued.contains(pos)) return;
-
+        if (
+            neighbor == null ||
+            !loaded.contains(pos) ||
+            inProgress.contains(pos) ||
+            queued.contains(pos) ||
+            manuallyRebuilt.contains(pos)
+        ) return;
         //DOES: snapshot neighbor's own neighbors for the mesh rebuild
         Block[][][] neighborUp = getNeighborBlocks(cx, cy + 1, cz);
         Block[][][] neighborDown = getNeighborBlocks(cx, cy - 1, cz);
@@ -391,5 +416,13 @@ public class ChunkManager {
      */
     public void shutdown() {
         executor.shutdownNow();
+    }
+
+    public boolean isInProgress(ChunkPos pos) {
+        return inProgress.contains(pos);
+    }
+
+    public void markManuallyRebuilt(ChunkPos pos) {
+        manuallyRebuilt.add(pos);
     }
 }

@@ -71,13 +71,18 @@ public class Chunk {
         dirty = true;
     }
 
+    /**
+     * creates & applies geometries from provided map of meshes to chunk node and removes old geometries
+     * @param meshes
+     */
     public void applyMesh(Map<String, Mesh> meshes) {
-        // remove old geometries
+        //DOES: remove old geometries
         for (Geometry geometry : geometries.values()) {
             geometry.removeFromParent();
         }
         geometries.clear();
 
+        //DOES: iterate over map of meshes and create and attach geometries from them
         for (Map.Entry<String, Mesh> entry : meshes.entrySet()) {
             Geometry geometry = new Geometry("chunk_" + entry.getKey(), entry.getValue());
             geometry.setMaterial(BlockMaterialCache.get(entry.getKey(), assetManager));
@@ -85,7 +90,8 @@ public class Chunk {
             chunkNode.attachChild(geometry);
         }
 
-        dirty = false;
+        if (dirty) rebuild();
+        else dirty = false;
     }
 
     /**
@@ -137,15 +143,27 @@ public class Chunk {
         dirty = false;
     }
 
+    /**
+     * applies collision to the chunk if it has any
+     */
     public void addCollision() {
+        CollisionShape shape = CollisionShapeFactory.createMeshShape(collisionNode);
+        addCollision(shape);
+    }
+
+    /**
+     * applies collision to the chunk from provided shape
+     * @param shape
+     */
+    public void addCollision(CollisionShape shape) {
         //CASE: when chunk has geometry at collision node
-        if (collisionNode.getQuantity() > 0) {
-            //DOES: create collision body
-            CollisionShape shape = CollisionShapeFactory.createMeshShape(collisionNode);
-            collisionBody = new RigidBodyControl(shape, 0f);
-            chunkNode.addControl(collisionBody);
-            physicsSpace.add(collisionBody);
-        }
+
+        removeCollision();
+
+        //DOES: create collision body
+        collisionBody = new RigidBodyControl(shape, 0f);
+        chunkNode.addControl(collisionBody);
+        physicsSpace.add(collisionBody);
     }
 
     /**

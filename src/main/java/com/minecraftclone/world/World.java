@@ -55,7 +55,8 @@ public class World {
         return getChunkAtPos(worldX, worldY, worldZ) != null;
     }
 
-    /**Sets block at world coordinates
+    /**
+     * sets block at world coordinates
      * @param worldX
      * @param worldY
      * @param worldZ
@@ -80,11 +81,14 @@ public class World {
         });
 
         chunk.setBlock(localX, localY, localZ, block);
-        chunk.rebuild();
 
         //DOES: add collision to chunk
+        ChunkPos pos = new ChunkPos(chunkX, chunkY, chunkZ);
+        chunk.setDirty(true);
+        chunk.rebuild();
         chunk.addCollision();
-        chunkManager.addToHasCollision(new ChunkPos(chunkX, chunkY, chunkZ));
+        chunkManager.addToHasCollision(pos);
+        chunkManager.markManuallyRebuilt(pos);
 
         rebuildNeighborsIfNeeded(chunkX, chunkY, chunkZ, localX, localY, localZ);
     }
@@ -144,9 +148,8 @@ public class World {
 
         chunk.setDirty(true);
         chunk.rebuild();
-        if (chunkManager.hasCollision(pos)) {
-            chunk.addCollision();
-        }
+        if (chunkManager.hasCollision(pos)) chunk.addCollision();
+        chunkManager.markManuallyRebuilt(pos);
     }
 
     static String key(int x, int y, int z) {
@@ -179,7 +182,19 @@ public class World {
         chunks.put(key(chunk.getChunkX(), chunk.getChunkY(), chunk.getChunkZ()), chunk);
     }
 
+    /**
+     * closes all running threads and processes
+     */
     public void shutdown() {
         chunkManager.shutdown();
+    }
+
+    /**
+     * removes chunk from root node and hashmap, used later when saving is implemented
+     * @param pos
+     */
+    public void removeChunk(ChunkPos pos) {
+        Chunk chunk = chunks.remove(key(pos.x, pos.y, pos.z));
+        if (chunk != null) app.getRootNode().detachChild(chunk.getNode());
     }
 }

@@ -204,6 +204,7 @@ public class Main extends SimpleApplication {
         return guiFont;
     }
 
+    //DOES: override jmonkeyengine destroy call to call world.shutdown() as well so that all threads exit
     @Override
     public void destroy() {
         world.shutdown();
