@@ -9,7 +9,6 @@ import com.jme3.system.AppSettings;
 import com.minecraftclone.block.Blocks;
 import com.minecraftclone.player.PlayerCharacter;
 import com.minecraftclone.player.input.ActionInput;
-import com.minecraftclone.player.input.AnalogInput;
 import com.minecraftclone.player.input.KeyMapping;
 import com.minecraftclone.render.CustomCam;
 import com.minecraftclone.world.BlockInteractionSystem;
@@ -29,9 +28,9 @@ public class Main extends SimpleApplication {
 
     //DOES: settings
     public static AppSettings settings;
-    public static boolean fullscreen = true;
-    public static int screen_width = 1920;
-    public static int screen_height = 1080;
+    public static boolean fullscreen = false;
+    public static int screen_width = 1280;
+    public static int screen_height = 720;
     private boolean initialized = false;
 
     //DOES: tps stuff
@@ -47,7 +46,6 @@ public class Main extends SimpleApplication {
     private PlayerCharacter playerCharacter;
     private World world;
     private ActionInput actionInput;
-    private AnalogInput analogInput;
     private BlockInteractionSystem blockInteraction;
 
     public static void main(String[] args) {
@@ -60,7 +58,7 @@ public class Main extends SimpleApplication {
 
     @Override
     protected BitmapFont loadGuiFont() {
-        return this.assetManager.loadFont("font/32px-s.fnt");
+        return this.assetManager.loadFont("font/36px-s.fnt");
     }
 
     @Override
@@ -95,12 +93,11 @@ public class Main extends SimpleApplication {
 
         //INFO: only for inputs with amounts (mouse movement)
         //DOES: nothing rn
-        analogInput = new AnalogInput();
-        new KeyMapping(inputManager, actionInput, flyCam);
+        new KeyMapping(inputManager, actionInput);
 
         //DOES: set up world and player
         //INFO: world owns all data
-        world = new World(this, actionInput, analogInput, bulletAppState);
+        world = new World(this, actionInput, bulletAppState);
         playerCharacter = world.getPlayerCharacter();
 
         //DOES: nothing rn, will render world eventually
@@ -148,7 +145,7 @@ public class Main extends SimpleApplication {
         totalTicks++;
 
         //DOES: update player (movement etc.)
-        playerCharacter.tick();
+        playerCharacter.tick(actionInput.buildCommand());
 
         //DOES: update entities
         //NOTE: no entities yet lol
@@ -202,5 +199,9 @@ public class Main extends SimpleApplication {
 
     public BitmapFont getguiFont() {
         return guiFont;
+    }
+
+    public void setPaused(boolean pause) {
+        paused = pause;
     }
 }

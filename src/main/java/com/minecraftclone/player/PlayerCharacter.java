@@ -1,14 +1,15 @@
 package com.minecraftclone.player;
 
-import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
-import com.minecraftclone.player.input.Action;
-import com.minecraftclone.player.input.ActionInput;
+import com.minecraftclone.Main;
+import com.minecraftclone.gui.PlayerGUI;
+import com.minecraftclone.gui.menu.Menus;
+import java.io.IOException;
 
 public class PlayerCharacter {
 
@@ -16,23 +17,24 @@ public class PlayerCharacter {
     public static final float WIDTH = 0.7f;
     public static final float HEIGHT = 1.8f;
     public static final float EYE_OFFSET = HEIGHT * 0.35f;
-    private final CharacterControl playerControl;
-    private final Node playerNode;
 
+    private final CharacterControl playerControl; //Info: Can replace with BetterCharacterControl
+    private final Node playerNode;
     private final float speed = 0.15f;
     private final boolean debugEnabled = false;
     private final Vector3f walkDir = new Vector3f();
     private Vector3f previousPosition, currentPosition;
-    private final ActionInput input;
     private final Camera cam;
-    private int life = 13;
-    private int hunger = 13;
-    private int hotbarSlot = 1;
-    private boolean inventoryVisible = false;
 
-    public PlayerCharacter(BulletAppState bulletAppState, ActionInput input, SimpleApplication app) {
-        this.input = input;
-        cam = app.getCamera();
+    private int life, hunger;
+    private int hotbarSlot = 1;
+
+    private PlayerGUI gui;
+    private Inventory inventory;
+    private InventoryController inventoryController;
+
+    public PlayerCharacter(BulletAppState bulletAppState, Main main) {
+        cam = main.getCamera();
 
         //DOES: set debug mode
         bulletAppState.setDebugEnabled(debugEnabled);
@@ -54,9 +56,18 @@ public class PlayerCharacter {
 
         this.playerControl = player;
         this.playerNode = playerNode;
+
+        this.inventory = new Inventory(35);
+        try {
+            this.gui = new PlayerGUI(main);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        this.inventoryController = new InventoryController(inventory, gui);
     }
 
-    public void tick() {
+    public void tick(PlayerCommand cmd) {
         //DOES: set previous and current position for camera interpolation
         previousPosition.set(currentPosition);
         currentPosition.set(playerControl.getPhysicsLocation());
@@ -64,39 +75,44 @@ public class PlayerCharacter {
         //DOES: walk movement
         //NOTE: some kind of interpolation to be added for smoother movement
         Vector3f forward = cam.getDirection().clone();
-        forward.setY(0).normalizeLocal().multLocal(speed);
+        forward.setY(0).normalizeLocal();
+
         Vector3f left = cam.getLeft().clone();
-        left.setY(0).normalizeLocal().multLocal(speed);
+        left.setY(0).normalizeLocal();
 
         walkDir.set(0, 0, 0);
 
-        if (input.isHeld(Action.FORWARD)) walkDir.addLocal(forward);
-        if (input.isHeld(Action.LEFT)) walkDir.addLocal(left);
-        if (input.isHeld(Action.BACKWARD)) walkDir.addLocal(forward.negate());
-        if (input.isHeld(Action.RIGHT)) walkDir.addLocal(left.negate());
+        walkDir.addLocal(forward.mult(cmd.forward));
+        walkDir.addLocal(left.mult(cmd.strafe));
+
+        if (walkDir.lengthSquared() > 0) {
+            walkDir.normalizeLocal().multLocal(speed);
+        }
 
         //DOES: jumping
         playerControl.setWalkDirection(walkDir);
-        if (input.isHeld(Action.JUMP) && playerControl.onGround()) playerControl.jump();
 
-        Action[] hotbar = {
-            Action.HOTBAR_1,
-            Action.HOTBAR_2,
-            Action.HOTBAR_3,
-            Action.HOTBAR_4,
-            Action.HOTBAR_5,
-            Action.HOTBAR_6,
-            Action.HOTBAR_7,
-            Action.HOTBAR_8,
-            Action.HOTBAR_9,
-        };
-
-        //DOES: iterate through hotbar slots and switch to them if key tapped
-        for (int i = 0; i < hotbar.length; i++) {
-            if (input.isTapped(hotbar[i])) hotbarSlot = i + 1;
+        if (cmd.jump && playerControl.onGround()) {
+            playerControl.jump();
         }
 
-        if (input.isTapped(Action.TOGGLE_INVENTORY)) inventoryVisible = !inventoryVisible;
+        // Hotbar direct selection
+        if (cmd.selectHotbar != 0) {
+            hotbarSlot = cmd.selectHotbar;
+        }
+
+        // Mouse wheel
+        hotbarSlot += cmd.hotbarDelta;
+        hotbarSlot = Math.max(1, Math.min(9, hotbarSlot));
+        gui.setHotbarSelectedSlot(hotbarSlot);
+
+        if (cmd.toggleInventory) {
+            if (gui.isMenuVisible()) {
+                gui.setMenuVisibility(Menus.NONE);
+            } else {
+                gui.setMenuVisibility(Menus.INVENTORY);
+            }
+        }
     }
 
     public Node getNode() {
@@ -111,20 +127,14 @@ public class PlayerCharacter {
         return playerControl.getPhysicsLocation();
     }
 
-    public int getLife() {
-        return life;
+    public void setLife(int life) {
+        this.life = life;
+        gui.setLife(life);
     }
 
-    public int getHunger() {
-        return hunger;
-    }
-
-    public int getHotbarSlot() {
-        return hotbarSlot;
-    }
-
-    public boolean getinventoryVisible() {
-        return inventoryVisible;
+    public void setHunger(int hunger) {
+        this.hunger = hunger;
+        gui.setHunger(hunger);
     }
 
     /**

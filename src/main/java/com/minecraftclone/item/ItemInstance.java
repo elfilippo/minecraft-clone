@@ -2,37 +2,31 @@ package com.minecraftclone.item;
 
 public class ItemInstance {
 
-    private String id;
-    private ItemType type;
-    private int stackSize;
-    private String name;
-    private int damage;
-    private int durability;
-    private int miningEfficiency;
+    private Item item;
+    private int amount;
 
-    public ItemInstance(Item base) {
-        this.id = base.getId();
-        this.type = base.getType();
-        this.stackSize = base.getMaxStack();
-        this.name = base.getName();
-        this.damage = base.getBaseDamage();
-        this.durability = base.getDurability();
-        this.miningEfficiency = base.getMiningEfficiency();
-    }
-
-    public void subtractStackSize(int stacksize) {
-        this.stackSize = this.stackSize - stacksize;
+    public ItemInstance(Item item, int amount) {
+        this.item = item;
+        this.amount = amount;
     }
 
     public String getId() {
-        return id;
+        return item.getId();
     }
 
-    public String getName() {
-        return name;
+    public Item getItem() {
+        return item;
     }
 
-    public int getStackSize() {
-        return stackSize;
+    public int getAmount() {
+        return amount;
+    }
+
+    public void add(int value) {
+        amount += value;
+    }
+
+    public void remove(int value) {
+        amount -= value;
     }
 }

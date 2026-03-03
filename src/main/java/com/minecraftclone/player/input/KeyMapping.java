@@ -4,7 +4,6 @@ import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
@@ -13,7 +12,6 @@ public class KeyMapping {
 
     private InputManager keys;
     private ActionListener actionListener;
-    private AnalogListener analogListener;
 
     /**
      * initializes keymappings
@@ -24,7 +22,6 @@ public class KeyMapping {
     public KeyMapping(InputManager keys, ActionListener actionListener, AnalogListener analogListener) {
         this.keys = keys;
         this.actionListener = actionListener;
-        this.analogListener = analogListener;
 
         bindKeyAction("FORWARD", KeyInput.KEY_W);
         bindKeyAction("BACKWARD", KeyInput.KEY_S);
@@ -47,10 +44,8 @@ public class KeyMapping {
         bindMouseAction("PLACE_BLOCK", MouseInput.BUTTON_RIGHT);
         bindMouseAction("BREAK_BLOCK", MouseInput.BUTTON_LEFT);
 
-        bindMouseAxis("MouseX+", MouseInput.AXIS_X, false);
-        bindMouseAxis("MouseX-", MouseInput.AXIS_X, true);
-        bindMouseAxis("MouseY+", MouseInput.AXIS_Y, false);
-        bindMouseAxis("MouseY-", MouseInput.AXIS_Y, true);
+        bindMouseAxis("INVENTORY_SLOT_DOWN", MouseInput.AXIS_WHEEL, true);
+        bindMouseAxis("INVENTORY_SLOT_UP", MouseInput.AXIS_WHEEL, false);
     }
 
     private void bindKeyAction(String name, int keyCode) {
@@ -59,12 +54,12 @@ public class KeyMapping {
     }
 
     private void bindMouseAction(String name, int buttonCode) {
-        keys.addMapping(name, new MouseButtonTrigger(buttonCode)); // Use MouseButtonTrigger for mouse events
+        keys.addMapping(name, new MouseButtonTrigger(buttonCode)); //INFO: Use MouseButtonTrigger for mouse events
         keys.addListener(actionListener, name);
     }
 
     private void bindMouseAxis(String name, int axisCode, boolean negative) {
         keys.addMapping(name, new MouseAxisTrigger(axisCode, negative));
-        keys.addListener(analogListener, name);
+        keys.addListener(actionListener, name);
     }
 }

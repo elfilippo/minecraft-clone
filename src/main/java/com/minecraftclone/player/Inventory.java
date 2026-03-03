@@ -1,16 +1,21 @@
 package com.minecraftclone.player;
 
-import com.minecraftclone.item.ItemInstance;
-import java.util.ArrayList;
-import java.util.List;
-
 public class Inventory {
 
-    List<ItemInstance> inventory = new ArrayList<>(36);
+    private final Slot[] slots;
 
-    //TODO: Find solution to getting cursor position
+    public Inventory(int size) {
+        slots = new Slot[size];
+        for (int i = 0; i < size; i++) {
+            slots[i] = new Slot();
+        }
+    }
 
-    public List<ItemInstance> getInventory() {
-        return inventory;
+    public Slot getSlot(int index) {
+        return slots[index];
+    }
+
+    public int getSize() {
+        return slots.length;
     }
 }

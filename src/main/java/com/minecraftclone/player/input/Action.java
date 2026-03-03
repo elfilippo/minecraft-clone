@@ -27,4 +27,7 @@ public enum Action {
     HOTBAR_7,
     HOTBAR_8,
     HOTBAR_9,
+
+    INVENTORY_SLOT_UP,
+    INVENTORY_SLOT_DOWN,
 }

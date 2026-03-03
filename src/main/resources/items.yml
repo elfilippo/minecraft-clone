@@ -6,28 +6,24 @@ items:
         name: "Wooden Sword"
         baseDurability: 50
         baseDamage: 4
-        miningEfficiency: 1
     stone_sword:
         type: SWORD
         maxStack: 1
         name: "Stone Sword"
         baseDurability: 100
         baseDamage: 5
-        miningEfficiency: 1
     iron_sword:
         type: SWORD
         maxStack: 1
         name: "Iron Sword"
         baseDurability: 250
         baseDamage: 6
-        miningEfficiency: 1
     diamond_sword:
         type: SWORD
         maxStack: 1
         name: "Diamond Sword"
         baseDurability: 1500
         baseDamage: 7
-        miningEfficiency: 1
     #Pickaxe
     wooden_pickaxe:
         type: PICKAXE
@@ -86,3 +82,6 @@ items:
         baseDurability: 1500
         baseDamage: 5
         miningEfficiency: 8
+    golden_apple:
+        type: CONSUMEABLE
+        name: "Golden Apple"

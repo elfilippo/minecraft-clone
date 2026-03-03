@@ -6,4 +6,5 @@ public enum ItemType {
     PICKAXE,
     AXE,
     BLOCKITEM,
+    CONSUMEABLE,
 }
