@@ -90,8 +90,7 @@ public class Chunk {
             chunkNode.attachChild(geometry);
         }
 
-        if (dirty) rebuild();
-        else dirty = false;
+        dirty = false;
     }
 
     /**
