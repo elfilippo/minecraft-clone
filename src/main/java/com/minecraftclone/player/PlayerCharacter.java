@@ -18,7 +18,7 @@ public class PlayerCharacter {
     public static final float HEIGHT = 1.8f;
     public static final float EYE_OFFSET = HEIGHT * 0.35f;
 
-    private final CharacterControl playerControl; //Info: Can replace with BetterCharacterControl
+    private final CharacterControl playerControl;
     private final Node playerNode;
     private final float speed = 0.15f;
     private final boolean debugEnabled = false;
@@ -96,12 +96,12 @@ public class PlayerCharacter {
             playerControl.jump();
         }
 
-        // Hotbar direct selection
+        //DOES: directly select hotbar slot
         if (cmd.selectHotbar != 0) {
             hotbarSlot = cmd.selectHotbar;
         }
 
-        // Mouse wheel
+        //DOES: mouse wheel stuff
         hotbarSlot += cmd.hotbarDelta;
         hotbarSlot = Math.max(1, Math.min(9, hotbarSlot));
         gui.setHotbarSelectedSlot(hotbarSlot);

@@ -19,7 +19,7 @@ public class KeyMapping {
      * @param actionListener
      * @param analogListener
      */
-    public KeyMapping(InputManager keys, ActionListener actionListener, AnalogListener analogListener) {
+    public KeyMapping(InputManager keys, ActionListener actionListener) {
         this.keys = keys;
         this.actionListener = actionListener;
 
