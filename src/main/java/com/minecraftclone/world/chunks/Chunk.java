@@ -11,6 +11,7 @@ import com.jme3.scene.Node;
 import com.minecraftclone.block.Block;
 import com.minecraftclone.render.BlockMaterialCache;
 import com.minecraftclone.render.ChunkMeshBuilder;
+import com.minecraftclone.world.World;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,17 +26,30 @@ public class Chunk {
     private final Block[][][] blocks = new Block[SIZE][SIZE][SIZE];
 
     private final Node chunkNode = new Node("Chunk");
+    private final Node collisionNode = new Node("Collision");
     private final AssetManager assetManager;
 
     private final Map<String, Geometry> geometries = new HashMap<>();
     private RigidBodyControl collisionBody;
+    private final PhysicsSpace physicsSpace;
+    private final World world;
+
     private boolean dirty = true;
 
-    public Chunk(int chunkX, int chunkY, int chunkZ, AssetManager assetManager) {
+    public Chunk(
+        World world,
+        int chunkX,
+        int chunkY,
+        int chunkZ,
+        AssetManager assetManager,
+        PhysicsSpace physicsSpace
+    ) {
+        this.world = world;
         this.chunkX = chunkX;
         this.chunkY = chunkY;
         this.chunkZ = chunkZ;
         this.assetManager = assetManager;
+        this.physicsSpace = physicsSpace;
 
         //DOES: set location of the chunk node
         chunkNode.setLocalTranslation(chunkX * SIZE, chunkY * SIZE, chunkZ * SIZE);
@@ -58,6 +72,28 @@ public class Chunk {
     }
 
     /**
+     * creates & applies geometries from provided map of meshes to chunk node and removes old geometries
+     * @param meshes
+     */
+    public void applyMesh(Map<String, Mesh> meshes) {
+        //DOES: remove old geometries
+        for (Geometry geometry : geometries.values()) {
+            geometry.removeFromParent();
+        }
+        geometries.clear();
+
+        //DOES: iterate over map of meshes and create and attach geometries from them
+        for (Map.Entry<String, Mesh> entry : meshes.entrySet()) {
+            Geometry geometry = new Geometry("chunk_" + entry.getKey(), entry.getValue());
+            geometry.setMaterial(BlockMaterialCache.get(entry.getKey(), assetManager));
+            geometries.put(entry.getKey(), geometry);
+            chunkNode.attachChild(geometry);
+        }
+
+        dirty = false;
+    }
+
+    /**
      * returns the block object at local pos
      * @param x
      * @param y
@@ -72,11 +108,10 @@ public class Chunk {
      * rebuilds the chunk mesh if not dirty
      * <p>
      */
-    public void rebuild(PhysicsSpace physicsSpace) {
+    public void rebuild() {
         if (!dirty) return;
 
-        Map<String, Mesh> meshes = ChunkMeshBuilder.build(blocks);
-
+        Map<String, Mesh> meshes = ChunkMeshBuilder.build(blocks, world, chunkX, chunkY, chunkZ);
         //DOES: remove old geometries
         for (Geometry geometry : geometries.values()) {
             geometry.removeFromParent();
@@ -84,11 +119,8 @@ public class Chunk {
         geometries.clear();
 
         //DOES: if exists, remove collision body
-        if (collisionBody != null) {
-            physicsSpace.remove(collisionBody);
-        }
-
-        Node collisionNode = new Node("CollisionNode");
+        removeCollision();
+        collisionNode.detachAllChildren();
 
         //DOES: iterate over meshes hashmap & create and add geometries
         for (Map.Entry<String, Mesh> meshEntry : meshes.entrySet()) {
@@ -106,17 +138,52 @@ public class Chunk {
             collisionNode.attachChild(geometry.clone());
         }
 
-        //CASE: when chunk has geometry at collision node
-        if (collisionNode.getQuantity() > 0) {
-            //DOES: create collision body
-            CollisionShape shape = CollisionShapeFactory.createMeshShape(collisionNode);
-            collisionBody = new RigidBodyControl(shape, 0f);
-            chunkNode.addControl(collisionBody);
-            physicsSpace.add(collisionBody);
-        }
-
         //DOES: set chunk to clean to indicate completion of rebuild
         dirty = false;
+    }
+
+    /**
+     * applies collision to the chunk if it has any
+     */
+    public void addCollision() {
+        CollisionShape shape = CollisionShapeFactory.createMeshShape(collisionNode);
+        addCollision(shape);
+    }
+
+    /**
+     * applies collision to the chunk from provided shape
+     * @param shape
+     */
+    public void addCollision(CollisionShape shape) {
+        //CASE: when chunk has geometry at collision node
+
+        removeCollision();
+
+        //DOES: create collision body
+        collisionBody = new RigidBodyControl(shape, 0f);
+        chunkNode.addControl(collisionBody);
+        physicsSpace.add(collisionBody);
+    }
+
+    /**
+     * removes collision from the chunk if it has any
+     */
+    public void removeCollision() {
+        if (collisionBody != null) {
+            physicsSpace.remove(collisionBody);
+        }
+    }
+
+    /**
+     * unloads the chunk and removes collision
+     */
+    public void unload() {
+        for (Geometry geometry : geometries.values()) {
+            geometry.removeFromParent();
+        }
+        geometries.clear();
+
+        removeCollision();
     }
 
     /**
@@ -137,5 +204,13 @@ public class Chunk {
 
     public int getChunkY() {
         return chunkY;
+    }
+
+    /**
+     * sets if the chunk is dirty (won't rebuild otherwise)
+     * @param dirty
+     */
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
     }
 }

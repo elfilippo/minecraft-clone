@@ -14,7 +14,8 @@ import java.util.Map;
 
 public class World {
 
-    private static final int RENDER_DISTANCE = 10;
+    private static final int RENDER_DISTANCE = 30;
+    private static final int SIMULATION_DISTANCE = 5;
     private final SimpleApplication app;
     private final PlayerCharacter playerCharacter;
     private final BulletAppState bulletAppState;
@@ -31,11 +32,11 @@ public class World {
 
         app.getRootNode().attachChild(playerCharacter.getNode());
 
-        chunkManager = new ChunkManager(app, this, RENDER_DISTANCE);
+        chunkManager = new ChunkManager(app, this, RENDER_DISTANCE, SIMULATION_DISTANCE);
     }
 
     public Block getBlock(int worldX, int worldY, int worldZ) {
-        Chunk chunk = getChunk(worldX, worldY, worldZ);
+        Chunk chunk = getChunkAtPos(worldX, worldY, worldZ);
         if (chunk == null) return null;
 
         //DOES: calculate chunk block is in and request it
@@ -48,10 +49,11 @@ public class World {
 
     public boolean isBlockLoaded(int worldX, int worldY, int worldZ) {
         //DOES: return bool if chunk can be gotten
-        return getChunk(worldX, worldY, worldZ) != null;
+        return getChunkAtPos(worldX, worldY, worldZ) != null;
     }
 
-    /**Sets block at world coordinates
+    /**
+     * sets block at world coordinates
      * @param worldX
      * @param worldY
      * @param worldZ
@@ -70,13 +72,20 @@ public class World {
 
         //DOES: get chunk from map, create & attatch to root node if doesn't exist
         Chunk chunk = chunks.computeIfAbsent(key(chunkX, chunkY, chunkZ), k -> {
-            Chunk c = new Chunk(chunkX, chunkY, chunkZ, app.getAssetManager());
+            Chunk c = new Chunk(this, chunkX, chunkY, chunkZ, app.getAssetManager(), bulletAppState.getPhysicsSpace());
             app.getRootNode().attachChild(c.getNode());
             return c;
         });
 
         chunk.setBlock(localX, localY, localZ, block);
-        chunk.rebuild(bulletAppState.getPhysicsSpace());
+
+        //DOES: add collision to chunk
+        ChunkPos pos = new ChunkPos(chunkX, chunkY, chunkZ);
+        chunk.setDirty(true);
+        chunk.rebuild();
+        chunk.addCollision();
+        chunkManager.addToHasCollision(pos);
+        chunkManager.markManuallyRebuilt(pos);
 
         rebuildNeighborsIfNeeded(chunkX, chunkY, chunkZ, localX, localY, localZ);
     }
@@ -87,11 +96,22 @@ public class World {
      * @param worldZ
      * @return Chunk, null if doesn't exist
      */
-    private Chunk getChunk(int worldX, int worldY, int worldZ) {
+    private Chunk getChunkAtPos(int worldX, int worldY, int worldZ) {
         int chunkX = Math.floorDiv(worldX, Chunk.SIZE);
         int chunkY = Math.floorDiv(worldY, Chunk.SIZE);
         int chunkZ = Math.floorDiv(worldZ, Chunk.SIZE);
         return chunks.get(key(chunkX, chunkY, chunkZ));
+    }
+
+    /**
+     * returns chunk at chunk coordinates
+     * @param chunkX
+     * @param chunkY
+     * @param chunkZ
+     * @return null if doesn't exist
+     */
+    public Chunk getChunk(ChunkPos pos) {
+        return chunks.get(key(pos.x, pos.y, pos.z));
     }
 
     /**
@@ -119,10 +139,14 @@ public class World {
      * @param chunkZ
      */
     private void rebuild(int chunkX, int chunkY, int chunkZ) {
+        ChunkPos pos = new ChunkPos(chunkX, chunkY, chunkZ);
         Chunk chunk = chunks.get(key(chunkX, chunkY, chunkZ));
-        if (chunk != null) {
-            chunk.rebuild(bulletAppState.getPhysicsSpace());
-        }
+        if (chunk == null) return;
+
+        chunk.setDirty(true);
+        chunk.rebuild();
+        if (chunkManager.hasCollision(pos)) chunk.addCollision();
+        chunkManager.markManuallyRebuilt(pos);
     }
 
     static String key(int x, int y, int z) {
@@ -152,5 +176,21 @@ public class World {
      */
     public void addChunk(Chunk chunk) {
         chunks.put(key(chunk.getChunkX(), chunk.getChunkY(), chunk.getChunkZ()), chunk);
+    }
+
+    /**
+     * closes all running threads and processes
+     */
+    public void shutdown() {
+        chunkManager.shutdown();
+    }
+
+    /**
+     * removes chunk from root node and hashmap, used later when saving is implemented
+     * @param pos
+     */
+    public void removeChunk(ChunkPos pos) {
+        Chunk chunk = chunks.remove(key(pos.x, pos.y, pos.z));
+        if (chunk != null) app.getRootNode().detachChild(chunk.getNode());
     }
 }

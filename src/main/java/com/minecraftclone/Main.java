@@ -104,7 +104,7 @@ public class Main extends SimpleApplication {
         //new RenderEngine(rootNode, assetManager, bulletAppState);
 
         //DOES: raycast and break & place blocks
-        blockInteraction = new BlockInteractionSystem(world, cam, actionInput);
+        blockInteraction = new BlockInteractionSystem(world, actionInput, this);
 
         //NOTE: will be set by hotbar later
         blockInteraction.setSelectedBlock(Blocks.STAIRS);
@@ -199,6 +199,13 @@ public class Main extends SimpleApplication {
 
     public BitmapFont getguiFont() {
         return guiFont;
+    }
+
+    //DOES: override jmonkeyengine destroy call to call world.shutdown() as well so that all threads exit
+    @Override
+    public void destroy() {
+        world.shutdown();
+        super.destroy();
     }
 
     public void setPaused(boolean pause) {
