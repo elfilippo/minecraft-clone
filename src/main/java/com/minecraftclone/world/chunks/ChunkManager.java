@@ -261,38 +261,38 @@ public class ChunkManager {
             if (result == null) return;
 
             //CASE: chunk was unloaded while task was running, discard result
-            if (!inProgress.contains(result.pos)) continue;
+            if (!inProgress.contains(result.pos())) continue;
 
-            inProgress.remove(result.pos);
+            inProgress.remove(result.pos());
 
-            if (manuallyRebuilt.contains(result.pos)) {
-                loaded.add(result.pos);
+            if (manuallyRebuilt.contains(result.pos())) {
+                loaded.add(result.pos());
                 continue;
             }
 
-            loaded.add(result.pos);
+            loaded.add(result.pos());
 
             //DOES: scene graph touches — safe since we are on the main thread
-            if (!world.hasChunk(result.pos)) {
-                world.addChunk(result.chunk);
-                app.getRootNode().attachChild(result.chunk.getNode());
+            if (!world.hasChunk(result.pos())) {
+                world.addChunk(result.chunk());
+                app.getRootNode().attachChild(result.chunk().getNode());
             }
-            result.chunk.applyMesh(result.meshes);
+            result.chunk().applyMesh(result.meshes());
 
             //DOES: add collision body to physics space if it was built
-            if (result.collisionShape != null) {
-                result.chunk.addCollision(result.collisionShape);
-                hasCollision.add(result.pos);
+            if (result.collisionShape() != null) {
+                result.chunk().addCollision(result.collisionShape());
+                hasCollision.add(result.pos());
             }
 
             //DOES: rebuild neighbors to cull faces across chunk borders properly
             //INFO: not recursive, since rebuildNeighbor does not rebuild neighbors for itself (does not loop infinitely)
-            requeueNeighborRebuild(result.pos.x + 1, result.pos.y, result.pos.z);
-            requeueNeighborRebuild(result.pos.x - 1, result.pos.y, result.pos.z);
-            requeueNeighborRebuild(result.pos.x, result.pos.y + 1, result.pos.z);
-            requeueNeighborRebuild(result.pos.x, result.pos.y - 1, result.pos.z);
-            requeueNeighborRebuild(result.pos.x, result.pos.y, result.pos.z + 1);
-            requeueNeighborRebuild(result.pos.x, result.pos.y, result.pos.z - 1);
+            requeueNeighborRebuild(result.pos().x + 1, result.pos().y, result.pos().z);
+            requeueNeighborRebuild(result.pos().x - 1, result.pos().y, result.pos().z);
+            requeueNeighborRebuild(result.pos().x, result.pos().y + 1, result.pos().z);
+            requeueNeighborRebuild(result.pos().x, result.pos().y - 1, result.pos().z);
+            requeueNeighborRebuild(result.pos().x, result.pos().y, result.pos().z + 1);
+            requeueNeighborRebuild(result.pos().x, result.pos().y, result.pos().z - 1);
         }
     }
 
