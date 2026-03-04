@@ -8,6 +8,7 @@ import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.debug.WireBox;
 import com.minecraftclone.block.Block;
+import com.minecraftclone.gui.PlayerGUI;
 import com.minecraftclone.player.PlayerCharacter;
 import com.minecraftclone.player.input.Action;
 import com.minecraftclone.player.input.ActionInput;
@@ -25,6 +26,7 @@ public final class BlockInteractionSystem {
     private final ActionInput input;
     private final Geometry selectionBox;
     private final SimpleApplication app;
+    private final PlayerGUI gui;
 
     private Block selectedBlock;
 
@@ -44,11 +46,13 @@ public final class BlockInteractionSystem {
 
     RaycastResult hit;
 
-    public BlockInteractionSystem(World world, ActionInput input, SimpleApplication app) {
+    public BlockInteractionSystem(World world, ActionInput input, PlayerGUI gui, SimpleApplication app) {
         this.world = world;
         this.camera = app.getCamera();
         this.input = input;
         this.app = app;
+        this.gui = gui;
+
         selectionBox = new Geometry("selection", new WireBox(0.501f, 0.501f, 0.501f));
         Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.Black);
@@ -60,6 +64,10 @@ public final class BlockInteractionSystem {
      * checks for block breaking and placing
      */
     public void tick() {
+        if (gui.isMenuVisible()) {
+            selectionBox.setLocalTranslation(-10000, -10000, -10000);
+            return;
+        }
         blockSelectionBox();
 
         ticksSinceBreak += 1;

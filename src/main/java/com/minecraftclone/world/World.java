@@ -4,6 +4,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.minecraftclone.Main;
 import com.minecraftclone.block.Block;
+import com.minecraftclone.gui.PlayerGUI;
 import com.minecraftclone.player.PlayerCharacter;
 import com.minecraftclone.player.input.ActionInput;
 import com.minecraftclone.world.chunks.Chunk;
@@ -192,5 +193,9 @@ public class World {
     public void removeChunk(ChunkPos pos) {
         Chunk chunk = chunks.remove(key(pos.x, pos.y, pos.z));
         if (chunk != null) app.getRootNode().detachChild(chunk.getNode());
+    }
+
+    public PlayerGUI getPlayerGui() {
+        return playerCharacter.getGui();
     }
 }

@@ -104,7 +104,7 @@ public class Main extends SimpleApplication {
         //new RenderEngine(rootNode, assetManager, bulletAppState);
 
         //DOES: raycast and break & place blocks
-        blockInteraction = new BlockInteractionSystem(world, actionInput, this);
+        blockInteraction = new BlockInteractionSystem(world, actionInput, world.getPlayerGui(), this);
 
         //NOTE: will be set by hotbar later
         blockInteraction.setSelectedBlock(Blocks.STAIRS);

@@ -57,14 +57,14 @@ public class PlayerCharacter {
         this.playerControl = player;
         this.playerNode = playerNode;
 
-        this.inventory = new Inventory(35);
+        inventory = new Inventory(35);
         try {
-            this.gui = new PlayerGUI(main);
+            gui = new PlayerGUI(main);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        this.inventoryController = new InventoryController(inventory, gui);
+        inventoryController = new InventoryController(inventory, gui);
     }
 
     public void tick(PlayerCommand cmd) {
@@ -135,6 +135,10 @@ public class PlayerCharacter {
     public void setHunger(int hunger) {
         this.hunger = hunger;
         gui.setHunger(hunger);
+    }
+
+    public PlayerGUI getGui() {
+        return gui;
     }
 
     /**
