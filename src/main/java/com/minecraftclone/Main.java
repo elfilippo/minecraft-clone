@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 public class Main extends SimpleApplication {
 
     //INFO: update with new versions
-    public static final String VERSION = "v0.3.0-alpha";
+    public static final String VERSION = "v0.4.0-alpha";
 
     //INFO: disable when debugging
     public static boolean disableWarnings = true;
