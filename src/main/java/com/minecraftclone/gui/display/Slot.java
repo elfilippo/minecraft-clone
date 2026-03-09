@@ -4,6 +4,7 @@ import com.jme3.font.BitmapText;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.ui.Picture;
 import com.minecraftclone.gui.GUIManager;
 
 public class Slot extends Display {
@@ -62,5 +63,9 @@ public class Slot extends Display {
 
     public Vector3f getPosition() {
         return new Vector3f(display.getLocalTranslation());
+    }
+
+    public Picture getDisplay() {
+        return display;
     }
 }

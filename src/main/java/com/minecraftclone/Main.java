@@ -146,7 +146,7 @@ public class Main extends SimpleApplication {
         totalTicks++;
 
         //DOES: update player (movement etc.)
-        playerCharacter.tick(actionInput.buildCommand());
+        playerCharacter.tick(actionInput.buildCommand(), actionInput.getCursorPosition());
 
         //DOES: update entities
         //NOTE: no entities yet lol

@@ -3,6 +3,7 @@ package com.minecraftclone.player;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.control.CharacterControl;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
@@ -67,7 +68,7 @@ public class PlayerCharacter {
         inventoryController = new InventoryController(inventory, gui);
     }
 
-    public void tick(PlayerCommand cmd) {
+    public void tick(PlayerCommand cmd, Vector2f cursorPosition) {
         //DOES: set previous and current position for camera interpolation
         previousPosition.set(currentPosition);
         currentPosition.set(playerControl.getPhysicsLocation());
@@ -90,7 +91,7 @@ public class PlayerCharacter {
         }
 
         if (cmd.select && gui.isMenuVisible()) {
-            //gui.getMenus().getInventorySlots().
+            System.out.println(gui.getClickedSlotIndex(cursorPosition));
         }
 
         //DOES: jumping

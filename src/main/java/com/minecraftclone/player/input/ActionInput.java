@@ -56,6 +56,7 @@ public class ActionInput implements ActionListener, AnalogListener {
         return actions.get(action).consumeTap();
     }
 
+    @Deprecated
     public PlayerCommand buildCommand() {
         PlayerCommand cmd = new PlayerCommand();
 
@@ -65,7 +66,7 @@ public class ActionInput implements ActionListener, AnalogListener {
         if (isHeld(Action.LEFT)) cmd.strafe += 1;
         if (isHeld(Action.RIGHT)) cmd.strafe -= 1;
 
-        if (isHeld(Action.MENU_SELECT)) cmd.select = true;
+        if (isTapped(Action.MENU_SELECT)) cmd.select = true;
 
         if (isHeld(Action.JUMP)) cmd.jump = true;
 
@@ -99,7 +100,7 @@ public class ActionInput implements ActionListener, AnalogListener {
         return temp;
     }
 
-    public Vector2f getCrusorPosition() {
+    public Vector2f getCursorPosition() {
         return inputManager.getCursorPosition();
     }
 

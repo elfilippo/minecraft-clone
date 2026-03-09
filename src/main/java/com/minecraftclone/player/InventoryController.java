@@ -27,10 +27,21 @@ public class InventoryController {
     }
 
     private void updateView(int index) {
-        gui.inventoryDisplayItem(index, inventory.getSlot(index).getStack().getId(), inventory.getSlot(index).getStack().getAmount());
+        gui.inventoryDisplayItem(
+            index,
+            inventory.getSlot(index).getStack().getId(),
+            inventory.getSlot(index).getStack().getAmount()
+        );
     }
 
     public Slot getInventorySlot(int slot) {
         return inventory.getSlot(slot);
+    }
+
+    public void switchSlots(int slot1, int slot2) {
+        Slot tempSlot = inventory.getSlot(slot1);
+
+        inventory.setSlot(slot1, inventory.getSlot(slot2));
+        inventory.setSlot(slot2, tempSlot);
     }
 }

@@ -15,6 +15,10 @@ public class Inventory {
         return slots[index];
     }
 
+    public void setSlot(int index, Slot slot) {
+        slots[index] = slot;
+    }
+
     public int getSize() {
         return slots.length;
     }

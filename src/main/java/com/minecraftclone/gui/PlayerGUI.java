@@ -1,5 +1,6 @@
 package com.minecraftclone.gui;
 
+import com.jme3.math.Vector2f;
 import com.minecraftclone.Main;
 import com.minecraftclone.gui.hud.HeadsUpDisplay;
 import com.minecraftclone.gui.menu.MenuManager;
@@ -25,7 +26,7 @@ public class PlayerGUI {
         );
 
         //Does: Creates GUI elements
-        menus = new MenuManager(guiManager, main.getInputManager(), main.getFlyByCamera());
+        menus = new MenuManager(guiManager, main.getInputManager(), main.getFlyByCamera()); //Fixme: menumanage should only know what it needs to (not input not cam)
         hud = new HeadsUpDisplay(guiManager);
     }
 
@@ -75,5 +76,9 @@ public class PlayerGUI {
 
     public MenuManager getMenus() {
         return menus;
+    }
+
+    public int getClickedSlotIndex(Vector2f cursorPosition) {
+        return menus.getClickedSlotIndex(cursorPosition);
     }
 }

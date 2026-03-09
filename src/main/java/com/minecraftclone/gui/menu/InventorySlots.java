@@ -1,10 +1,7 @@
 package com.minecraftclone.gui.menu;
 
-import com.jme3.collision.CollisionResults;
-import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.minecraftclone.gui.GUIManager;
@@ -35,6 +32,7 @@ public class InventorySlots {
                     anchors.add(tempVec);
 
                     Slot slot = new Slot(guiManager, tempVec.x(), tempVec.y());
+                    slot.getDisplay().setUserData("index", i0 * 9 + i);
                     slot.attachTo(node);
                     inventorySlots.add(slot);
                 } else {
@@ -46,6 +44,7 @@ public class InventorySlots {
                     anchors.add(tempVec);
 
                     Slot slot = new Slot(guiManager, tempVec.x(), tempVec.y());
+                    slot.getDisplay().setUserData("index", i0 * 9 + i);
                     slot.attachTo(node);
                     inventorySlots.add(slot);
                 }
@@ -95,5 +94,19 @@ public class InventorySlots {
 
     public Slot getSlot(int slot) {
         return inventorySlots.get(slot);
+    }
+
+    public int getClickedSlotIndex(Vector2f cursorPosition) {
+        for (int i = 0; i < inventorySlots.size(); i++) {
+            Vector3f tempPos = inventorySlots.get(i).getPosition();
+
+            if (
+                cursorPosition.x >= tempPos.x &&
+                cursorPosition.x <= tempPos.x + inventorySlots.get(i).getWidth() &&
+                cursorPosition.y >= tempPos.y &&
+                cursorPosition.y <= tempPos.y + inventorySlots.get(i).getHeight()
+            ) return i;
+        }
+        return -1;
     }
 }
