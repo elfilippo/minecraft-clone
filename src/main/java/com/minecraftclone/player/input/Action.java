@@ -12,6 +12,7 @@ public enum Action {
 
     PLACE_BLOCK,
     BREAK_BLOCK,
+    MENU_SELECT,
 
     TOGGLE_INVENTORY,
     DROP,

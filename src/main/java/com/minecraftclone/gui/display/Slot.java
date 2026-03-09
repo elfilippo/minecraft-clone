@@ -55,4 +55,12 @@ public class Slot extends Display {
             text.setCullHint(Spatial.CullHint.Always);
         }
     }
+
+    public String getText() {
+        return text.getText();
+    }
+
+    public Vector3f getPosition() {
+        return new Vector3f(display.getLocalTranslation());
+    }
 }

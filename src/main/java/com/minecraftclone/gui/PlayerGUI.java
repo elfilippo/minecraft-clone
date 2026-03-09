@@ -72,4 +72,8 @@ public class PlayerGUI {
         if (menus.getVisibleMenu() != Menus.NONE) return true;
         else return false;
     }
+
+    public MenuManager getMenus() {
+        return menus;
+    }
 }

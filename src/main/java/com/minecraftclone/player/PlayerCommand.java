@@ -10,4 +10,5 @@ public class PlayerCommand {
     public int selectHotbar;
 
     public boolean toggleInventory;
+    public boolean select;
 }

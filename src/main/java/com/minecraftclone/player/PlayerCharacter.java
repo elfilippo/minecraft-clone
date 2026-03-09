@@ -89,6 +89,10 @@ public class PlayerCharacter {
             walkDir.normalizeLocal().multLocal(speed);
         }
 
+        if (cmd.select && gui.isMenuVisible()) {
+            //gui.getMenus().getInventorySlots().
+        }
+
         //DOES: jumping
         playerControl.setWalkDirection(walkDir);
 

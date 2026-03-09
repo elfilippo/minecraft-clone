@@ -3,7 +3,7 @@ package com.minecraftclone.gui.hud;
 import com.jme3.scene.Node;
 import com.jme3.ui.Picture;
 import com.minecraftclone.gui.GUIManager;
-import com.minecraftclone.gui.display.InventorySlot;
+import com.minecraftclone.gui.display.Slot;
 
 public class HeadsUpDisplay {
 
@@ -79,7 +79,7 @@ public class HeadsUpDisplay {
      * @param invPic List of all Item Pictures in the inventory
      * @param invText List of all Item Texts in the inventory
      */
-    public void updateHotbarDisplayItem(int slotNumber, InventorySlot slots) {
+    public void updateHotbarDisplayItem(int slotNumber, Slot slots) {
         hotbar.updateHotbarDisplayItem(slotNumber, slots);
     }
 

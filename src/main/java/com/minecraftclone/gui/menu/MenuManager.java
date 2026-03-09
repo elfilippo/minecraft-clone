@@ -4,7 +4,7 @@ import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
 import com.jme3.scene.Node;
 import com.minecraftclone.gui.GUIManager;
-import com.minecraftclone.gui.display.InventorySlot;
+import com.minecraftclone.gui.display.Slot;
 
 public class MenuManager {
 
@@ -65,8 +65,8 @@ public class MenuManager {
         inventorySlots.displayItem(index, id, amount);
     }
 
-    public InventorySlot getHotbarSlot(int slot) {
-        return inventorySlots.getInventorySlot(slot);
+    public Slot getHotbarSlot(int slot) {
+        return inventorySlots.getSlot(slot);
     }
 
     public Menus getVisibleMenu() {

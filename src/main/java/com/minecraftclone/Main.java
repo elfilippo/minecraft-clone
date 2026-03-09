@@ -63,7 +63,6 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-        fpsText.setLocalScale(0.5f);
         initialTime = System.nanoTime();
         tickTime = 1f / TICKS_PER_SECOND;
 
@@ -71,6 +70,8 @@ public class Main extends SimpleApplication {
         tpsText = new BitmapText(guiFont);
         guiNode.attachChild(tpsText);
         tpsText.setLocalTranslation(0, cam.getHeight(), 0);
+
+        fpsText.setLocalScale(0.5f);
 
         //NOTE: physics object is bulletAppState
         var bulletAppState = new BulletAppState();
@@ -90,10 +91,9 @@ public class Main extends SimpleApplication {
         getRenderer().setDefaultAnisotropicFilter(4);
 
         //INFO: for all bool inputs (keypresses etc.)
-        actionInput = new ActionInput();
+        actionInput = new ActionInput(inputManager);
 
         //INFO: only for inputs with amounts (mouse movement)
-        //DOES: nothing rn
         new KeyMapping(inputManager, actionInput);
 
         //DOES: set up world and player
