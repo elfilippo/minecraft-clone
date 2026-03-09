@@ -5,6 +5,7 @@ import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
+import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
@@ -35,6 +36,7 @@ public class Chunk {
     private final World world;
 
     private boolean dirty = true;
+    private boolean shadowsEnabled = false;
 
     public Chunk(
         World world,
@@ -163,6 +165,7 @@ public class Chunk {
         collisionBody = new RigidBodyControl(shape, 0f);
         chunkNode.addControl(collisionBody);
         physicsSpace.add(collisionBody);
+        addShadows();
     }
 
     /**
@@ -171,7 +174,20 @@ public class Chunk {
     public void removeCollision() {
         if (collisionBody != null) {
             physicsSpace.remove(collisionBody);
+            removeShadows();
         }
+    }
+
+    public void addShadows() {
+        if (shadowsEnabled) return;
+        for (Geometry geometry : geometries.values()) geometry.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+        shadowsEnabled = true;
+    }
+
+    public void removeShadows() {
+        if (!shadowsEnabled) return;
+        for (Geometry geometry : geometries.values()) geometry.setShadowMode(RenderQueue.ShadowMode.Off);
+        shadowsEnabled = false;
     }
 
     /**

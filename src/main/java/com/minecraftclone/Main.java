@@ -4,8 +4,15 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
+import com.jme3.light.AmbientLight;
+import com.jme3.light.DirectionalLight;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Spatial;
+import com.jme3.shadow.DirectionalLightShadowRenderer;
+import com.jme3.shadow.EdgeFilteringMode;
 import com.jme3.system.AppSettings;
+import com.jme3.util.SkyFactory;
 import com.minecraftclone.block.Blocks;
 import com.minecraftclone.player.PlayerCharacter;
 import com.minecraftclone.player.input.ActionInput;
@@ -87,6 +94,29 @@ public class Main extends SimpleApplication {
         cam.setFrustumNear(0.2f);
         cam.setFov(70);
         getRenderer().setDefaultAnisotropicFilter(4);
+
+        Spatial sky = SkyFactory.createSky(
+            assetManager,
+            "textures/environment/skybox.png",
+            SkyFactory.EnvMapType.EquirectMap
+        );
+        rootNode.attachChild(sky);
+
+        DirectionalLight sun = new DirectionalLight();
+        sun.setDirection(new Vector3f(-0.5f, -1f, -0.5f).normalizeLocal());
+        sun.setColor(ColorRGBA.White);
+        rootNode.addLight(sun);
+
+        AmbientLight ambient = new AmbientLight();
+        ambient.setColor(new ColorRGBA(0.3f, 0.3f, 0.3f, 1f));
+        rootNode.addLight(ambient);
+
+        DirectionalLightShadowRenderer shadows = new DirectionalLightShadowRenderer(assetManager, 16384, 1);
+        shadows.setEdgeFilteringMode(EdgeFilteringMode.PCFPOISSON);
+        shadows.setLight(sun);
+        shadows.setShadowIntensity(0.7f);
+        shadows.setEnabledStabilization(true);
+        viewPort.addProcessor(shadows);
 
         //INFO: for all bool inputs (keypresses etc.)
         actionInput = new ActionInput();

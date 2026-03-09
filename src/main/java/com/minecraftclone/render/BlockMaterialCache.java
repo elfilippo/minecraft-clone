@@ -2,6 +2,7 @@ package com.minecraftclone.render;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.texture.Texture;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,11 +22,16 @@ public final class BlockMaterialCache {
 
         //DOES: take material for the texture and name out of map or create it if absent
         return CACHE.computeIfAbsent(texture, name -> {
-            Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+            Material mat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
             Texture tex = assetManager.loadTexture("textures/block/" + name + ".png");
             tex.setMagFilter(Texture.MagFilter.Nearest);
             tex.setMinFilter(Texture.MinFilter.Trilinear);
-            mat.setTexture("ColorMap", tex);
+            mat.setTexture("DiffuseMap", tex);
+            mat.setColor("Diffuse", ColorRGBA.White);
+            mat.setColor("Ambient", ColorRGBA.White);
+            mat.setColor("Specular", ColorRGBA.Black);
+            mat.setFloat("Shininess", 0f);
+            mat.setBoolean("UseMaterialColors", true);
             return mat;
         });
     }
