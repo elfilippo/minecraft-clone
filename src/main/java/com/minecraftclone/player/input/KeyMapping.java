@@ -17,7 +17,6 @@ public class KeyMapping {
      * initializes keymappings
      * @param keys
      * @param actionListener
-     * @param analogListener
      */
     public KeyMapping(InputManager keys, ActionListener actionListener) {
         this.keys = keys;
@@ -43,6 +42,7 @@ public class KeyMapping {
 
         bindMouseAction("PLACE_BLOCK", MouseInput.BUTTON_RIGHT);
         bindMouseAction("BREAK_BLOCK", MouseInput.BUTTON_LEFT);
+        bindMouseAction("MENU_SELECT", MouseInput.BUTTON_LEFT);
 
         bindMouseAxis("INVENTORY_SLOT_DOWN", MouseInput.AXIS_WHEEL, true);
         bindMouseAxis("INVENTORY_SLOT_UP", MouseInput.AXIS_WHEEL, false);

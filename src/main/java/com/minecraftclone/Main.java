@@ -78,6 +78,8 @@ public class Main extends SimpleApplication {
         guiNode.attachChild(tpsText);
         tpsText.setLocalTranslation(0, cam.getHeight(), 0);
 
+        fpsText.setLocalScale(0.5f);
+
         //NOTE: physics object is bulletAppState
         var bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
@@ -119,10 +121,9 @@ public class Main extends SimpleApplication {
         viewPort.addProcessor(shadows);
 
         //INFO: for all bool inputs (keypresses etc.)
-        actionInput = new ActionInput();
+        actionInput = new ActionInput(inputManager);
 
         //INFO: only for inputs with amounts (mouse movement)
-        //DOES: nothing rn
         new KeyMapping(inputManager, actionInput);
 
         //DOES: set up world and player
@@ -175,7 +176,7 @@ public class Main extends SimpleApplication {
         totalTicks++;
 
         //DOES: update player (movement etc.)
-        playerCharacter.tick(actionInput.buildCommand());
+        playerCharacter.tick(actionInput.buildCommand(), actionInput.getCursorPosition());
 
         //DOES: update entities
         //NOTE: no entities yet lol

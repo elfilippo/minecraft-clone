@@ -1,9 +1,10 @@
 package com.minecraftclone.gui.hud;
 
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.ui.Picture;
 import com.minecraftclone.gui.GUIManager;
-import com.minecraftclone.gui.display.InventorySlot;
+import com.minecraftclone.gui.display.Slot;
 
 public class HeadsUpDisplay {
 
@@ -79,7 +80,7 @@ public class HeadsUpDisplay {
      * @param invPic List of all Item Pictures in the inventory
      * @param invText List of all Item Texts in the inventory
      */
-    public void updateHotbarDisplayItem(int slotNumber, InventorySlot slots) {
+    public void updateHotbarDisplayItem(int slotNumber, Slot slots) {
         hotbar.updateHotbarDisplayItem(slotNumber, slots);
     }
 
@@ -90,6 +91,18 @@ public class HeadsUpDisplay {
     public void setHotbarSelectedSlot(int slot) {
         if (slot <= 9 && slot >= 1) {
             hotbar.setSelectedSlot(slot);
+        }
+    }
+
+    public Hotbar getHotbar() {
+        return hotbar;
+    }
+
+    public void setCrosshairVisibility(boolean visibility) {
+        if (visibility) {
+            crosshair.setCullHint(Spatial.CullHint.Inherit);
+        } else {
+            crosshair.setCullHint(Spatial.CullHint.Always);
         }
     }
 }

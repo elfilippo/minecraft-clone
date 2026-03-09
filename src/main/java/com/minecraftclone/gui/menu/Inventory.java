@@ -15,8 +15,8 @@ public class Inventory extends MenuGeneric {
 
     public Inventory(GUIManager guiManager, Node node, InputManager inputManager, FlyByCamera flyByCamera) {
         super(guiManager, node, 40, 45, "container/inventory");
-        this.inputManager = inputManager;
         this.flyByCamera = flyByCamera;
+        this.inputManager = inputManager;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class Inventory extends MenuGeneric {
         } else {
             node.setCullHint(Spatial.CullHint.Always);
         }
-        inputManager.setCursorVisible(visible);
-        flyByCamera.setEnabled(!visible); //Todo: needs to be changed
+        inputManager.setCursorVisible(visible); //Fixme: needs to be changed
+        flyByCamera.setEnabled(!visible); //Fixme: needs to be changed
     }
 }

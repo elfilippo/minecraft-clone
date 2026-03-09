@@ -3,7 +3,6 @@ package com.minecraftclone.gui.hud;
 import com.jme3.scene.Node;
 import com.minecraftclone.gui.GUIManager;
 import com.minecraftclone.gui.display.Display;
-import com.minecraftclone.gui.display.InventorySlot;
 import com.minecraftclone.gui.display.Slot;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,7 @@ public class Hotbar {
         );
     }
 
-    protected void updateHotbarDisplayItem(int column, InventorySlot slots) {
+    protected void updateHotbarDisplayItem(int column, Slot slots) {
         Slot slot = hotbarSlots.get(column);
 
         slot.setTexture(slots.getTexture());
@@ -60,5 +59,9 @@ public class Hotbar {
 
     protected Display getSelector() {
         return selector;
+    }
+
+    public void setHotbarSlotVisibility(int index, boolean visibility) {
+        hotbarSlots.get(index).setVisible(visibility);
     }
 }

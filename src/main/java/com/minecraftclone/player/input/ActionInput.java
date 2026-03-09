@@ -1,7 +1,9 @@
 package com.minecraftclone.player.input;
 
+import com.jme3.input.InputManager;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
+import com.jme3.math.Vector2f;
 import com.minecraftclone.player.PlayerCommand;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,9 +13,12 @@ public class ActionInput implements ActionListener, AnalogListener {
     private final Map<Action, InputState> actions = new HashMap<>();
     private float mouseWheelUp;
     private float mouseWheelDown;
+    private InputManager inputManager;
 
     //DOES: put every player input into the actions map
-    public ActionInput() {
+    public ActionInput(InputManager inputManager) {
+        this.inputManager = inputManager;
+
         for (Action action : Action.values()) {
             actions.put(action, new InputState());
         }
@@ -51,6 +56,7 @@ public class ActionInput implements ActionListener, AnalogListener {
         return actions.get(action).consumeTap();
     }
 
+    @Deprecated
     public PlayerCommand buildCommand() {
         PlayerCommand cmd = new PlayerCommand();
 
@@ -59,6 +65,8 @@ public class ActionInput implements ActionListener, AnalogListener {
 
         if (isHeld(Action.LEFT)) cmd.strafe += 1;
         if (isHeld(Action.RIGHT)) cmd.strafe -= 1;
+
+        if (isTapped(Action.MENU_SELECT)) cmd.select = true;
 
         if (isHeld(Action.JUMP)) cmd.jump = true;
 
@@ -90,5 +98,13 @@ public class ActionInput implements ActionListener, AnalogListener {
         float temp = mouseWheelUp;
         mouseWheelUp = 0f;
         return temp;
+    }
+
+    public Vector2f getCursorPosition() {
+        return inputManager.getCursorPosition();
+    }
+
+    public void setCursorVisibility(boolean visibility) {
+        inputManager.setCursorVisible(visibility);
     }
 }

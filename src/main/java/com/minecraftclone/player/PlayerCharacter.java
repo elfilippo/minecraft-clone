@@ -3,6 +3,7 @@ package com.minecraftclone.player;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.control.CharacterControl;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
@@ -67,7 +68,7 @@ public class PlayerCharacter {
         inventoryController = new InventoryController(inventory, gui);
     }
 
-    public void tick(PlayerCommand cmd) {
+    public void tick(PlayerCommand cmd, Vector2f cursorPosition) {
         //DOES: set previous and current position for camera interpolation
         previousPosition.set(currentPosition);
         currentPosition.set(playerControl.getPhysicsLocation());
@@ -89,6 +90,15 @@ public class PlayerCharacter {
             walkDir.normalizeLocal().multLocal(speed);
         }
 
+        if (cmd.select && gui.isMenuVisible() && gui.getClickedSlotIndex(cursorPosition) != -1) {
+            int clicked = gui.getClickedSlotIndex(cursorPosition);
+
+            if (inventoryController.getSelected() != -1) {
+                inventoryController.switchSlots(inventoryController.getSelected(), clicked);
+                inventoryController.setSelected(-1);
+            } else if (inventoryController.getSelected() == -1) inventoryController.setSelected(clicked);
+        }
+
         //DOES: jumping
         playerControl.setWalkDirection(walkDir);
 
@@ -108,6 +118,7 @@ public class PlayerCharacter {
 
         if (cmd.toggleInventory) {
             if (gui.isMenuVisible()) {
+                inventoryController.setSelected(-1);
                 gui.setMenuVisibility(Menus.NONE);
             } else {
                 gui.setMenuVisibility(Menus.INVENTORY);

@@ -2,9 +2,10 @@ package com.minecraftclone.gui.menu;
 
 import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
+import com.jme3.math.Vector2f;
 import com.jme3.scene.Node;
 import com.minecraftclone.gui.GUIManager;
-import com.minecraftclone.gui.display.InventorySlot;
+import com.minecraftclone.gui.display.Slot;
 
 public class MenuManager {
 
@@ -17,7 +18,7 @@ public class MenuManager {
         this.guiManager = guiManager;
 
         inventoryGUI = new Inventory(guiManager, newNode("inventory"), inputManager, flyByCamera);
-        inventorySlots = new InventorySlots(guiManager, newNode("slots"));
+        inventorySlots = new InventorySlots(guiManager, newNode("fuckingSlots"));
 
         setMenuVisibility(Menus.NONE);
     }
@@ -65,11 +66,15 @@ public class MenuManager {
         inventorySlots.displayItem(index, id, amount);
     }
 
-    public InventorySlot getHotbarSlot(int slot) {
-        return inventorySlots.getInventorySlot(slot);
+    public Slot getHotbarSlot(int slot) {
+        return inventorySlots.getSlot(slot);
     }
 
     public Menus getVisibleMenu() {
         return visibleMenu;
+    }
+
+    public int getClickedSlotIndex(Vector2f cursorPosition) {
+        return inventorySlots.getClickedSlotIndex(cursorPosition);
     }
 }
