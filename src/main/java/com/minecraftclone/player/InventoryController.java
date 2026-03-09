@@ -32,10 +32,10 @@ public class InventoryController {
     private void updateView(int index) {
         if (inventory.getSlot(index).getStack() == null) {
             gui.getMenus().getInventorySlots().getSlot(index).setVisible(false);
-            gui.getHud().getHotbar().setHotbarSlotVisibility(index, false);
+            if (index <= 8) gui.getHud().getHotbar().setHotbarSlotVisibility(index, false);
         } else {
             gui.getMenus().getInventorySlots().getSlot(index).setVisible(true);
-            gui.getHud().getHotbar().setHotbarSlotVisibility(index, true);
+            if (index <= 8) gui.getHud().getHotbar().setHotbarSlotVisibility(index, true);
 
             gui.inventoryDisplayItem(
                 index,

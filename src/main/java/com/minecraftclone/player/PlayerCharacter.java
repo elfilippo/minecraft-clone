@@ -58,7 +58,7 @@ public class PlayerCharacter {
         this.playerControl = player;
         this.playerNode = playerNode;
 
-        inventory = new Inventory(35);
+        inventory = new Inventory(36);
         try {
             gui = new PlayerGUI(main);
         } catch (IOException e) {
@@ -96,7 +96,9 @@ public class PlayerCharacter {
             if (inventoryController.getSelected() != -1) {
                 inventoryController.switchSlots(inventoryController.getSelected(), clicked);
                 inventoryController.setSelected(-1);
-            } else if (inventoryController.getSelected() == -1) inventoryController.setSelected(clicked);
+            } else if (inventoryController.getSelected() == -1) {
+                if (!inventoryController.getInventorySlot(clicked).isEmpty()) inventoryController.setSelected(clicked);
+            }
         }
 
         //DOES: jumping
