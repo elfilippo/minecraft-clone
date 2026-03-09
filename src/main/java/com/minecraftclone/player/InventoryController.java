@@ -7,13 +7,15 @@ import com.minecraftclone.item.ItemRegistry;
 public class InventoryController {
 
     private final Inventory inventory;
+    private int selected = -1;
     private PlayerGUI gui;
 
     public InventoryController(Inventory inventory, PlayerGUI playerGUI) {
         this.inventory = inventory;
         this.gui = playerGUI;
 
-        addToInventory(new ItemInstance(ItemRegistry.get("diamond_sword"), 0));
+        addToInventory(new ItemInstance(ItemRegistry.get("diamond_sword"), 1));
+        addToInventory(new ItemInstance(ItemRegistry.get("golden_apple"), 1));
     }
 
     public void addToInventory(ItemInstance item) {
@@ -26,12 +28,21 @@ public class InventoryController {
         }
     }
 
+    @Deprecated
     private void updateView(int index) {
-        gui.inventoryDisplayItem(
-            index,
-            inventory.getSlot(index).getStack().getId(),
-            inventory.getSlot(index).getStack().getAmount()
-        );
+        if (inventory.getSlot(index).getStack() == null) {
+            gui.getMenus().getInventorySlots().getSlot(index).setVisible(false);
+            gui.getHud().getHotbar().setHotbarSlotVisibility(index, false);
+        } else {
+            gui.getMenus().getInventorySlots().getSlot(index).setVisible(true);
+            gui.getHud().getHotbar().setHotbarSlotVisibility(index, true);
+
+            gui.inventoryDisplayItem(
+                index,
+                inventory.getSlot(index).getStack().getId(),
+                inventory.getSlot(index).getStack().getAmount()
+            );
+        }
     }
 
     public Slot getInventorySlot(int slot) {
@@ -43,5 +54,16 @@ public class InventoryController {
 
         inventory.setSlot(slot1, inventory.getSlot(slot2));
         inventory.setSlot(slot2, tempSlot);
+
+        updateView(slot1);
+        updateView(slot2);
+    }
+
+    public int getSelected() {
+        return selected;
+    }
+
+    public void setSelected(int selected) {
+        this.selected = selected;
     }
 }

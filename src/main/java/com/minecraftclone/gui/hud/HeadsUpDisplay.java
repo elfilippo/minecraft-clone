@@ -92,4 +92,8 @@ public class HeadsUpDisplay {
             hotbar.setSelectedSlot(slot);
         }
     }
+
+    public Hotbar getHotbar() {
+        return hotbar;
+    }
 }

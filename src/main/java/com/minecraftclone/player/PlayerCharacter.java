@@ -90,8 +90,13 @@ public class PlayerCharacter {
             walkDir.normalizeLocal().multLocal(speed);
         }
 
-        if (cmd.select && gui.isMenuVisible()) {
-            System.out.println(gui.getClickedSlotIndex(cursorPosition));
+        if (cmd.select && gui.isMenuVisible() && gui.getClickedSlotIndex(cursorPosition) != -1) {
+            int clicked = gui.getClickedSlotIndex(cursorPosition);
+
+            if (inventoryController.getSelected() != -1) {
+                inventoryController.switchSlots(inventoryController.getSelected(), clicked);
+                inventoryController.setSelected(-1);
+            } else if (inventoryController.getSelected() == -1) inventoryController.setSelected(clicked);
         }
 
         //DOES: jumping
@@ -113,6 +118,7 @@ public class PlayerCharacter {
 
         if (cmd.toggleInventory) {
             if (gui.isMenuVisible()) {
+                inventoryController.setSelected(-1);
                 gui.setMenuVisibility(Menus.NONE);
             } else {
                 gui.setMenuVisibility(Menus.INVENTORY);

@@ -81,4 +81,8 @@ public class PlayerGUI {
     public int getClickedSlotIndex(Vector2f cursorPosition) {
         return menus.getClickedSlotIndex(cursorPosition);
     }
+
+    public HeadsUpDisplay getHud() {
+        return hud;
+    }
 }

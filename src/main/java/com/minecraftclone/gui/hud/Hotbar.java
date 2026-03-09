@@ -60,4 +60,8 @@ public class Hotbar {
     protected Display getSelector() {
         return selector;
     }
+
+    public void setHotbarSlotVisibility(int index, boolean visibility) {
+        hotbarSlots.get(index).setVisible(visibility);
+    }
 }
