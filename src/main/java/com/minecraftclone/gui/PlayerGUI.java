@@ -67,6 +67,7 @@ public class PlayerGUI {
      */
     public void setMenuVisibility(Menus menu) {
         menus.setMenuVisibility(menu);
+        getHud().setCrosshairVisibility(!isMenuVisible());
     }
 
     public boolean isMenuVisible() {

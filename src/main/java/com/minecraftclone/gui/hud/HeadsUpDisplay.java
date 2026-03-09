@@ -1,6 +1,7 @@
 package com.minecraftclone.gui.hud;
 
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.ui.Picture;
 import com.minecraftclone.gui.GUIManager;
 import com.minecraftclone.gui.display.Slot;
@@ -95,5 +96,13 @@ public class HeadsUpDisplay {
 
     public Hotbar getHotbar() {
         return hotbar;
+    }
+
+    public void setCrosshairVisibility(boolean visibility) {
+        if (visibility) {
+            crosshair.setCullHint(Spatial.CullHint.Inherit);
+        } else {
+            crosshair.setCullHint(Spatial.CullHint.Always);
+        }
     }
 }
