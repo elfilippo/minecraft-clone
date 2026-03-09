@@ -11,6 +11,7 @@ public class Block {
     private final String sideTex;
     private final BlockGeometry geometry;
     private final BlockType type;
+    private final String modelName;
 
     /**
      * full constructor with sided textures and custom block type
@@ -22,6 +23,7 @@ public class Block {
         this.bottomTex = bottomTex;
         this.type = type;
         this.geometry = getBlockGeometry(type);
+        modelName = null;
     }
 
     /**
@@ -43,6 +45,25 @@ public class Block {
      */
     public Block(boolean full, String texture, BlockType type) {
         this(full, texture, texture, texture, type);
+    }
+
+    /**
+     * constructor for custom blocks
+     * string is name of obj file in models/custom
+     * @param modelName
+     */
+    public Block(String modelName) {
+        this.modelName = modelName;
+        full = false;
+        topTex = null;
+        sideTex = null;
+        bottomTex = null;
+        type = BlockType.CUSTOM;
+        geometry = getBlockGeometry(type);
+    }
+
+    public String getModelName() {
+        return modelName;
     }
 
     public boolean isFull() {

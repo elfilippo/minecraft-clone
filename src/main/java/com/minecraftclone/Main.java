@@ -137,7 +137,7 @@ public class Main extends SimpleApplication {
         blockInteraction = new BlockInteractionSystem(world, actionInput, world.getPlayerGui(), this);
 
         //NOTE: will be set by hotbar later
-        blockInteraction.setSelectedBlock(Blocks.STAIRS);
+        blockInteraction.setSelectedBlock(Blocks.DIAMOND_BLOCK);
     }
 
     @Override

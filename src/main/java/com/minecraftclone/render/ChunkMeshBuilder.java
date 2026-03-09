@@ -86,7 +86,7 @@ public final class ChunkMeshBuilder {
                 for (int z = 0; z < Chunk.SIZE; z++) {
                     //DOES: save current block as block
                     Block block = blocks[x][y][z];
-                    if (block == null) continue;
+                    if (block == null || block.getType() == Block.BlockType.CUSTOM) continue;
 
                     //DOES: get geometry for block
                     BlockGeometry geometry = block.getGeometry();

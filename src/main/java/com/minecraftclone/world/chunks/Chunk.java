@@ -1,6 +1,7 @@
 package com.minecraftclone.world.chunks;
 
 import com.jme3.asset.AssetManager;
+import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
@@ -9,11 +10,14 @@ import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.minecraftclone.block.Block;
 import com.minecraftclone.render.BlockMaterialCache;
 import com.minecraftclone.render.ChunkMeshBuilder;
 import com.minecraftclone.world.World;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Chunk {
@@ -25,6 +29,7 @@ public class Chunk {
 
     //IS: block object stored in triple array of ints (local pos)
     private final Block[][][] blocks = new Block[SIZE][SIZE][SIZE];
+    private final List<Spatial> customModels = new ArrayList<>();
 
     private final Node chunkNode = new Node("Chunk");
     private final Node collisionNode = new Node("Collision");
@@ -138,6 +143,30 @@ public class Chunk {
             //DOES: attatch geometry to chunkNode and collisionNode
             chunkNode.attachChild(geometry);
             collisionNode.attachChild(geometry.clone());
+        }
+
+        //DOES: remove old custom models
+        for (Spatial model : customModels) model.removeFromParent();
+        customModels.clear();
+
+        //DOES: attach custom models for CUSTOM type blocks
+        for (int x = 0; x < SIZE; x++) for (int y = 0; y < SIZE; y++) for (int z = 0; z < SIZE; z++) {
+            Block block = blocks[x][y][z];
+            if (block == null || block.getType() != Block.BlockType.CUSTOM) continue;
+            Spatial model = assetManager.loadModel("models/custom/" + block.getModelName() + ".obj");
+            model.rotate(300, 0, 0);
+            model.setLocalTranslation(x + 0.5f, y + 0.6f, z + 0.5f);
+            model.updateGeometricState();
+            BoundingBox bounds = (BoundingBox) model.getWorldBound();
+            float maxExtent = Math.max(bounds.getXExtent(), Math.max(bounds.getYExtent(), bounds.getZExtent()));
+            float scale = 0.5f / maxExtent;
+            model.setLocalScale(scale);
+            CollisionShape shape = CollisionShapeFactory.createMeshShape(model);
+            RigidBodyControl body = new RigidBodyControl(shape, 0f);
+            model.addControl(body);
+            physicsSpace.add(body);
+            chunkNode.attachChild(model);
+            customModels.add(model);
         }
 
         //DOES: set chunk to clean to indicate completion of rebuild

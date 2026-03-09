@@ -6,6 +6,8 @@ public class Blocks {
 
     //INFO: only pngs, no file name extensions
 
+    public static final Block TOILET = new Block("toilet/10778_Toilet_V2");
+    public static final Block CUBE = new Block(true, "oak_planks", BlockType.CUBE);
     public static final Block STAIRS = new Block(false, "oak_planks", BlockType.STAIRS);
     public static final Block SLAB = new Block(false, "oak_planks", BlockType.SLAB);
     public static final Block FENCE = new Block(false, "oak_planks", BlockType.FENCE);
@@ -24,6 +26,7 @@ public class Blocks {
     public static final Block SAND = new Block(true, "sand");
     public static final Block GRAVEL = new Block(true, "gravel");
     public static final Block GOLD_ORE = new Block(true, "gold_ore");
+    public static final Block KAFKA = new Block("kafkaV0/kafkaV0");
     public static final Block IRON_ORE = new Block(true, "iron_ore");
     public static final Block COAL_ORE = new Block(true, "coal_ore");
     public static final Block LAPIS_ORE = new Block(true, "lapis_ore");
