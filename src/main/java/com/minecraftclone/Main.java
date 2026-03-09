@@ -63,6 +63,7 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        fpsText.setLocalScale(0.5f);
         initialTime = System.nanoTime();
         tickTime = 1f / TICKS_PER_SECOND;
 
