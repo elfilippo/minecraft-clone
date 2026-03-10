@@ -37,6 +37,14 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.7.0</version>
+        <configuration>
+          <show>private</show>
+          <doclint>none</doclint>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <dependencies>

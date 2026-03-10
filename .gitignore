@@ -17,7 +17,8 @@
 *.war
 *.nar
 *.ear
-*.zip
+/*.zip
+!/javadoc*.zip
 *.tar.gz
 *.rar
 
@@ -28,5 +29,4 @@ target/
 hs_err_pid*
 replay_pid*
 target/original-minecraft-clone-0.1-SNAPSHOT.jar
-
 erstheelDesktopMeine SachenCodeJavaminecraft-clone*

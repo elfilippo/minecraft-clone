@@ -35,10 +35,11 @@ public class Main extends SimpleApplication {
 
     //DOES: settings
     public static AppSettings settings;
-    public static boolean fullscreen = false;
+    public static boolean fullscreen = true;
     public static int screen_width = 1280;
     public static int screen_height = 720;
     private boolean initialized = false;
+    public static final int SHADOW_MAP_RESOLUTION = 2048;
 
     //DOES: tps stuff
     private static final float TICKS_PER_SECOND = 40f;
@@ -113,7 +114,11 @@ public class Main extends SimpleApplication {
         ambient.setColor(new ColorRGBA(0.3f, 0.3f, 0.3f, 1f));
         rootNode.addLight(ambient);
 
-        DirectionalLightShadowRenderer shadows = new DirectionalLightShadowRenderer(assetManager, 16384, 1);
+        DirectionalLightShadowRenderer shadows = new DirectionalLightShadowRenderer(
+            assetManager,
+            SHADOW_MAP_RESOLUTION,
+            1
+        );
         shadows.setEdgeFilteringMode(EdgeFilteringMode.PCFPOISSON);
         shadows.setLight(sun);
         shadows.setShadowIntensity(0.7f);

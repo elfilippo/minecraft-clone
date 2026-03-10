@@ -16,7 +16,7 @@ import java.util.Map;
 public class World {
 
     private static final int RENDER_DISTANCE = 20;
-    private static final int SIMULATION_DISTANCE = 6;
+    private static final int SIMULATION_DISTANCE = 4;
     private final SimpleApplication app;
     private final PlayerCharacter playerCharacter;
     private final BulletAppState bulletAppState;
