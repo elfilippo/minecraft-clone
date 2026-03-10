@@ -47,13 +47,13 @@ public class HeartsDisplay {
             Display heart = hearts.get(i);
 
             if (i < fullHearts) {
-                heart.setVisible(true);
+                heart.setVisibility(true);
                 heart.setTexture(full);
             } else if (i == fullHearts && halfHeart) {
-                heart.setVisible(true);
+                heart.setVisibility(true);
                 heart.setTexture(half);
             } else {
-                heart.setVisible(false);
+                heart.setVisibility(false);
             }
         }
     }

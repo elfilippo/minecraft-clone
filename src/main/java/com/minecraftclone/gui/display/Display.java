@@ -1,5 +1,6 @@
 package com.minecraftclone.gui.display;
 
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture2D;
@@ -30,12 +31,12 @@ public class Display {
         display.setPosition(x, y);
     }
 
-    public void setTexture(Texture2D texture) {
-        display.setTexture(guiManager.getAssetManager(), texture, true);
+    public void setPosition(int x, int y) {
+        display.setPosition(x, y);
     }
 
-    public Texture2D getTexture() {
-        return (Texture2D) display.getMaterial().getTextureParam("Texture").getTextureValue();
+    public void setTexture(Texture2D texture) {
+        display.setTexture(guiManager.getAssetManager(), texture, true);
     }
 
     public void attachTo(Node node) {
@@ -46,7 +47,7 @@ public class Display {
         node.detachChild(display);
     }
 
-    public void setVisible(boolean visible) {
+    public void setVisibility(boolean visible) {
         if (visible) {
             display.setCullHint(Spatial.CullHint.Inherit);
         } else {
@@ -62,7 +63,15 @@ public class Display {
         return (int) display.getHeight();
     }
 
-    public void setPosition(int x, int y) {
-        display.setPosition(x, y);
+    public Picture getDisplay() {
+        return display;
+    }
+
+    public Texture2D getTexture() {
+        return (Texture2D) display.getMaterial().getTextureParam("Texture").getTextureValue();
+    }
+
+    public Vector3f getPosition() {
+        return new Vector3f(display.getLocalTranslation());
     }
 }

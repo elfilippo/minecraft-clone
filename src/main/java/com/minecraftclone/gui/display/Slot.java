@@ -47,7 +47,7 @@ public class Slot extends Display {
     }
 
     @Override
-    public void setVisible(boolean visible) {
+    public void setVisibility(boolean visible) {
         if (visible) {
             display.setCullHint(Spatial.CullHint.Inherit);
             text.setCullHint(Spatial.CullHint.Inherit);
@@ -59,13 +59,5 @@ public class Slot extends Display {
 
     public String getText() {
         return text.getText();
-    }
-
-    public Vector3f getPosition() {
-        return new Vector3f(display.getLocalTranslation());
-    }
-
-    public Picture getDisplay() {
-        return display;
     }
 }

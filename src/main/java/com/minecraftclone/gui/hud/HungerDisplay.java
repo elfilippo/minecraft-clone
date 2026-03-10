@@ -42,13 +42,13 @@ public class HungerDisplay {
             Display hunger = hungerBars.get(i);
 
             if (i < fullHunger) {
-                hunger.setVisible(true);
+                hunger.setVisibility(true);
                 hunger.setTexture(full);
             } else if (i == fullHunger && halfHunger) {
-                hunger.setVisible(true);
+                hunger.setVisibility(true);
                 hunger.setTexture(half);
             } else {
-                hunger.setVisible(false);
+                hunger.setVisibility(false);
             }
         }
     }

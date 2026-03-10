@@ -62,6 +62,6 @@ public class Hotbar {
     }
 
     public void setHotbarSlotVisibility(int index, boolean visibility) {
-        hotbarSlots.get(index).setVisible(visibility);
+        hotbarSlots.get(index).setVisibility(visibility);
     }
 }
